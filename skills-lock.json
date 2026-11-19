@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "skills": {
+    "caption-styles": {
+      "source": "vargHQ/skills",
+      "commit": "55ac28d4b4f336f9235df38d1d7aa639e4bec942",
+      "sourceType": "github",
+      "skillPath": "caption-styles/SKILL.md",
+      "computedHash": "fef4f1a6eb9eea0181710087c8014778b8417b4412089235fabb500bdd2734f1"
+    },
+    "edit-footage-with-code": {
+      "source": "vargHQ/skills",
+      "commit": "55ac28d4b4f336f9235df38d1d7aa639e4bec942",
+      "sourceType": "github",
+      "skillPath": "edit-footage-with-code/SKILL.md",
+      "computedHash": "835f37df87dab8212356cafdf48aa4e49dcfb4f6d19280040442b231cd2233d5"
+    },
+    "kinetic-type-art": {
+      "source": "vargHQ/skills",
+      "commit": "55ac28d4b4f336f9235df38d1d7aa639e4bec942",
+      "sourceType": "github",
+      "skillPath": "kinetic-type-art/SKILL.md",
+      "computedHash": "853eb818e17868ffe383765d39f50a13c5f4a4dd666ce0c07013032a59e88570"
+    },
+    "short-form-ffmpeg-cookbook": {
+      "source": "vargHQ/skills",
+      "commit": "55ac28d4b4f336f9235df38d1d7aa639e4bec942",
+      "sourceType": "github",
+      "skillPath": "short-form-ffmpeg-cookbook/SKILL.md",
+      "computedHash": "9ce16e16faf8fde7104fa1f66fb2155085c0c2d10aa77932fdc0038a62b6f99d"
+    },
+    "title-design": {
+      "source": "vargHQ/skills",
+      "commit": "55ac28d4b4f336f9235df38d1d7aa639e4bec942",
+      "sourceType": "github",
+      "skillPath": "title-design/SKILL.md",
+      "computedHash": "0b642a6aeb722c9440f631aaea51a580fd6efc0a61249ff93efb75a538586d61"
+    },
+    "transition-craft": {
+      "source": "vargHQ/skills",
+      "commit": "55ac28d4b4f336f9235df38d1d7aa639e4bec942",
+      "sourceType": "github",
+      "skillPath": "transition-craft/SKILL.md",
+      "computedHash": "567d826b92c2ef2be84351ac7e156188d5a084d6f5107303cf8c71b5d20345c6"
+    },
+    "varg-video-editing": {
+      "source": "vargHQ/skills",
+      "commit": "55ac28d4b4f336f9235df38d1d7aa639e4bec942",
+      "sourceType": "github",
+      "skillPath": "varg-video-editing/SKILL.md",
+      "computedHash": "e5ab96152781a07fee4e57b64740007771783a5a28650893980302baf52d36dd"
+    }
+  }
+}
