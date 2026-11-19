@@ -1,0 +1,250 @@
+<title>Corte Seco</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@75..150,500..900&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: editor's timeline. Horizontal tracks, a playhead, timecode as structure. Boldness lives in the condensed display type and the playhead blue. */
+:root{
+  --bg:#EDEFF3; --surface:#F8F9FB; --fg:#0D1017; --muted:#5A6272; --line:#CDD2DC;
+  --accent:#2457FF; --accent-fg:#fff;
+  --t1:#7A4DFF; --t2:#0FA38F; --t3:#E08A00;
+  --screen:#0B0D12; --screen-fg:#fff;
+  --display:'Anybody','Arial Narrow',Impact,sans-serif;
+  --body:'Instrument Sans',system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0B0D12; --surface:#141822; --fg:#EEF0F5; --muted:#9AA2B3; --line:#262C3A;
+  --accent:#6C8DFF; --accent-fg:#0B0D12; --t1:#9B7BFF; --t2:#2FD0B8; --t3:#F2A52E; --screen:#05060A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B0D12; --surface:#141822; --fg:#EEF0F5; --muted:#9AA2B3; --line:#262C3A;
+  --accent:#6C8DFF; --accent-fg:#0B0D12; --t1:#9B7BFF; --t2:#2FD0B8; --t3:#F2A52E; --screen:#05060A; color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font:400 17px/1.55 var(--body);padding-block:0}
+.wrap{max-width:1160px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:4px}
+.mono{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:var(--display);font-stretch:75%;font-weight:800;line-height:.95;letter-spacing:-.01em;margin:0;text-wrap:balance;text-transform:uppercase}
+h2{font-size:clamp(38px,6vw,76px)}
+h3{font-size:26px;font-stretch:90%}
+p{margin:0;max-width:62ch}
+section{padding-block:clamp(56px,9vw,112px);border-top:1px solid var(--line)}
+
+/* nav */
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px}
+.logo{font:800 22px/1 var(--display);font-stretch:75%;text-transform:uppercase;text-decoration:none;display:flex;gap:10px;align-items:center}
+.logo i{width:10px;height:22px;background:var(--accent);display:block;border-radius:2px}
+.nav nav{display:flex;gap:22px;font-size:15px}
+.nav nav a{text-decoration:none;color:var(--muted)}
+.nav nav a:hover{color:var(--fg)}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--accent-fg);font:600 15px var(--body);padding:12px 20px;border-radius:8px;border:0;text-decoration:none;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+@media(max-width:720px){.nav nav{display:none}}
+
+/* hero */
+.hero{border-top:0;padding-top:clamp(40px,6vw,80px);padding-bottom:0}
+.hero-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:48px;align-items:end}
+.hero h1{font-size:clamp(64px,13vw,184px);line-height:.84;margin:18px 0 28px}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero p.lead{font-size:20px;max-width:46ch;color:var(--fg)}
+.hero .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+@media(max-width:860px){.hero-grid{grid-template-columns:1fr}}
+
+/* phone */
+.phone-col{display:flex;flex-direction:column;align-items:center;gap:14px;min-width:0}
+.phone{width:min(100%,270px);aspect-ratio:9/16;background:var(--screen);border-radius:30px;border:6px solid var(--fg);position:relative;overflow:hidden;box-shadow:0 30px 60px -30px rgba(0,0,0,.5)}
+.phone .safe{position:absolute;inset:8% 14% 22% 6%;border:1px dashed color-mix(in srgb,#fff 28%,transparent);border-radius:6px}
+.phone .bgfx{position:absolute;inset:0;background:radial-gradient(120% 60% at 30% 20%,#27407f,transparent 60%),radial-gradient(90% 50% at 80% 90%,#5b2a8a,transparent 60%)}
+.phone .tc{position:absolute;top:14px;left:16px;font:600 11px var(--mono);color:#fff;opacity:.85;font-variant-numeric:tabular-nums}
+.phone .rec{position:absolute;top:14px;right:16px;width:9px;height:9px;border-radius:50%;background:#ff4455;animation:blink 1.2s steps(2) infinite}
+.cap{position:absolute;left:6%;right:14%;bottom:30%;text-align:center;font:800 30px/1.05 var(--display);font-stretch:80%;text-transform:uppercase;color:#fff;min-height:64px;display:flex;flex-wrap:wrap;justify-content:center;gap:4px 8px;align-content:flex-end}
+.cap span{display:inline-block;padding:0 4px;border-radius:6px;transition:all .12s}
+.cap span.on{transform:scale(1.14)}
+.cap.k-pop span.on{color:#FFD23F}
+.cap.k-pill span.on{background:#fff;color:#0B0D12}
+.cap.k-neon{color:#d6c8ff;text-shadow:0 0 6px #8e6bff,0 0 18px #8e6bff}
+.cap.k-neon span.on{color:#fff;text-shadow:0 0 6px #fff,0 0 22px #4fe3ff,0 0 40px #4fe3ff}
+.cap.k-karaoke span{color:#fff6}
+.cap.k-karaoke span.done,.cap.k-karaoke span.on{color:#fff}
+.cap.k-karaoke span.on{color:#FFD23F}
+.picker{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.picker button{font:600 12px var(--mono);letter-spacing:.04em;text-transform:uppercase;background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:7px 12px;cursor:pointer}
+.picker button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+
+/* timeline */
+.tl{margin-top:56px;border:1px solid var(--line);background:var(--surface);border-radius:10px 10px 0 0;border-bottom:0;overflow:hidden}
+.ruler{display:flex;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--line)}
+.tracks{position:relative;padding:12px 14px 16px;display:grid;gap:8px}
+.track{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:center}
+.track b{font:600 11px var(--mono);color:var(--muted)}
+.lane{position:relative;height:30px;background:color-mix(in srgb,var(--line) 40%,transparent);border-radius:4px;overflow:hidden}
+.clip{position:absolute;top:3px;bottom:3px;border-radius:3px;font:600 10px/24px var(--mono);padding-left:8px;color:#fff;white-space:nowrap;overflow:hidden;text-transform:uppercase;letter-spacing:.05em}
+.c1{background:var(--t1)}.c2{background:var(--t2)}.c3{background:var(--t3);color:#1a1200}
+.head{position:absolute;top:0;bottom:0;left:calc(14px + 44px);width:2px;background:var(--accent);animation:play 9s linear infinite;pointer-events:none}
+.head::before{content:"";position:absolute;top:0;left:-6px;border:7px solid transparent;border-top-color:var(--accent);border-bottom:0}
+@keyframes play{from{transform:translateX(0)}to{transform:translateX(calc(min(1132px,100vw - 32px) - 44px - 30px))}}
+@keyframes blink{50%{opacity:.15}}
+.stat{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-top:0;background:var(--surface);border-radius:0 0 10px 10px}
+.stat div{padding:16px 18px;border-left:1px solid var(--line);min-width:0}
+.stat div:first-child{border-left:0}
+.stat strong{display:block;font:800 30px/1 var(--display);font-stretch:80%;margin-bottom:4px}
+@media(max-width:720px){.stat{grid-template-columns:1fr 1fr}.stat div:nth-child(3){border-left:0}.stat div:nth-child(n+3){border-top:1px solid var(--line)}}
+
+/* services */
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap;margin-bottom:44px}
+.sec-head p{color:var(--muted)}
+.svc{display:grid;grid-template-columns:repeat(2,1fr);gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.svc article{padding:30px;display:grid;gap:12px;align-content:start;background:var(--surface);border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-width:0}
+.svc article:nth-child(2n){border-right:0}.svc article:nth-last-child(-n+2){border-bottom:0}
+.svc .tag{display:inline-flex;align-items:center;gap:8px}
+.svc .tag s{width:22px;height:8px;border-radius:2px;display:block;text-decoration:none}
+.svc p{color:var(--muted);font-size:16px}
+@media(max-width:720px){.svc{grid-template-columns:1fr}.svc article{border-right:0!important;border-bottom:1px solid var(--line)!important}.svc article:last-child{border-bottom:0!important}}
+
+/* process */
+.steps{display:grid;gap:0;border-top:1px solid var(--line)}
+.step{display:grid;grid-template-columns:120px 1fr 1.4fr;gap:24px;padding:26px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.step p{color:var(--muted)}
+@media(max-width:720px){.step{grid-template-columns:1fr;gap:6px}}
+
+/* brief */
+.brief{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
+@media(max-width:860px){.brief{grid-template-columns:1fr}}
+form{display:grid;gap:14px}
+label{display:grid;gap:6px;font-size:14px;font-weight:500}
+input,select,textarea{font:400 16px var(--body);background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;width:100%}
+textarea{min-height:92px;resize:vertical}
+.out{background:var(--screen);color:var(--screen-fg);border-radius:10px;padding:20px;font:400 13px/1.6 var(--mono);white-space:pre-wrap;word-break:break-word;min-height:200px}
+.out-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px}
+footer{border-top:1px solid var(--line);padding-block:32px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+@media(prefers-reduced-motion:reduce){.head,.rec{animation:none}.cap span{transition:none}html{scroll-behavior:auto}}
+</style>
+
+<header><div class="wrap nav">
+  <a class="logo" href="#top"><i></i>Corte Seco</a>
+  <nav aria-label="Principal"><a href="#servicios">Servicios</a><a href="#proceso">Proceso</a><a href="#brief">Brief</a></nav>
+  <a class="btn" href="#brief">Pedir un corte</a>
+</div></header>
+
+<main id="top">
+<section class="hero"><div class="wrap">
+  <div class="hero-grid">
+    <div>
+      <span class="mono">Estudio de edición · video vertical 9:16</span>
+      <h1>Cortamos<br>donde <em>respira</em></h1>
+      <p class="lead">Convertimos tomas en bruto de talking head, podcast o anuncio en clips verticales limpios: sin silencios muertos, con subtítulos que entran justo con la voz.</p>
+      <div class="cta"><a class="btn" href="#brief">Armar el brief</a><a class="btn ghost" href="#servicios">Ver qué hacemos</a></div>
+    </div>
+    <div class="phone-col">
+      <div class="phone" aria-label="Demostración de subtítulos">
+        <div class="bgfx"></div><div class="safe"></div>
+        <span class="tc" id="tc">00:00:00:00</span><span class="rec"></span>
+        <div class="cap k-pop" id="cap" aria-live="off"></div>
+      </div>
+      <div class="picker" id="picker" role="group" aria-label="Estilo de subtítulo">
+        <button aria-pressed="true" data-k="k-pop">Pop</button>
+        <button aria-pressed="false" data-k="k-pill">Píldora</button>
+        <button aria-pressed="false" data-k="k-neon">Neón</button>
+        <button aria-pressed="false" data-k="k-karaoke">Karaoke</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tl" aria-hidden="true">
+    <div class="ruler mono"><span>00:00</span><span>00:15</span><span>00:30</span><span>00:45</span><span>00:60</span></div>
+    <div class="tracks">
+      <div class="track"><b>V1</b><div class="lane"><span class="clip c1" style="left:0;width:23%">Toma A</span><span class="clip c1" style="left:25%;width:31%">Toma B</span><span class="clip c1" style="left:58%;width:42%">Toma C</span></div></div>
+      <div class="track"><b>T1</b><div class="lane"><span class="clip c3" style="left:4%;width:12%">Título</span><span class="clip c3" style="left:70%;width:20%">Cierre</span></div></div>
+      <div class="track"><b>CC</b><div class="lane"><span class="clip c2" style="left:0;width:100%">Subtítulos palabra por palabra</span></div></div>
+      <div class="head"></div>
+    </div>
+  </div>
+  <div class="stat">
+    <div><strong>1080×1920</strong><span class="mono">Resolución de salida</span></div>
+    <div><strong>9:16</strong><span class="mono">Zona segura respetada</span></div>
+    <div><strong>−14 LUFS</strong><span class="mono">Audio normalizado</span></div>
+    <div><strong>17</strong><span class="mono">Estilos de subtítulo</span></div>
+  </div>
+</div></section>
+
+<section id="servicios"><div class="wrap">
+  <div class="sec-head"><h2>Lo que<br>hacemos</h2><p>Cuatro oficios, cada uno con valores concretos en lugar de «se ve bien».</p></div>
+  <div class="svc">
+    <article><span class="tag mono"><s style="background:var(--t1)"></s>Corte</span><h3>Limpieza de tomas</h3><p>Quitamos pausas, tropiezos y repeticiones sin comernos ninguna palabra. El corte queda como una lista de ediciones que podés revisar antes del render.</p></article>
+    <article><span class="tag mono"><s style="background:var(--t2)"></s>Subtítulos</span><h3>Palabra por palabra</h3><p>La palabra activa se marca uno o dos fotogramas antes de la voz. Elegís entre karaoke, pop, píldora, neón, vidrio esmerilado y más, con tamaño y márgenes pensados para 9:16.</p></article>
+    <article><span class="tag mono"><s style="background:var(--t3)"></s>Títulos</span><h3>Rótulos y tipografía en movimiento</h3><p>Tercios inferiores, placas de orador, aperturas de show y piezas tipográficas cinéticas, con tiempos de lectura calculados según la cantidad de palabras.</p></article>
+    <article><span class="tag mono"><s style="background:var(--accent)"></s>Ritmo</span><h3>Transiciones al compás</h3><p>Zoom infinito, corte con vibración, mosaico de impacto o destello de bokeh, colocados donde cae el pico del beat y con duración medida en fotogramas.</p></article>
+  </div>
+</div></section>
+
+<section id="proceso"><div class="wrap">
+  <div class="sec-head"><h2>Cómo<br>trabajamos</h2><p>El orden importa: cada paso depende del anterior.</p></div>
+  <div class="steps">
+    <div class="step"><span class="mono">Paso 1</span><h3>Transcribimos</h3><p>Leemos la toma como texto y como audio para ubicar cada palabra en el tiempo.</p></div>
+    <div class="step"><span class="mono">Paso 2</span><h3>Cortamos</h3><p>Sacamos silencios y errores y te mostramos la lista de cortes para aprobar.</p></div>
+    <div class="step"><span class="mono">Paso 3</span><h3>Vestimos</h3><p>Subtítulos, títulos y transiciones, cada gráfico anclado a la palabra que se dice.</p></div>
+    <div class="step"><span class="mono">Paso 4</span><h3>Verificamos</h3><p>Medimos sonoridad, zona segura y fotogramas antes de que lo mires vos.</p></div>
+  </div>
+</div></section>
+
+<section id="brief"><div class="wrap brief">
+  <div>
+    <h2 style="margin-bottom:20px">Armá tu<br>brief</h2>
+    <p style="color:var(--muted);margin-bottom:28px">Completá los datos y copiá el texto resultante para enviarlo a quien produzca tu video. No se envía nada desde esta página.</p>
+    <form id="f">
+      <label for="fmt">Formato<select id="fmt"><option>TikTok / Reels / Shorts (9:16)</option><option>YouTube horizontal (16:9)</option><option>Cuadrado (1:1)</option></select></label>
+      <label for="sty">Estilo de subtítulo<select id="sty"><option>Pop (palabra activa amarilla)</option><option>Píldora</option><option>Neón</option><option>Karaoke</option><option>Sin subtítulos</option></select></label>
+      <label for="dur">Duración aproximada (segundos)<input id="dur" type="number" min="5" max="600" value="45"></label>
+      <label for="not">Notas<textarea id="not" placeholder="Referencias, tono, palabras que no pueden cortarse…"></textarea></label>
+    </form>
+  </div>
+  <div>
+    <div class="out-head"><span class="mono">Vista previa del brief</span><button class="btn ghost" id="copy" type="button">Copiar</button></div>
+    <div class="out" id="out"></div>
+  </div>
+</div></section>
+</main>
+
+<footer class="wrap"><span class="logo" style="font-size:18px"><i style="height:16px"></i>Corte Seco</span><span class="mono">Edición vertical · 1080×1920</span></footer>
+
+<script>
+(function(){
+  var words="Cada pausa de más cuesta una vista".toUpperCase().split(" "),
+      cap=document.getElementById("cap"),tc=document.getElementById("tc"),
+      picker=document.getElementById("picker"),i=0,t0=Date.now();
+  words.forEach(function(w){var s=document.createElement("span");s.textContent=w;cap.appendChild(s)});
+  var spans=cap.children;
+  function tick(){
+    for(var j=0;j<spans.length;j++){spans[j].classList.toggle("on",j===i);spans[j].classList.toggle("done",j<i)}
+    i=(i+1)%(words.length+1);
+    if(i===words.length+0){/* hold on last word, then restart */}
+  }
+  var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  tick();
+  if(!reduce){setInterval(tick,520);
+    setInterval(function(){var f=Math.floor((Date.now()-t0)/(1000/30)),s=Math.floor(f/30)%60,fr=f%30;
+      tc.textContent="00:00:"+String(s).padStart(2,"0")+":"+String(fr).padStart(2,"0")},33)}
+  picker.addEventListener("click",function(e){
+    var b=e.target.closest("button");if(!b)return;
+    cap.className="cap "+b.dataset.k;
+    [].forEach.call(picker.children,function(x){x.setAttribute("aria-pressed",x===b)});
+  });
+  /* brief */
+  var out=document.getElementById("out"),f=document.getElementById("f");
+  function render(){
+    out.textContent="BRIEF DE EDICIÓN\n\nFormato: "+fmt.value+"\nSubtítulos: "+sty.value+
+      "\nDuración: ~"+(dur.value||"?")+" s\nAudio: normalizado a −14 LUFS\nEntrega: MP4 + lista de cortes\n\nNotas:\n"+(not.value||"(sin notas)");
+  }
+  f.addEventListener("input",render);f.addEventListener("submit",function(e){e.preventDefault()});render();
+  var cb=document.getElementById("copy");
+  cb.addEventListener("click",function(){
+    function ok(){cb.textContent="Copiado";setTimeout(function(){cb.textContent="Copiar"},1500)}
+    try{navigator.clipboard.writeText(out.textContent).then(ok,function(){sel()})}catch(e){sel()}
+    function sel(){var r=document.createRange();r.selectNodeContents(out);var s=getSelection();s.removeAllRanges();s.addRange(r);cb.textContent="Seleccionado"}
+  });
+})();
+</script>
