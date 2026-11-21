@@ -334,6 +334,94 @@ aside.filters{position:sticky;top:84px;align-self:start;max-height:calc(100vh - 
 .verdict{margin-top:18px;padding:14px 16px;border-radius:14px;background:linear-gradient(90deg,rgba(250,204,21,.08),rgba(0,229,255,.06));border:1px solid var(--line2);font-size:13.5px;color:var(--mut)}
 .verdict b{color:var(--txt)}
 
+/* ---------- RANKINGS ---------- */
+a.hbtn{text-decoration:none}
+.spill{font-size:11px;font-weight:800;color:var(--amber);padding:3px 7px;border-radius:99px;background:rgba(250,204,21,.08);border:1px solid rgba(250,204,21,.28);font-family:var(--mono)}
+.card .meta .spill{margin-left:auto}
+.brandg:not(.all) .opt.more{display:none}
+.more-btn{display:block;padding:6px 4px 2px}
+.rank{padding:10px 0 50px;border-top:1px solid var(--line);background:radial-gradient(60% 40% at 50% 0%,rgba(250,204,21,.07),transparent 70%)}
+.sec-head{margin:30px 0 20px}
+.sec-head h2{font-size:clamp(26px,3.2vw,38px);letter-spacing:-1.1px;margin:12px 0 6px;line-height:1.1}
+.sec-head p{margin:0;color:var(--mut);max-width:680px}
+.awards{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+.award{--tc:var(--amber);background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;opacity:0;translate:0 26px;transition:opacity .6s var(--ease) var(--d,0ms),translate .6s var(--ease) var(--d,0ms),transform .3s var(--ease),border-color .3s,box-shadow .3s}
+.award.in{opacity:1;translate:0 0}
+.award:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--tc) 45%,var(--line));box-shadow:0 18px 40px -20px color-mix(in srgb,var(--tc) 60%,transparent)}
+.award.big{grid-column:span 2;background:radial-gradient(90% 120% at 100% 0%,rgba(250,204,21,.10),transparent 60%),var(--card);border-color:rgba(250,204,21,.35)}
+.aw-head{display:flex;gap:10px;align-items:center}
+.aw-ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:color-mix(in srgb,var(--tc) 14%,transparent);border:1px solid color-mix(in srgb,var(--tc) 30%,transparent);flex-shrink:0}
+.aw-head h3{margin:0;font-size:15px;font-weight:800;letter-spacing:-.2px}
+.aw-head p{margin:1px 0 0;font-size:12px;color:var(--dim)}
+.aw-win{display:grid;grid-template-columns:104px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px 10px 10px;border-radius:14px;background:var(--bg2);border:1px solid var(--line);cursor:pointer;transition:border-color .2s;position:relative;text-align:left;width:100%}
+.aw-win:hover{border-color:var(--tc)}
+.aw-win .kbx{border-radius:10px;padding:6px;background:radial-gradient(circle at 50% 100%,color-mix(in srgb,var(--tc) 28%,transparent),#15181e 72%)}
+.aw-win svg.kb{width:100%;height:auto;display:block}
+.aw-tag{font-size:10px;font-weight:800;letter-spacing:.6px;color:var(--tc);display:block;margin-bottom:2px}
+.aw-name{font-weight:700;font-size:14px;line-height:1.25}
+.aw-name small{display:block;color:var(--mut);font-weight:500;font-size:12px;margin-top:3px}
+.aw-score{font-family:var(--mono);font-weight:800;font-size:24px;color:var(--tc);text-align:right;line-height:1;white-space:nowrap}
+.aw-score small{display:block;font-size:10.5px;color:var(--dim);font-weight:600;margin-top:3px}
+.award.big .aw-win{grid-template-columns:minmax(120px,190px) minmax(0,1fr) auto;padding:14px}
+.award.big .aw-name{font-size:18px}
+.award.big .aw-score{font-size:34px}
+.aw-rest{list-style:none;margin:auto 0 0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:2px}
+.aw-rest li{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:6px 8px;border-radius:9px;cursor:pointer;color:var(--mut);transition:background .2s,color .2s}
+.aw-rest li:hover{background:var(--card2);color:var(--txt)}
+.aw-rest .pos{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-size:11px;font-weight:800;flex-shrink:0;font-family:var(--mono)}
+.aw-rest .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aw-rest .v{font-family:var(--mono);font-weight:700;color:var(--txt)}
+.pos.m1,.medal.m1{background:linear-gradient(145deg,#FDE047,#CA8A04);color:#1a1300;box-shadow:0 0 16px -4px #FACC15}
+.pos.m2,.medal.m2{background:linear-gradient(145deg,#F3F4F6,#9CA3AF);color:#111}
+.pos.m3,.medal.m3{background:linear-gradient(145deg,#FDBA74,#C2410C);color:#1f0b00}
+.rank-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:36px 0 12px}
+.tabs{display:inline-flex;padding:4px;gap:4px;border-radius:13px;background:var(--card);border:1px solid var(--line)}
+.tab{height:38px;padding:0 16px;border-radius:10px;font-weight:700;font-size:13.5px;color:var(--mut);transition:background .3s var(--ease),color .3s}
+.tab:hover{color:var(--txt)}
+.tab.on{background:var(--amber);color:#1a1300}
+.seg{display:flex;gap:6px;flex-wrap:wrap;transition:opacity .3s}
+.seg.hide{opacity:0;pointer-events:none}
+.seg button{height:34px;padding:0 12px;border-radius:99px;border:1px solid var(--line2);font-size:12.5px;font-weight:700;color:var(--mut);background:var(--card);transition:.2s}
+.seg button:hover{color:var(--txt)}
+.seg button.on{border-color:var(--c,var(--amber));color:var(--c,var(--amber));background:color-mix(in srgb,var(--c,var(--amber)) 10%,var(--card))}
+.table-wrap{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:auto;max-height:720px;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+.rtable{width:100%;border-collapse:collapse;font-size:13.5px;min-width:980px}
+.rtable th{position:sticky;top:0;z-index:2;background:var(--card2);text-align:left;padding:0;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--mut);font-weight:700;border-bottom:1px solid var(--line2);line-height:1.25}
+.rtable th button,.rtable th span{width:100%;padding:12px 8px;display:flex;align-items:center;gap:4px;text-align:left;font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit}
+.rtable th button:hover,.rtable th.sorted button{color:var(--amber)}
+.rtable th .ar{font-size:10px;opacity:.4}
+.rtable th.sorted .ar{opacity:1}
+.rtable td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.rtable tbody tr{cursor:pointer;transition:background .2s;animation:rowIn .45s var(--ease) both;animation-delay:var(--d,0ms)}
+.rtable tbody tr:hover{background:rgba(255,255,255,.03)}
+.rtable tbody tr:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+@keyframes rowIn{from{opacity:0;transform:translateX(-12px)}}
+.medal{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-weight:800;font-family:var(--mono);background:var(--card2);color:var(--mut);font-size:12.5px}
+.rt-name{display:flex;align-items:center;gap:12px;min-width:270px}
+.rt-kb{--tc:var(--amber);width:54px;flex-shrink:0;padding:5px;border-radius:9px;background:radial-gradient(circle at 50% 100%,color-mix(in srgb,var(--tc) 28%,transparent),#15181e 72%)}
+.rt-kb svg{width:100%;height:auto;display:block}
+.rt-sub{font-size:11.5px;color:var(--mut);display:flex;align-items:center;gap:6px;margin-top:2px;white-space:nowrap}
+.tdots{display:inline-flex;gap:4px}
+.tdots i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.sc-cell{display:flex;align-items:center;gap:8px}
+.sc-cell b{font-family:var(--mono);font-size:14.5px;min-width:32px}
+.sc-cell .bar{flex:0 0 58px;height:6px}
+.num{font-family:var(--mono);font-weight:700}
+.rtable .cmp-btn{height:30px;flex:0 0 auto;padding:0 10px;font-size:12px;white-space:nowrap}
+.best-link{color:var(--txt);font-weight:600;text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px;text-align:left}
+.best-link:hover{text-decoration-color:var(--amber)}
+.rank-note{font-size:12.5px;color:var(--dim);margin:14px 2px 0;line-height:1.65;max-width:980px}
+.rank-note b{color:var(--mut)}
+@media (max-width:720px){
+  .award.big{grid-column:auto}
+  .award.big .aw-win,.aw-win{grid-template-columns:78px minmax(0,1fr) auto;padding:10px}
+  .award.big .aw-name{font-size:15px}
+  .award.big .aw-score{font-size:26px}
+  .tabs{width:100%}
+  .tab{flex:1;padding:0 8px}
+  .table-wrap{max-height:none}
+}
+
 /* toast */
 .toasts{position:fixed;top:82px;right:18px;z-index:120;display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .toast{background:var(--card2);border:1px solid var(--line2);border-left:3px solid var(--amber);padding:11px 14px;border-radius:12px;font-size:13.5px;box-shadow:0 14px 30px -10px rgba(0,0,0,.7);animation:toastIn .4s var(--ease);max-width:320px}
@@ -409,6 +497,7 @@ footer{border-top:1px solid var(--line);padding:30px 0 120px;color:var(--dim);fo
   .toasts{left:12px;right:12px;top:auto;bottom:90px}
   .toast{max-width:none}
 }
+@media (max-width:420px){.hbtn.rk{display:none}}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0ms!important;transition-duration:.01ms!important}
 }
@@ -428,6 +517,7 @@ footer{border-top:1px solid var(--line);padding:30px 0 120px;color:var(--dim);fo
       <button class="clear" id="qClear" aria-label="Borrar búsqueda"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     </div>
     <div class="top-actions">
+      <a class="hbtn rk" href="#rankings" aria-label="Ver clasificación">🏆<span class="lbl">Rankings</span></a>
       <button class="hbtn" id="openFavs" aria-label="Ver favoritos">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-9.3-9.6C1.5 7.4 3.7 4 7.2 4c2 0 3.6 1.1 4.8 2.8C13.2 5.1 14.8 4 16.8 4c3.5 0 5.7 3.4 4.5 6.9-1.8 5-9.3 9.6-9.3 9.6Z"/></svg>
         <span class="lbl">Favoritos</span><span class="count" id="favCount">0</span>
@@ -454,6 +544,7 @@ footer{border-top:1px solid var(--line);padding:30px 0 120px;color:var(--dim);fo
       <div class="hero-cta">
         <button class="btn btn-cy" data-quick="magnetico">Ver magnéticos ⚡</button>
         <button class="btn btn-sec" data-quick="value">Mejor calidad-precio</button>
+        <a class="btn btn-sec" href="#rankings">🏆 Ver rankings</a>
       </div>
     </div>
 
@@ -514,6 +605,29 @@ footer{border-top:1px solid var(--line);padding:30px 0 120px;color:var(--dim);fo
   </section>
 </div>
 
+<section class="rank" id="rankings" aria-labelledby="rankTitle">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <span class="kicker"><i></i>Clasificación 2026</span>
+        <h2 id="rankTitle">Los mejores teclados por categoría</h2>
+        <p>Comparamos todos los modelos del catálogo con el mismo criterio: velocidad, durabilidad, ruido, funciones y opiniones de compradores.</p>
+      </div>
+    </div>
+    <div class="awards" id="awards"></div>
+
+    <div class="rank-bar">
+      <div class="tabs" role="tablist" aria-label="Tipo de tabla">
+        <button class="tab on" role="tab" aria-selected="true" data-tab="models">Tabla de posiciones</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="brands">Ranking de marcas</button>
+      </div>
+      <div class="seg" id="rankTech"></div>
+    </div>
+    <div class="table-wrap"><table class="rtable" id="rtable"></table></div>
+    <p class="rank-note"><b>Cómo calculamos.</b> El <b>puntaje general (0 a 10)</b> combina velocidad de respuesta (35%), durabilidad (25%) y silencio (10%), suma puntos por Rapid Trigger, hot-swap, conexión inalámbrica y polling de 8000 Hz, y se ajusta según la calificación de los compradores. No tiene en cuenta el precio. La <b>calidad-precio (0 a 100)</b> sí lo tiene en cuenta: es la calidad dividida por el precio. En el ranking de marcas se promedian todos sus modelos del catálogo. Tocá los encabezados de la tabla para ordenar.</p>
+  </div>
+</section>
+
 <footer>
   <div class="wrap">
     <div class="f-grid">
@@ -569,7 +683,7 @@ const TECH = {
   mecanico:  { label:'Mecánico',  long:'Mecánico',               color:'#FACC15' },
   magnetico: { label:'Magnético', long:'Magnético (Hall Effect)', color:'#00E5FF' }
 };
-const BRANDS = ['Logitech','Redragon','Royal Kludge','Machenike','HyperX','Corsair','Aula','MCHOSE','Razer','Asus ROG','Keychron','VSG','Nisuta'];
+const BRANDS = ['Logitech','Redragon','Royal Kludge','Machenike','HyperX','Corsair','Aula','MCHOSE','Razer','Asus ROG','Keychron','VSG','Nisuta','SteelSeries','Wooting','Akko','Ajazz','Attack Shark','Genius'];
 const FORMATS = [['100','100% (Full Size)'],['90','90%'],['tkl','TKL (80%)'],['75','75%'],['65','65%'],['60','60%']];
 const FMT = Object.fromEntries(FORMATS);
 const FMT_SHORT = {'100':'100%','90':'90%','tkl':'TKL','75':'75%','65':'65%','60':'60%'};
@@ -581,7 +695,7 @@ const PRICES = [
   ['c','$120.000 a $220.000',120000,220000],
   ['d','Más de $220.000',220000,Infinity]
 ];
-const SORTS = [['rel','Más relevantes'],['value','Mejor calidad-precio'],['asc','Menor precio'],['desc','Mayor precio']];
+const SORTS = [['rel','Más relevantes'],['score','Mejor puntaje general'],['value','Mejor calidad-precio'],['asc','Menor precio'],['desc','Mayor precio']];
 
 const STORES = {
   compragamer: { name:'Compra Gamer',  short:'CG', color:'#E11D48', url:'https://compragamer.com/' },
@@ -708,7 +822,142 @@ const PRODUCTS = [
     price:292450, rating:4.8, reviews:160, sold:500, rgb:true, theme:'dark',
     specs:{ polling:'8000 Hz', act:'0,1 – 3,8 mm ajustable', travel:'3,8 mm', hs:true, rt:true, keycaps:'PBT doble inyección', weight:'780 g', extra:'Rapid Trigger 0,01 mm · Doble puerto USB-C · Panel táctil · Armoury Crate' },
     sc:{ speed:98, silence:60, dur:94 }, use:'eSports y máximo rendimiento', badges:['rt','ship'], stores:['compragamer','maximus','fravega'],
-    desc:'Lo más alto de la gama: switches magnéticos ROG, 8000 Hz y construcción premium. Para competir sin excusas.' }
+    desc:'Lo más alto de la gama: switches magnéticos ROG, 8000 Hz y construcción premium. Para competir sin excusas.' },
+
+  /* ---------- MEMBRANA (ampliación) ---------- */
+  { id:'logitech-mx-keys-s', brand:'Logitech', model:'MX Keys S', tech:'membrana', sw:'Tijera de perfil bajo (scissor)', format:'100', conn:['24','bt'],
+    price:185000, old:209000, rating:4.8, reviews:2300, sold:2600, rgb:false, theme:'gray',
+    specs:{ polling:'125 Hz', act:'≈ 1,5 mm', travel:'1,8 mm', hs:false, rt:false, keycaps:'ABS esféricas cóncavas', weight:'810 g', extra:'Retroiluminación inteligente · Logi Bolt + Bluetooth (3 equipos) · Batería recargable USB-C · Smart Actions' },
+    sc:{ speed:40, silence:92, dur:86 }, use:'Oficina premium y productividad', badges:['ship'], stores:['maximus','fravega','meli'],
+    desc:'El teclado de oficina más elegido por profesionales: escritura precisa y silenciosa, retroiluminación que se enciende al acercar las manos y cambio entre 3 equipos.' },
+
+  { id:'logitech-k380', brand:'Logitech', model:'K380 Multi-Device', tech:'membrana', sw:'Tijera de perfil bajo', format:'75', conn:['bt'],
+    price:48000, rating:4.7, reviews:6100, sold:8200, rgb:false, theme:'pink',
+    specs:{ polling:'125 Hz', act:'≈ 1,5 mm', travel:'1,5 mm', hs:false, rt:false, keycaps:'ABS redondeadas', weight:'423 g', extra:'Bluetooth para 3 dispositivos · Pilas AAA (hasta 24 meses) · Windows, Mac, iPad y Android' },
+    sc:{ speed:32, silence:90, dur:70 }, use:'Tablet, notebook y oficina portátil', badges:['sold'], stores:['compragamer','fravega','meli'],
+    desc:'Compacto, liviano y muy silencioso. Lo emparejás con la compu, la tablet y el celular y cambiás con una tecla.' },
+
+  { id:'razer-cynosa-v2', brand:'Razer', model:'Cynosa V2', tech:'membrana', sw:'Membrana suave silenciosa', format:'100', conn:['usb'],
+    price:65000, rating:4.5, reviews:1900, sold:2400, rgb:true, theme:'dark',
+    specs:{ polling:'1000 Hz', act:'≈ 2,0 mm', travel:'3,5 mm', hs:false, rt:false, keycaps:'ABS', weight:'950 g', extra:'Razer Chroma RGB por tecla · Teclas multimedia · Resistente a salpicaduras' },
+    sc:{ speed:52, silence:78, dur:68 }, use:'Gaming casual con RGB por tecla', badges:[], stores:['compragamer','maximus','meli'],
+    desc:'Membrana gamer con iluminación Chroma tecla por tecla y controles multimedia dedicados. Muy silencioso.' },
+
+  { id:'steelseries-apex3-tkl', brand:'SteelSeries', model:'Apex 3 TKL', tech:'membrana', sw:'Membrana Whisper-Quiet', format:'tkl', conn:['usb'],
+    price:78000, old:92000, rating:4.6, reviews:1500, sold:1800, rgb:true, theme:'dark',
+    specs:{ polling:'1000 Hz', act:'≈ 2,0 mm', travel:'3,6 mm', hs:false, rt:false, keycaps:'ABS', weight:'730 g', extra:'Resistencia al agua IP32 · RGB en 8 zonas · Controles multimedia' },
+    sc:{ speed:56, silence:82, dur:78 }, use:'Gaming silencioso en escritorios chicos', badges:[], stores:['hypergaming','mexx','meli'],
+    desc:'Formato TKL con switches de membrana silenciosos y resistencia IP32. Gran opción si jugás de noche o compartís espacio.' },
+
+  { id:'genius-kb116', brand:'Genius', model:'KB-116 USB', tech:'membrana', sw:'Membrana estándar', format:'100', conn:['usb'],
+    price:11500, rating:4.4, reviews:5200, sold:11000, rgb:false, theme:'dark',
+    specs:{ polling:'125 Hz', act:'≈ 3,0 mm', travel:'3,5 mm', hs:false, rt:false, keycaps:'ABS perfil bajo', weight:'450 g', extra:'Resistente a derrames · Plug & play' },
+    sc:{ speed:22, silence:78, dur:50 }, use:'Oficina, escuela y cibers', badges:['sold'], stores:['alltek','fravega','meli'],
+    desc:'El teclado de batalla de oficinas y escuelas: barato, resistente y sin vueltas.' },
+
+  { id:'redragon-karura', brand:'Redragon', model:'Karura K502 RGB', tech:'membrana', sw:'Membrana semi-mecánica', format:'100', conn:['usb'],
+    price:35000, rating:4.4, reviews:3300, sold:6100, rgb:true, theme:'dark',
+    specs:{ polling:'1000 Hz', act:'≈ 2,5 mm', travel:'4,0 mm', hs:false, rt:false, keycaps:'ABS', weight:'870 g', extra:'Reposamuñecas · Anti-ghosting en 26 teclas · Patas antideslizantes' },
+    sc:{ speed:44, silence:72, dur:58 }, use:'Primer teclado gamer', badges:[], stores:['compragamer','alltek','meli'],
+    desc:'Teclado gamer de entrada con RGB y reposamuñecas a un precio muy accesible.' },
+
+  /* ---------- MECÁNICOS (ampliación) ---------- */
+  { id:'aula-f75', brand:'Aula', model:'F75 Gasket Trimodal', tech:'mecanico', sw:'LEOBOG Reaper lineal · Hot-swap', format:'75', conn:['usb','24','bt'],
+    price:85000, old:99000, rating:4.8, reviews:2900, sold:4200, rgb:true, theme:'white',
+    specs:{ polling:'1000 Hz', act:'2,0 mm', travel:'3,6 mm', hs:true, rt:false, keycaps:'PBT doble inyección', weight:'920 g', extra:'Gasket mount · 5 capas de espuma · Perilla multimedia · Batería 4000 mAh' },
+    sc:{ speed:68, silence:80, dur:82 }, use:'Entusiastas: sonido premium a precio medio', badges:['sold','value'], stores:['hypergaming','compragamer','meli'],
+    desc:'El fenómeno de la comunidad: suena “thocky” de fábrica, es trimodal y tiene keycaps PBT. Muy difícil de superar por su precio.' },
+
+  { id:'akko-5075b', brand:'Akko', model:'5075B Plus', tech:'mecanico', sw:'Akko V3 Cream Yellow lineal · Hot-swap', format:'75', conn:['usb','24','bt'],
+    price:110000, rating:4.7, reviews:980, sold:1300, rgb:true, theme:'white',
+    specs:{ polling:'1000 Hz', act:'1,9 mm', travel:'4,0 mm', hs:true, rt:false, keycaps:'PBT doble inyección (perfil ASA)', weight:'1.000 g', extra:'Gasket mount · Perilla · Trimodal · Batería 4000 mAh' },
+    sc:{ speed:66, silence:74, dur:84 }, use:'Escribir mucho y jugar', badges:[], stores:['maximus','hypergaming','meli'],
+    desc:'75% trimodal con switches muy suaves y keycaps de gran calidad. Ideal para quien escribe todo el día.' },
+
+  { id:'hyperx-origins-core', brand:'HyperX', model:'Alloy Origins Core', tech:'mecanico', sw:'HyperX Red lineal', format:'tkl', conn:['usb'],
+    price:115000, old:129000, rating:4.7, reviews:2700, sold:2900, rgb:true, theme:'dark',
+    specs:{ polling:'1000 Hz', act:'1,8 mm', travel:'3,8 mm', hs:false, rt:false, keycaps:'ABS doble inyección', weight:'900 g', extra:'Cuerpo de aluminio aeronáutico · Cable USB-C desmontable · 3 perfiles en memoria' },
+    sc:{ speed:72, silence:55, dur:88 }, use:'Gaming competitivo TKL robusto', badges:[], stores:['hypergaming','compragamer','meli'],
+    desc:'TKL de aluminio con switches lineales rápidos. Un tanque pensado para jugar durante años.' },
+
+  { id:'corsair-k70-pro', brand:'Corsair', model:'K70 RGB Pro', tech:'mecanico', sw:'Cherry MX Red lineal', format:'100', conn:['usb'],
+    price:230000, rating:4.7, reviews:1300, sold:1100, rgb:true, theme:'dark',
+    specs:{ polling:'8000 Hz', act:'2,0 mm', travel:'4,0 mm', hs:false, rt:false, keycaps:'PBT doble inyección', weight:'1.200 g', extra:'AXON Hyper-Processing · Modo torneo · Reposamuñecas · Rueda de volumen' },
+    sc:{ speed:80, silence:56, dur:92 }, use:'Gaming full size de alta gama', badges:['ship'], stores:['maximus','compragamer','fravega'],
+    desc:'Un clásico de alta gama: switches Cherry MX, polling de 8000 Hz y construcción de aluminio.' },
+
+  { id:'keychron-v1', brand:'Keychron', model:'V1 (QMK/VIA)', tech:'mecanico', sw:'Keychron K Pro Red lineal · Hot-swap · Perilla', format:'75', conn:['usb'],
+    price:120000, rating:4.7, reviews:870, sold:1100, rgb:true, theme:'gray',
+    specs:{ polling:'1000 Hz', act:'2,0 mm', travel:'4,0 mm', hs:true, rt:false, keycaps:'OSA PBT doble inyección', weight:'1.020 g', extra:'QMK/VIA · Montaje con juntas · Compatible Mac y Windows' },
+    sc:{ speed:66, silence:62, dur:86 }, use:'Programación y custom accesible', badges:[], stores:['maximus','hypergaming','meli'],
+    desc:'La puerta de entrada al mundo custom: 100% programable, hot-swap y con perilla, a precio razonable.' },
+
+  { id:'vsg-quasar', brand:'VSG', model:'Quasar', tech:'mecanico', sw:'Switch Blue clicky · Hot-swap', format:'60', conn:['usb'],
+    price:45000, rating:4.3, reviews:610, sold:1800, rgb:true, theme:'dark',
+    specs:{ polling:'1000 Hz', act:'2,2 mm', travel:'4,0 mm', hs:true, rt:false, keycaps:'ABS', weight:'600 g', extra:'Cable USB-C desmontable · RGB con 18 efectos' },
+    sc:{ speed:58, silence:30, dur:68 }, use:'Setups compactos económicos', badges:[], stores:['compragamer','alltek','meli'],
+    desc:'60% mecánico hot-swap de marca local, económico y con mucho RGB.' },
+
+  { id:'rk61', brand:'Royal Kludge', model:'RK61 Trimodal', tech:'mecanico', sw:'RK Red lineal · Hot-swap', format:'60', conn:['usb','24','bt'],
+    price:55000, rating:4.5, reviews:3400, sold:5200, rgb:true, theme:'white',
+    specs:{ polling:'1000 Hz', act:'2,0 mm', travel:'4,0 mm', hs:true, rt:false, keycaps:'ABS doble inyección', weight:'600 g', extra:'USB-C + 2.4GHz + Bluetooth (3 equipos) · Batería 1450 mAh' },
+    sc:{ speed:62, silence:50, dur:72 }, use:'Primer mecánico inalámbrico', badges:[], stores:['compragamer','mexx','meli'],
+    desc:'El 60% inalámbrico más barato y popular. Ideal para estrenarse en el mundo mecánico sin cables.' },
+
+  { id:'rog-strix-scope-ii-96', brand:'Asus ROG', model:'Strix Scope II 96 Wireless', tech:'mecanico', sw:'ROG NX Snow lineal · Hot-swap', format:'90', conn:['usb','24','bt'],
+    price:260000, rating:4.7, reviews:540, sold:650, rgb:true, theme:'dark',
+    specs:{ polling:'1000 Hz', act:'1,8 mm', travel:'4,0 mm', hs:true, rt:false, keycaps:'PBT doble inyección', weight:'1.050 g', extra:'Espumas y switches lubricados de fábrica · Perilla multifunción · Hasta 1500 h de batería' },
+    sc:{ speed:74, silence:72, dur:90 }, use:'Trabajo + gaming sin cables, con numérico', badges:['ship'], stores:['compragamer','maximus','meli'],
+    desc:'96% inalámbrico premium: numérico compacto, sonido muy cuidado y batería casi eterna.' },
+
+  { id:'logitech-gpro-x-tkl', brand:'Logitech', model:'G Pro X TKL Lightspeed', tech:'mecanico', sw:'GX Brown táctil', format:'tkl', conn:['usb','24','bt'],
+    price:279000, rating:4.6, reviews:720, sold:900, rgb:true, theme:'dark',
+    specs:{ polling:'1000 Hz', act:'1,9 mm', travel:'3,7 mm', hs:false, rt:false, keycaps:'PBT doble inyección', weight:'1.000 g', extra:'Lightspeed 2.4GHz + Bluetooth + cable · Hasta 50 h de batería · Modo torneo' },
+    sc:{ speed:76, silence:55, dur:90 }, use:'eSports inalámbrico', badges:['ship'], stores:['maximus','compragamer','fravega'],
+    desc:'El TKL inalámbrico que usan muchos profesionales: conexión Lightspeed sin lag y construcción de primera.' },
+
+  /* ---------- MAGNÉTICOS (ampliación) ---------- */
+  { id:'wooting-80he', brand:'Wooting', model:'80HE', tech:'magnetico', sw:'Lekker L60 V2 magnético · Rapid Trigger', format:'75', conn:['usb'],
+    price:330000, rating:4.9, reviews:380, sold:420, rgb:true, theme:'dark',
+    specs:{ polling:'8000 Hz', act:'0,1 – 4,0 mm ajustable', travel:'4,0 mm', hs:true, rt:true, keycaps:'PBT doble inyección', weight:'1.150 g', extra:'Rapid Trigger 0,1 mm · Entrada analógica (como un joystick) · Wootility web · Chasis de aluminio' },
+    sc:{ speed:99, silence:62, dur:95 }, use:'Lo mejor para FPS competitivo', badges:['rt','ship'], stores:['hypergaming','maximus','meli'],
+    desc:'La referencia absoluta en teclados magnéticos: 8000 Hz, Rapid Trigger impecable y el mejor software del mercado.' },
+
+  { id:'wooting-60he', brand:'Wooting', model:'60HE+', tech:'magnetico', sw:'Lekker magnético · Rapid Trigger', format:'60', conn:['usb'],
+    price:260000, rating:4.9, reviews:610, sold:700, rgb:true, theme:'dark',
+    specs:{ polling:'1000 Hz', act:'0,1 – 4,0 mm ajustable', travel:'4,0 mm', hs:true, rt:true, keycaps:'PBT doble inyección', weight:'605 g', extra:'Rapid Trigger · Entrada analógica · Tachyon Mode' },
+    sc:{ speed:98, silence:60, dur:92 }, use:'FPS competitivo, el referente original', badges:['rt','ship'], stores:['hypergaming','alltek','meli'],
+    desc:'El teclado que popularizó el Rapid Trigger en Valorant y CS2. Compacto, preciso y muy configurable.' },
+
+  { id:'steelseries-apex-pro-tkl', brand:'SteelSeries', model:'Apex Pro TKL Wireless (Gen 3)', tech:'magnetico', sw:'OmniPoint 3.0 magnético · Rapid Trigger', format:'tkl', conn:['usb','24','bt'],
+    price:380000, rating:4.7, reviews:650, sold:600, rgb:true, theme:'dark',
+    specs:{ polling:'1000 Hz', act:'0,1 – 4,0 mm ajustable', travel:'4,0 mm', hs:false, rt:true, keycaps:'PBT doble inyección', weight:'974 g', extra:'Pantalla OLED · 2 acciones por tecla · Rueda de volumen · Trimodal' },
+    sc:{ speed:95, silence:62, dur:93 }, use:'Competitivo premium inalámbrico', badges:['rt','ship'], stores:['maximus','compragamer','fravega'],
+    desc:'Magnético inalámbrico de gama alta con pantalla OLED y switches OmniPoint de actuación ajustable.' },
+
+  { id:'aula-hero68he', brand:'Aula', model:'Hero 68 HE', tech:'magnetico', sw:'Switch magnético lineal · Rapid Trigger', format:'65', conn:['usb'],
+    price:98000, rating:4.6, reviews:450, sold:1400, rgb:true, theme:'gray',
+    specs:{ polling:'8000 Hz', act:'0,1 – 3,5 mm ajustable', travel:'3,5 mm', hs:true, rt:true, keycaps:'PBT', weight:'700 g', extra:'Rapid Trigger 0,01 mm · SOCD · Gasket mount' },
+    sc:{ speed:95, silence:60, dur:84 }, use:'Competitivo en formato 65%', badges:['rt'], stores:['hypergaming','mexx','meli'],
+    desc:'65% magnético con 8000 Hz y montaje gasket a precio intermedio. Mucha performance por la plata.' },
+
+  { id:'ajazz-ak680-max', brand:'Ajazz', model:'AK680 MAX', tech:'magnetico', sw:'Gateron magnético · Rapid Trigger', format:'65', conn:['usb'],
+    price:70000, old:82000, rating:4.6, reviews:880, sold:2700, rgb:true, theme:'white',
+    specs:{ polling:'1000 Hz', act:'0,1 – 3,4 mm ajustable', travel:'3,4 mm', hs:true, rt:true, keycaps:'PBT', weight:'650 g', extra:'Rapid Trigger · Actuación por tecla · Configuración web' },
+    sc:{ speed:90, silence:58, dur:78 }, use:'Magnético económico para FPS', badges:['value','rt'], stores:['compragamer','mexx','meli'],
+    desc:'Uno de los magnéticos más baratos con switches Gateron y Rapid Trigger. Ideal para probar la tecnología.' },
+
+  { id:'attack-shark-x68he', brand:'Attack Shark', model:'X68HE', tech:'magnetico', sw:'Switch magnético lineal · Rapid Trigger', format:'65', conn:['usb'],
+    price:82000, rating:4.5, reviews:530, sold:1500, rgb:true, theme:'dark',
+    specs:{ polling:'1000 Hz', act:'0,1 – 3,5 mm ajustable', travel:'3,5 mm', hs:true, rt:true, keycaps:'ABS doble inyección', weight:'640 g', extra:'Rapid Trigger · SOCD · Gasket mount' },
+    sc:{ speed:90, silence:56, dur:78 }, use:'FPS competitivo económico', badges:['rt'], stores:['alltek','hypergaming','meli'],
+    desc:'65% magnético accesible con gasket y Rapid Trigger, muy recomendado para Valorant y CS2.' },
+
+  { id:'keychron-q1-he', brand:'Keychron', model:'Q1 HE', tech:'magnetico', sw:'Gateron magnético Double-Rail · Rapid Trigger', format:'75', conn:['usb','24','bt'],
+    price:320000, rating:4.8, reviews:190, sold:240, rgb:true, theme:'gray',
+    specs:{ polling:'1000 Hz', act:'0,1 – 4,0 mm ajustable', travel:'4,0 mm', hs:true, rt:true, keycaps:'PBT doble inyección', weight:'1.800 g', extra:'Chasis CNC de aluminio · Gasket mount · Trimodal · Perilla' },
+    sc:{ speed:93, silence:70, dur:96 }, use:'Premium de aluminio para jugar y trabajar', badges:['rt','ship'], stores:['maximus','hypergaming','meli'],
+    desc:'Aluminio macizo, sonido premium y switches magnéticos con Rapid Trigger. Lo mejor de los dos mundos.' }
 ];
 
 /* =========================================================
@@ -783,6 +1032,18 @@ PRODUCTS.forEach(p => {
 });
 const vMax = Math.max(...PRODUCTS.map(p => p.valueRaw)), vMin = Math.min(...PRODUCTS.map(p => p.valueRaw));
 PRODUCTS.forEach(p => p.value = Math.round(45 + 55 * (p.valueRaw - vMin) / (vMax - vMin)));
+/* Puntaje general (0-10): rendimiento + funciones + opiniones, sin mirar el precio */
+const isWireless = p => p.conn.some(c => c !== 'usb');
+PRODUCTS.forEach(p => {
+  p.scoreRaw = p.sc.speed * .35 + p.sc.dur * .25 + p.sc.silence * .10 +
+    (p.specs.rt ? 6 : 0) + (p.specs.hs ? 3 : 0) + (isWireless(p) ? 3 : 0) +
+    (p.specs.polling.startsWith('8000') ? 4 : 0) + (p.rating - 4) * 20;
+});
+const sMax = Math.max(...PRODUCTS.map(p => p.scoreRaw)), sMin = Math.min(...PRODUCTS.map(p => p.scoreRaw));
+PRODUCTS.forEach(p => p.score = Math.round((6 + 3.8 * (p.scoreRaw - sMin) / (sMax - sMin)) * 10) / 10);
+[...PRODUCTS].sort((a, b) => b.scoreRaw - a.scoreRaw).forEach((p, i) => p.rankAll = i + 1);
+Object.keys(TECH).forEach(t => PRODUCTS.filter(p => p.tech === t).sort((a, b) => b.scoreRaw - a.scoreRaw).forEach((p, i) => p.rankTech = i + 1));
+const fmtScore = v => v.toFixed(1).replace('.', ',');
 const byId = Object.fromEntries(PRODUCTS.map(p => [p.id, p]));
 
 /* =========================================================
@@ -871,6 +1132,7 @@ function filtered() {
     s === 'asc' ? a.price - b.price :
     s === 'desc' ? b.price - a.price :
     s === 'value' ? b.valueRaw - a.valueRaw :
+    s === 'score' ? b.scoreRaw - a.scoreRaw :
     b.rel - a.rel);
   return list;
 }
@@ -884,13 +1146,13 @@ const cTech = countBy(p => p.tech), cBrand = countBy(p => p.brand), cFmt = count
 function optHTML(type, group, value, label, n, extra = '') {
   return `<label class="opt"><input type="${type}" name="${group}" value="${esc(value)}" data-g="${group}"><span class="box">${ICON.check}</span>${extra}<span>${esc(label)}</span>${n != null ? `<span class="n">${n}</span>` : ''}</label>`;
 }
-function groupHTML(title, inner, closed = false) {
-  return `<div class="fgroup${closed ? ' closed' : ''}"><button class="fg-t" type="button" aria-expanded="${!closed}">${title}${ICON.chev}</button><div class="fg-body"><div>${inner}</div></div></div>`;
+function groupHTML(title, inner, closed = false, cls = '') {
+  return `<div class="fgroup${closed ? ' closed' : ''} ${cls}"><button class="fg-t" type="button" aria-expanded="${!closed}">${title}${ICON.chev}</button><div class="fg-body"><div>${inner}</div></div></div>`;
 }
 function buildFilters() {
   $('#fgroups').innerHTML =
     groupHTML('Tecnología', Object.entries(TECH).map(([k, t]) => optHTML('checkbox','tech',k,t.long,cTech[k],`<span class="tdot" style="background:${t.color}"></span>`)).join('')) +
-    groupHTML('Marca', BRANDS.map(b => optHTML('checkbox','brand',b,b,cBrand[b] || 0)).join('')) +
+    groupHTML('Marca', [...BRANDS].sort((a, b) => (cBrand[b] || 0) - (cBrand[a] || 0) || a.localeCompare(b)).map((b, i) => optHTML('checkbox','brand',b,b,cBrand[b] || 0).replace('class="opt"', i >= 8 ? 'class="opt more"' : 'class="opt"')).join('') + `<button type="button" class="link-btn more-btn" id="brandMore">Ver todas las marcas (${BRANDS.length})</button>`, false, 'brandg') +
     groupHTML('Formato', FORMATS.map(([k,l]) => optHTML('checkbox','format',k,l,cFmt[k] || 0)).join('')) +
     groupHTML('Conectividad', CONNS.map(([k,l]) => optHTML('checkbox','conn',k,l,cConn[k] || 0)).join('')) +
     groupHTML('Rango de precio (ARS)', PRICES.map(([k,l]) => optHTML('radio','price',k,l)).join('')) +
@@ -936,7 +1198,7 @@ function cardHTML(p, i) {
       </div>
     </div>
     <div class="body">
-      <div class="meta"><span class="tpill">${t.label}</span><span class="fpill">${FMT_SHORT[p.format]}</span>${p.conn.length > 1 || p.conn[0] !== 'usb' ? `<span class="fpill">${p.conn.length === 3 ? 'Trimodal' : p.conn.includes('bt') ? 'Bluetooth' : '2.4GHz'}</span>` : ''}</div>
+      <div class="meta"><span class="tpill">${t.label}</span><span class="fpill">${FMT_SHORT[p.format]}</span>${p.conn.length > 1 || p.conn[0] !== 'usb' ? `<span class="fpill">${p.conn.length === 3 ? 'Trimodal' : p.conn.includes('bt') ? 'Bluetooth' : '2.4GHz'}</span>` : ''}<span class="spill" title="Puntaje general · puesto #${p.rankAll}">🏆 ${fmtScore(p.score)}</span></div>
       <h3><span class="brand">${esc(p.brand)}</span> ${esc(p.model)}</h3>
       <p class="swt" title="${esc(p.sw)}">${esc(p.sw)}</p>
       <div class="stars"><span class="st" aria-hidden="true"><i style="width:${p.rating / 5 * 100}%"></i></span><span>${p.rating.toFixed(1).replace('.', ',')} (${p.reviews.toLocaleString('es-AR')})</span></div>
@@ -955,7 +1217,6 @@ function cardHTML(p, i) {
   </article>`;
 }
 function renderGrid() {
-  svgUid = 0;
   const list = filtered();
   const grid = $('#grid');
   grid.innerHTML = list.length ? list.map(cardHTML).join('') :
@@ -1108,7 +1369,7 @@ function openDetail(id) {
         </div>
       </div>
       <div class="d-info">
-        <div class="meta"><span class="tpill" style="--tc:${t.color}">${t.label}</span><span class="fpill">${FMT_SHORT[p.format]}</span>${p.badges.map(b => `<span class="badge ${BADGE[b][0]}">${b === 'rt' && p.rt8k ? 'RAPID TRIGGER 8000Hz' : BADGE[b][1]}</span>`).join('')}</div>
+        <div class="meta"><span class="tpill" style="--tc:${t.color}">${t.label}</span><span class="fpill">${FMT_SHORT[p.format]}</span><span class="spill">🏆 ${fmtScore(p.score)}/10 · #${p.rankAll} general · #${p.rankTech} en ${t.label.toLowerCase()}</span>${p.badges.map(b => `<span class="badge ${BADGE[b][0]}">${b === 'rt' && p.rt8k ? 'RAPID TRIGGER 8000Hz' : BADGE[b][1]}</span>`).join('')}</div>
         <h2 id="dTitle">${esc(fullName(p))}</h2>
         <div class="stars"><span class="st"><i style="width:${p.rating / 5 * 100}%"></i></span><span>${p.rating.toFixed(1).replace('.', ',')} · ${p.reviews.toLocaleString('es-AR')} opiniones · +${p.sold.toLocaleString('es-AR')} vendidos</span></div>
         <p class="desc">${esc(p.desc)}</p>
@@ -1160,6 +1421,7 @@ function renderCompare() {
     ['Mejor precio encontrado', p => `${money(p.best.price)}<div style="font-size:11.5px;color:var(--mut);font-weight:500">${STORES[p.best.store].name}</div>`, p => p.best.price, 'min'],
     ['Cuotas', p => `6x ${money(p.price / 6)}`, null],
     ['sec','Rendimiento'],
+    ['Puntaje general', p => `<b class="mono" style="font-size:16px">${fmtScore(p.score)}</b>/10 <span style="color:var(--dim);font-size:12px">· puesto #${p.rankAll}</span>`, p => p.scoreRaw, 'max'],
     ['Velocidad', p => barCell(p.sc.speed, TECH[p.tech].color), p => p.sc.speed, 'max'],
     ['Ruido', p => `${barCell(p.sc.silence, '#A78BFA')}<div style="font-size:11.5px;color:var(--mut);margin-top:3px">Ruido ${noise(p.sc.silence).toLowerCase()}</div>`, p => p.sc.silence, 'max'],
     ['Durabilidad', p => barCell(p.sc.dur, '#22C55E'), p => p.sc.dur, 'max'],
@@ -1251,6 +1513,7 @@ function bind() {
     update();
   });
   $('#fgroups').addEventListener('click', e => {
+    if (e.target.id === 'brandMore') { const g = e.target.closest('.fgroup'); g.classList.toggle('all'); e.target.textContent = g.classList.contains('all') ? 'Ver menos marcas' : `Ver todas las marcas (${BRANDS.length})`; return; }
     const b = e.target.closest('.fg-t'); if (!b) return;
     const g = b.parentElement; g.classList.toggle('closed');
     b.setAttribute('aria-expanded', !g.classList.contains('closed'));
@@ -1534,12 +1797,169 @@ function sound(type) {
 }
 
 /* =========================================================
+   CLASIFICACIÓN / RANKINGS
+   ========================================================= */
+const AWARDS = [
+  { ico:'🏆', t:'Mejor teclado del mercado', d:'El de mayor puntaje general, sin importar el precio', big:true, f:() => true, by:p => p.scoreRaw, v:p => [fmtScore(p.score), 'de 10'] },
+  { ico:'💰', t:'Mejor calidad-precio', d:'Lo que más rinde por cada peso', f:() => true, by:p => p.valueRaw, v:p => [p.value, 'de 100'] },
+  { ico:'⚙️', t:'Mejor mecánico', d:'Switches mecánicos tradicionales', f:p => p.tech === 'mecanico', by:p => p.scoreRaw, v:p => [fmtScore(p.score), 'de 10'] },
+  { ico:'⚡', t:'Mejor magnético (Hall Effect)', d:'Actuación ajustable y Rapid Trigger', f:p => p.tech === 'magnetico', by:p => p.scoreRaw, v:p => [fmtScore(p.score), 'de 10'] },
+  { ico:'◍', t:'Mejor de membrana', d:'Silencioso, práctico y accesible', f:p => p.tech === 'membrana', by:p => p.scoreRaw, v:p => [fmtScore(p.score), 'de 10'] },
+  { ico:'🎯', t:'Mejor para FPS competitivo', d:'Velocidad de respuesta y polling', f:() => true, by:p => p.sc.speed * 100 + (p.specs.polling.startsWith('8000') ? 50 : 0) + p.rating * 10, v:p => [p.sc.speed, 'velocidad'] },
+  { ico:'🪙', t:'Mejor económico', d:'Precio de referencia menor a $60.000', f:p => p.price < 60000, by:p => p.scoreRaw, v:p => [fmtScore(p.score), 'de 10'] },
+  { ico:'📡', t:'Mejor inalámbrico', d:'2.4GHz, Bluetooth o trimodal', f:isWireless, by:p => p.scoreRaw, v:p => [fmtScore(p.score), 'de 10'] },
+  { ico:'🎒', t:'Mejor compacto (60–65%)', d:'Más espacio para el mouse y fácil de llevar', f:p => p.format === '60' || p.format === '65', by:p => p.scoreRaw, v:p => [fmtScore(p.score), 'de 10'] },
+  { ico:'🤫', t:'Más silencioso', d:'Ideal para la oficina o jugar de noche', f:() => true, by:p => p.sc.silence * 10 + p.rating, v:p => [p.sc.silence, 'silencio'] },
+  { ico:'🔥', t:'Más vendido', d:'El preferido por los compradores', f:() => true, by:p => p.sold, v:p => ['+' + (p.sold / 1000).toFixed(1).replace('.', ',') + 'k', 'ventas'] }
+];
+const rank = { tab:'models', tech:'', key:'score', dir:-1 };
+const brandRank = { key:'score', dir:-1 };
+const MCOLS = [
+  { k:'pos',     l:'#' },
+  { k:'name',    l:'Teclado' },
+  { k:'score',   l:'Puntaje',        get:p => p.scoreRaw },
+  { k:'value',   l:'Calidad-precio', get:p => p.valueRaw },
+  { k:'speed',   l:'Velocidad',      get:p => p.sc.speed },
+  { k:'silence', l:'Silencio',       get:p => p.sc.silence },
+  { k:'dur',     l:'Durabilidad',    get:p => p.sc.dur },
+  { k:'rating',  l:'Opiniones',      get:p => p.rating },
+  { k:'price',   l:'Mejor precio',   get:p => p.best.price },
+  { k:'act',     l:'' }
+];
+const BCOLS = [
+  { k:'pos',    l:'#' },
+  { k:'brand',  l:'Marca' },
+  { k:'score',  l:'Puntaje prom.',  get:b => b.score },
+  { k:'value',  l:'Calidad-precio', get:b => b.value },
+  { k:'rating', l:'Calificación',   get:b => b.rating },
+  { k:'n',      l:'Modelos',        get:b => b.n },
+  { k:'from',   l:'Desde',          get:b => b.from },
+  { k:'best',   l:'Mejor modelo' }
+];
+const BRAND_STATS = BRANDS.map(b => {
+  const ps = PRODUCTS.filter(p => p.brand === b);
+  if (!ps.length) return null;
+  const avg = f => ps.reduce((s, p) => s + f(p), 0) / ps.length;
+  const reviews = ps.reduce((s, p) => s + p.reviews, 0);
+  return {
+    brand:b, n:ps.length, reviews,
+    techs:Object.keys(TECH).filter(t => ps.some(p => p.tech === t)),
+    from:Math.min(...ps.map(p => p.best.price)),
+    rating:ps.reduce((s, p) => s + p.rating * p.reviews, 0) / reviews,
+    value:avg(p => p.value), score:avg(p => p.score),
+    best:[...ps].sort((a, c) => c.scoreRaw - a.scoreRaw)[0]
+  };
+}).filter(Boolean);
+
+const medal = i => `<span class="medal${i < 3 ? ' m' + (i + 1) : ''}">${i + 1}</span>`;
+const scoreBar = (v, pct, c) => `<div class="sc-cell"><b>${v}</b><div class="bar"><i data-w="${Math.max(3, Math.min(100, pct)).toFixed(0)}" style="--bc:${c}"></i></div></div>`;
+
+function renderAwards() {
+  $('#awards').innerHTML = AWARDS.map((a, ai) => {
+    const top = PRODUCTS.filter(a.f).sort((x, y) => a.by(y) - a.by(x)).slice(0, 3);
+    if (!top.length) return '';
+    const w = top[0], [wv, wl] = a.v(w), tc = TECH[w.tech].color;
+    return `<article class="award${a.big ? ' big' : ''}" style="--tc:${tc};--d:${ai * 70}ms">
+      <div class="aw-head"><span class="aw-ico">${a.ico}</span><div><h3>${a.t}</h3><p>${a.d}</p></div></div>
+      <button class="aw-win" data-open="${w.id}" aria-label="Ganador: ${esc(fullName(w))}. Ver ficha">
+        <span class="kbx">${kbSVG(w)}</span>
+        <span class="aw-name"><span class="aw-tag">🥇 GANADOR</span>${esc(fullName(w))}<small>${TECH[w.tech].label} · ${FMT_SHORT[w.format]} · desde ${money(w.best.price)}</small></span>
+        <span class="aw-score">${wv}<small>${wl}</small></span>
+      </button>
+      <ol class="aw-rest">${top.slice(1).map((p, i) => { const [v] = a.v(p); return `<li data-open="${p.id}" tabindex="0"><span class="pos m${i + 2}">${i + 2}</span><span class="nm">${esc(fullName(p))}</span><span class="v">${v}</span></li>`; }).join('')}</ol>
+    </article>`;
+  }).join('');
+  const cards = $$('#awards .award');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold:.12 });
+    cards.forEach(c => io.observe(c));
+  } else cards.forEach(c => c.classList.add('in'));
+}
+
+function thHTML(cols, st) {
+  return `<thead><tr>${cols.map(c => c.get
+    ? `<th class="${st.key === c.k ? 'sorted' : ''}" aria-sort="${st.key === c.k ? (st.dir < 0 ? 'descending' : 'ascending') : 'none'}"><button data-sort="${c.k}">${c.l}<span class="ar">${st.key === c.k ? (st.dir < 0 ? '▼' : '▲') : '↕'}</span></button></th>`
+    : `<th><span>${c.l}</span></th>`).join('')}</tr></thead>`;
+}
+
+function renderRankTable() {
+  const tbl = $('#rtable');
+  $('#rankTech').classList.toggle('hide', rank.tab !== 'models');
+  if (rank.tab === 'models') {
+    const col = MCOLS.find(c => c.k === rank.key);
+    const list = PRODUCTS.filter(p => !rank.tech || (rank.tech === 'wireless' ? isWireless(p) : p.tech === rank.tech))
+      .sort((a, b) => (col.get(a) - col.get(b)) * rank.dir || b.scoreRaw - a.scoreRaw);
+    tbl.innerHTML = thHTML(MCOLS, rank) + `<tbody>${list.map((p, i) => {
+      const t = TECH[p.tech], inCmp = cmp.includes(p.id);
+      return `<tr data-open="${p.id}" tabindex="0" style="--d:${Math.min(i, 18) * 28}ms">
+        <td>${medal(i)}</td>
+        <td><div class="rt-name"><span class="rt-kb" style="--tc:${t.color}">${kbSVG(p)}</span><div><b>${esc(p.brand)}</b> ${esc(p.model)}<div class="rt-sub"><span class="tdot" style="background:${t.color}"></span>${t.label} · ${FMT_SHORT[p.format]}${p.specs.rt ? ' · Rapid Trigger' : ''}</div></div></div></td>
+        <td>${scoreBar(fmtScore(p.score), (p.score - 5.5) / 4.5 * 100, '#FACC15')}</td>
+        <td>${scoreBar(p.value, p.value, '#22C55E')}</td>
+        <td class="num" style="color:${t.color}">${p.sc.speed}</td>
+        <td class="num">${p.sc.silence}</td>
+        <td class="num">${p.sc.dur}</td>
+        <td style="white-space:nowrap" title="${p.reviews.toLocaleString('es-AR')} opiniones"><span style="color:var(--amber)">★</span> ${p.rating.toFixed(1).replace('.', ',')}</td>
+        <td style="white-space:nowrap"><b class="num">${money(p.best.price)}</b><div style="font-size:11.5px;color:var(--mut)">${STORES[p.best.store].name}</div></td>
+        <td><button class="cmp-btn${inCmp ? ' on' : ''}" data-cmp-id="${p.id}" aria-pressed="${inCmp}">${ICON.cmp}${inCmp ? 'En comparador' : 'Comparar'}</button></td>
+      </tr>`;
+    }).join('')}</tbody>`;
+  } else {
+    const col = BCOLS.find(c => c.k === brandRank.key);
+    const list = [...BRAND_STATS].sort((a, b) => (col.get(a) - col.get(b)) * brandRank.dir || b.score - a.score);
+    tbl.innerHTML = thHTML(BCOLS, brandRank) + `<tbody>${list.map((b, i) => `<tr data-open="${b.best.id}" tabindex="0" style="--d:${Math.min(i, 18) * 30}ms">
+        <td>${medal(i)}</td>
+        <td><b style="font-size:15px">${esc(b.brand)}</b><div class="rt-sub"><span class="tdots">${b.techs.map(t => `<i style="background:${TECH[t].color}" title="${TECH[t].label}"></i>`).join('')}</span>${b.techs.map(t => TECH[t].label).join(' · ')}</div></td>
+        <td>${scoreBar(fmtScore(b.score), (b.score - 5.5) / 4.5 * 100, '#FACC15')}</td>
+        <td>${scoreBar(Math.round(b.value), b.value, '#22C55E')}</td>
+        <td style="white-space:nowrap"><span style="color:var(--amber)">★</span> ${b.rating.toFixed(2).replace('.', ',')} <span style="color:var(--dim);font-size:12px">(${b.reviews.toLocaleString('es-AR')})</span></td>
+        <td class="num">${b.n}</td>
+        <td class="num" style="white-space:nowrap">${money(b.from)}</td>
+        <td><button class="best-link" data-open="${b.best.id}">${esc(b.best.model)}</button> <span class="spill">${fmtScore(b.best.score)}</span></td>
+      </tr>`).join('')}</tbody>`;
+  }
+  animateBars(tbl);
+}
+
+function buildRankings() {
+  $('#rankTech').innerHTML = [['', 'Todos', '#E8EAF0'], ['membrana', 'Membrana', TECH.membrana.color], ['mecanico', 'Mecánicos', TECH.mecanico.color], ['magnetico', 'Magnéticos', TECH.magnetico.color], ['wireless', 'Inalámbricos', '#22C55E']]
+    .map(([k, l, c]) => `<button data-rtech="${k}" style="--c:${c}" class="${rank.tech === k ? 'on' : ''}">${l}</button>`).join('');
+  renderAwards();
+  renderRankTable();
+  const sec = $('#rankings');
+  sec.addEventListener('click', e => {
+    const c = e.target.closest('[data-cmp-id]');
+    if (c) { toggleCmp(c.dataset.cmpId); return; }
+    const tab = e.target.closest('[data-tab]');
+    if (tab) {
+      rank.tab = tab.dataset.tab;
+      $$('.tab', sec).forEach(b => { const on = b === tab; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+      renderRankTable(); return;
+    }
+    const tf = e.target.closest('[data-rtech]');
+    if (tf) { rank.tech = tf.dataset.rtech; $$('#rankTech button').forEach(b => b.classList.toggle('on', b === tf)); renderRankTable(); return; }
+    const so = e.target.closest('[data-sort]');
+    if (so) {
+      const st = rank.tab === 'models' ? rank : brandRank, k = so.dataset.sort;
+      if (st.key === k) st.dir *= -1; else { st.key = k; st.dir = (k === 'price' || k === 'from') ? 1 : -1; }
+      renderRankTable(); return;
+    }
+    const o = e.target.closest('[data-open]');
+    if (o) openDetail(o.dataset.open);
+  });
+  sec.addEventListener('keydown', e => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('tr[data-open], li[data-open]')) { e.preventDefault(); openDetail(e.target.dataset.open); }
+  });
+}
+
+/* =========================================================
    INIT
    ========================================================= */
 buildFilters();
 bind();
 buildSim();
 update();
+buildRankings();
 updateCounters();
 renderCbar();
 // contador animado de modelos
