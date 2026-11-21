@@ -252,6 +252,9 @@ aside.filters{position:sticky;top:84px;align-self:start;max-height:calc(100vh - 
 .cmp-btn{flex:1;height:36px;border-radius:10px;border:1px solid var(--line2);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;color:var(--mut);transition:.2s var(--ease)}
 .cmp-btn:hover{border-color:var(--cyan);color:var(--cyan)}
 .cmp-btn.on{background:rgba(0,229,255,.1);border-color:var(--cyan);color:var(--cyan)}
+.try-btn{height:36px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:800;color:#001a1f;background:var(--tc);transition:transform .15s var(--ease),filter .2s;white-space:nowrap}
+.try-btn:hover{filter:brightness(1.15)}
+.try-btn:active{transform:scale(.95)}
 .det-btn{height:36px;padding:0 12px;border-radius:10px;background:var(--card2);font-size:13px;font-weight:700;transition:.2s}
 .det-btn:hover{background:var(--line2)}
 .empty{grid-column:1/-1;text-align:center;padding:60px 20px;border:1px dashed var(--line2);border-radius:var(--r);color:var(--mut);animation:cardIn .5s var(--ease)}
@@ -1334,7 +1337,7 @@ function cardHTML(p, i) {
       </div>
       <div class="cfoot">
         <button class="cmp-btn${inCmp ? ' on' : ''}" data-act="cmp" aria-pressed="${inCmp}">${ICON.cmp}${inCmp ? 'En comparador' : 'Comparar'}</button>
-        <button class="det-btn" data-act="detail">Ver detalle</button>
+        <button class="try-btn" data-act="try" title="Probar este teclado" aria-label="Probar el teclado ${esc(fullName(p))}">⌨ Probar</button>
       </div>
     </div>
   </article>`;
@@ -1460,7 +1463,7 @@ function barsHTML(p) {
 }
 function animateBars(root) { requestAnimationFrame(() => requestAnimationFrame(() => $$('.bar i', root).forEach(i => i.style.width = i.dataset.w + '%'))); }
 
-function openDetail(id) {
+function openDetail(id, tryIt = false) {
   const p = byId[id], t = TECH[p.tech];
   const off = p.old ? Math.round((1 - p.price / p.old) * 100) : 0;
   const offers = [...p.offers].sort((a, b) => a.price - b.price);
@@ -1528,6 +1531,7 @@ function openDetail(id) {
   openOv(ov);
   animateBars($('#detail'));
   initVK(p);
+  if (tryIt) setTimeout(() => $('#vkSec')?.scrollIntoView({ behavior:'smooth', block:'center' }), 380);
 }
 
 function openCompare() {
@@ -1675,6 +1679,7 @@ function bind() {
     const act = e.target.closest('[data-act]')?.dataset.act;
     if (act === 'fav') return toggleFav(card.dataset.id);
     if (act === 'cmp') return toggleCmp(card.dataset.id);
+    if (act === 'try') return openDetail(card.dataset.id, true);
     openDetail(card.dataset.id);
   });
   $('#grid').addEventListener('keydown', e => {
