@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KeyMarket AR · Comparador de teclados</title>
+<meta name="description" content="Marketplace y comparador de teclados de membrana, mecánicos y magnéticos (Hall Effect) en Argentina. Compará precios entre tiendas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0F1115; --bg2:#13161C; --card:#181B22; --card2:#1F232C; --line:#2A2F3A; --line2:#353B48;
+  --txt:#E8EAF0; --mut:#9AA1AE; --dim:#6B7280;
+  --amber:#FACC15; --cyan:#00E5FF; --violet:#A78BFA; --green:#22C55E; --red:#F87171;
+  --mem:#A78BFA; --mec:#FACC15; --mag:#00E5FF;
+  --r:16px; --ease:cubic-bezier(.2,.8,.2,1);
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+body.lock{overflow:hidden}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1360px;margin:0 auto;padding:0 20px}
+.mono{font-family:var(--mono)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ---------- HEADER ---------- */
+header.top{position:sticky;top:0;z-index:50;background:rgba(15,17,21,.82);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid var(--line)}
+.top-in{display:flex;align-items:center;gap:18px;height:68px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.logo-mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(145deg,#FDE047,#F59E0B);display:grid;place-items:center;box-shadow:0 4px 0 #A16207,0 8px 20px -6px rgba(250,204,21,.5);transition:transform .15s var(--ease),box-shadow .15s}
+.logo:active .logo-mark{transform:translateY(3px);box-shadow:0 1px 0 #A16207}
+.logo-mark span{font-weight:800;color:#1a1300;font-size:17px;letter-spacing:-.5px}
+.logo-text{font-weight:800;font-size:19px;letter-spacing:-.4px}
+.logo-text em{font-style:normal;font-size:11px;font-weight:700;background:var(--cyan);color:#001a1f;padding:2px 6px;border-radius:5px;margin-left:5px;vertical-align:3px;letter-spacing:.5px}
+.search{flex:1;position:relative;max-width:640px}
+.search input{width:100%;height:44px;border-radius:12px;border:1px solid var(--line2);background:var(--card);padding:0 44px 0 44px;outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
+.search input::placeholder{color:var(--dim)}
+.search input:focus{border-color:var(--amber);box-shadow:0 0 0 4px rgba(250,204,21,.12);background:var(--card2)}
+.search .ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--dim);pointer-events:none}
+.search .clear{position:absolute;right:8px;top:50%;transform:translateY(-50%) scale(.6);opacity:0;pointer-events:none;width:30px;height:30px;border-radius:8px;color:var(--mut);transition:.2s var(--ease)}
+.search.has .clear{opacity:1;transform:translateY(-50%) scale(1);pointer-events:auto}
+.search .clear:hover{background:var(--line);color:var(--txt)}
+.top-actions{display:flex;gap:8px;flex-shrink:0}
+.hbtn{position:relative;display:flex;align-items:center;gap:8px;height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);background:var(--card);font-weight:600;font-size:14px;transition:border-color .2s,background .2s,transform .15s}
+.hbtn:hover{border-color:var(--mut);background:var(--card2)}
+.hbtn:active{transform:scale(.96)}
+.hbtn .count{min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:var(--line2);color:var(--mut);font-size:11.5px;font-weight:700;display:grid;place-items:center;transition:background .2s,color .2s}
+.hbtn .count.on{background:var(--amber);color:#1a1300}
+.hbtn.cmp .count.on{background:var(--cyan);color:#001a1f}
+.bump{animation:bump .45s var(--ease)}
+@keyframes bump{0%{transform:scale(1)}35%{transform:scale(1.55)}100%{transform:scale(1)}}
+
+/* ---------- HERO ---------- */
+.hero{padding:30px 0 10px}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:28px;align-items:stretch}
+.hero-copy{padding:26px 4px}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--amber);background:rgba(250,204,21,.08);border:1px solid rgba(250,204,21,.25);padding:6px 10px;border-radius:99px}
+.kicker i{width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{opacity:.35}}
+.hero h1{font-size:clamp(30px,4vw,48px);line-height:1.05;letter-spacing:-1.4px;margin:16px 0 14px;font-weight:800}
+.hero h1 .hl{background:linear-gradient(90deg,var(--amber),#FB923C 45%,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.lead{color:var(--mut);font-size:16.5px;max-width:520px;margin:0 0 22px}
+.hero-stats{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:24px}
+.hero-stats b{display:block;font-size:24px;font-weight:800;letter-spacing:-.5px}
+.hero-stats span{font-size:12.5px;color:var(--dim)}
+.hero-cta{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:12px;font-weight:700;font-size:14px;transition:transform .15s var(--ease),box-shadow .2s,background .2s,border-color .2s;text-decoration:none;white-space:nowrap}
+.btn:active{transform:scale(.96)}
+.btn-pri{background:var(--amber);color:#1a1300;box-shadow:0 8px 24px -10px rgba(250,204,21,.7)}
+.btn-pri:hover{background:#FDE047}
+.btn-sec{background:var(--card);border:1px solid var(--line2)}
+.btn-sec:hover{border-color:var(--mut)}
+.btn-cy{background:var(--cyan);color:#001a1f;box-shadow:0 8px 24px -10px rgba(0,229,255,.6)}
+.btn-cy:hover{background:#67F0FF}
+.btn[disabled]{opacity:.4;pointer-events:none}
+
+/* ---------- SIMULATOR ---------- */
+.sim{background:linear-gradient(180deg,#171A21,#13161C);border:1px solid var(--line);border-radius:22px;padding:18px;position:relative;overflow:hidden}
+.sim::before{content:"";position:absolute;inset:-40% -10% auto auto;width:360px;height:360px;background:radial-gradient(circle,rgba(0,229,255,.12),transparent 65%);pointer-events:none}
+.sim-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px;position:relative}
+.sim-head h2{margin:0;font-size:16px;font-weight:800;letter-spacing:-.2px}
+.sim-head p{margin:3px 0 0;font-size:12.5px;color:var(--mut)}
+.sim-head kbd{font-family:var(--mono);font-size:11px;background:var(--card2);border:1px solid var(--line2);border-bottom-width:2px;border-radius:5px;padding:1px 5px;color:var(--txt)}
+.sim-tools{display:flex;gap:6px;flex-shrink:0}
+.chip-btn{height:32px;padding:0 11px;border-radius:9px;background:var(--card2);border:1px solid var(--line2);font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px;transition:.2s}
+.chip-btn:hover{border-color:var(--mut)}
+.chip-btn.on{border-color:var(--cyan);color:var(--cyan)}
+.sim-keys{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;position:relative}
+.skey{--p:0;background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:12px 12px 10px;user-select:none;-webkit-user-select:none;touch-action:none;cursor:pointer;transition:border-color .12s,box-shadow .12s;position:relative}
+.skey.on{border-color:var(--kc);box-shadow:0 0 0 1px var(--kc),0 0 28px -6px var(--kc)}
+.skey-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.skey-name{font-size:12px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--kc)}
+.led{width:9px;height:9px;border-radius:50%;background:#2b303b;transition:background .06s,box-shadow .06s}
+.skey.on .led{background:var(--kc);box-shadow:0 0 12px var(--kc)}
+.stage{height:126px;display:flex;gap:10px;align-items:stretch}
+.gauge{width:14px;border-radius:7px;background:#0c0e12;border:1px solid var(--line);position:relative;overflow:hidden;flex-shrink:0}
+.gauge-fill{position:absolute;left:0;right:0;top:0;height:calc(var(--p)*100%);background:linear-gradient(180deg,color-mix(in srgb,var(--kc) 40%,transparent),var(--kc))}
+.gauge-act{position:absolute;left:-2px;right:-2px;height:2px;background:#fff;top:var(--act,50%);box-shadow:0 0 6px #fff}
+.gauge-rst{position:absolute;left:0;right:0;height:0;border-top:1px dashed rgba(255,255,255,.45);top:var(--rst,40%)}
+.mech{flex:1;position:relative;display:flex;flex-direction:column;align-items:center}
+.cap{width:min(86px,100%);height:50px;border-radius:10px;background:linear-gradient(180deg,#3a404d,#262a33);border:1px solid #4a5160;box-shadow:inset 0 -6px 0 rgba(0,0,0,.35),0 4px 0 #111;display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:18px;color:#cfd3dc;transform:translateY(calc(var(--p)*34px));position:relative;z-index:2}
+.skey.on .cap{color:var(--kc);text-shadow:0 0 10px var(--kc)}
+.under{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:min(70px,90%);height:66px;display:flex;align-items:flex-end;justify-content:center}
+.dome{width:60px;height:calc(40px - var(--p)*26px);border-radius:50% 50% 8px 8px/80% 80% 8px 8px;background:radial-gradient(ellipse at 50% 20%,#7c6ab0,#4a3d75);opacity:.9}
+.spring{width:26px;height:calc(58px - var(--p)*36px);background:repeating-linear-gradient(180deg,transparent 0 3px,#c9a20c 3px 6px);border-left:2px solid #6b5606;border-right:2px solid #6b5606;border-radius:3px}
+.magnet{position:absolute;bottom:calc(52px - var(--p)*34px);width:30px;height:12px;border-radius:3px;background:linear-gradient(90deg,#EF4444 50%,#3B82F6 50%)}
+.sensor{width:44px;height:10px;border-radius:3px;background:#0e2a30;border:1px solid #1f5b66;box-shadow:0 0 calc(var(--p)*26px) calc(var(--p)*6px) rgba(0,229,255,.55)}
+.field{position:absolute;bottom:10px;width:56px;height:calc(46px - var(--p)*30px);border-radius:50%;border:1px dashed rgba(0,229,255,calc(.15 + var(--p)*.7))}
+.skey-read{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;margin-top:8px;font-size:11.5px}
+.skey-read div{display:flex;flex-direction:column}
+.skey-read span{color:var(--dim);font-size:10.5px;text-transform:uppercase;letter-spacing:.5px}
+.skey-read b{font-family:var(--mono);font-size:13px;color:var(--txt)}
+.skey-read b.big{color:var(--kc)}
+.sim-foot{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;margin-top:12px;align-items:center}
+.graph-wrap{background:#0c0e12;border:1px solid var(--line);border-radius:12px;padding:6px 8px 4px;position:relative}
+.graph-wrap canvas{width:100%;height:70px;display:block}
+.graph-lbl{position:absolute;top:6px;left:10px;font-size:10px;color:var(--dim);letter-spacing:.4px;text-transform:uppercase;pointer-events:none}
+.mag-ctl{display:flex;flex-direction:column;gap:8px;min-width:200px}
+.mag-ctl label{font-size:12px;color:var(--mut);display:flex;justify-content:space-between;gap:8px}
+.mag-ctl label b{color:var(--cyan);font-family:var(--mono)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:9px;background:linear-gradient(90deg,var(--cyan) var(--v,15%),var(--line2) var(--v,15%));outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--cyan);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid var(--cyan);cursor:pointer}
+.switch{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--mut);cursor:pointer}
+.switch input{display:none}
+.switch .tg{width:34px;height:20px;border-radius:99px;background:var(--line2);position:relative;transition:background .2s;flex-shrink:0}
+.switch .tg::after{content:"";position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .25s var(--ease)}
+.switch input:checked + .tg{background:var(--cyan)}
+.switch input:checked + .tg::after{transform:translateX(14px)}
+.sim-result{font-size:12.5px;color:var(--mut);margin-top:10px;min-height:18px}
+.sim-result b{color:var(--txt)}
+
+/* ---------- CATEGORY STRIP ---------- */
+.cats{display:flex;gap:10px;padding:22px 0 6px;overflow-x:auto;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cat{flex-shrink:0;display:flex;align-items:center;gap:10px;padding:10px 16px 10px 10px;border-radius:14px;background:var(--card);border:1px solid var(--line);font-weight:700;font-size:14px;transition:.25s var(--ease)}
+.cat .dot{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--c)}
+.cat small{color:var(--dim);font-weight:600;margin-left:2px}
+.cat:hover{border-color:var(--line2);transform:translateY(-2px)}
+.cat.on{border-color:var(--c);box-shadow:0 0 0 1px var(--c) inset;background:color-mix(in srgb,var(--c) 8%,var(--card))}
+
+/* ---------- LAYOUT ---------- */
+.main{display:grid;grid-template-columns:270px minmax(0,1fr);gap:24px;padding:16px 0 60px}
+aside.filters{position:sticky;top:84px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:6px 16px 16px;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+.f-head{display:flex;justify-content:space-between;align-items:center;padding:12px 0 6px}
+.f-head h3{margin:0;font-size:16px;font-weight:800}
+.link-btn{color:var(--cyan);font-size:13px;font-weight:600}
+.link-btn:hover{text-decoration:underline}
+.f-close{display:none;width:34px;height:34px;border-radius:9px;background:var(--card2)}
+.fgroup{border-top:1px solid var(--line);padding:12px 0 6px}
+.fgroup:first-of-type{border-top:0}
+.fgroup > button.fg-t{display:flex;width:100%;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:var(--mut);padding:2px 0 8px}
+.fgroup > button.fg-t svg{transition:transform .3s var(--ease)}
+.fgroup.closed > button.fg-t svg{transform:rotate(-90deg)}
+.fg-body{display:grid;grid-template-rows:1fr;transition:grid-template-rows .35s var(--ease)}
+.fgroup.closed .fg-body{grid-template-rows:0fr}
+.fg-body > div{overflow:hidden}
+.opt{display:flex;align-items:center;gap:10px;padding:6px 4px;border-radius:8px;cursor:pointer;font-size:14px;transition:background .15s}
+.opt:hover{background:var(--card2)}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.box{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--line2);display:grid;place-items:center;flex-shrink:0;transition:.15s}
+.box svg{opacity:0;transform:scale(.5);transition:.2s var(--ease)}
+.opt input:checked + .box{background:var(--amber);border-color:var(--amber)}
+.opt input:checked + .box svg{opacity:1;transform:none}
+.opt input[type=radio] + .box{border-radius:50%}
+.opt input[type=radio]:checked + .box{background:transparent;border-color:var(--amber);box-shadow:inset 0 0 0 4px var(--bg2),inset 0 0 0 9px var(--amber)}
+.opt input[type=radio] + .box svg{display:none}
+.opt input:focus-visible + .box{outline:2px solid var(--amber);outline-offset:2px}
+.opt .n{margin-left:auto;font-size:12px;color:var(--dim)}
+.opt .tdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.res-count{font-size:14px;color:var(--mut)}
+.res-count b{color:var(--txt);font-size:20px;font-weight:800;margin-right:4px}
+.tb-right{display:flex;gap:8px;align-items:center}
+.sel{height:40px;border-radius:10px;border:1px solid var(--line2);background:var(--card);padding:0 34px 0 12px;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239AA1AE' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;font-size:13.5px;font-weight:600;cursor:pointer}
+.btn-filters{display:none}
+.f-scrim{display:none}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;min-height:0}
+.fchip{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 6px 0 11px;border-radius:99px;background:var(--card2);border:1px solid var(--line2);font-size:12.5px;font-weight:600;animation:chipIn .3s var(--ease)}
+.fchip button{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:var(--mut)}
+.fchip button:hover{background:var(--line2);color:var(--txt)}
+@keyframes chipIn{from{opacity:0;transform:scale(.8)}}
+
+/* ---------- GRID / CARDS ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.card{--tc:var(--amber);background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;cursor:pointer;position:relative;opacity:0;animation:cardIn .6s var(--ease) forwards;animation-delay:var(--d,0ms);transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .35s}
+@keyframes cardIn{from{opacity:0;translate:0 22px;scale:.97}to{opacity:1;translate:0 0;scale:1}}
+.card:hover{transform:translateY(-6px);border-color:color-mix(in srgb,var(--tc) 45%,var(--line));box-shadow:0 22px 44px -18px rgba(0,0,0,.8),0 12px 36px -14px color-mix(in srgb,var(--tc) 45%,transparent)}
+.media{height:176px;position:relative;display:grid;place-items:center;background:radial-gradient(120% 90% at 50% 110%,color-mix(in srgb,var(--tc) 22%,transparent),transparent 60%),linear-gradient(180deg,#1c2028,#15181e);overflow:hidden}
+.media svg.kb{width:86%;height:auto;max-height:120px;transition:transform .5s var(--ease);filter:drop-shadow(0 14px 16px rgba(0,0,0,.55))}
+.card:hover .media svg.kb{transform:translateY(-10px) scale(1.04) rotate(-1.5deg)}
+.badges{position:absolute;top:10px;left:10px;display:flex;flex-direction:column;align-items:flex-start;gap:5px;z-index:2}
+.badge{font-size:10px;font-weight:800;letter-spacing:.5px;padding:4px 7px;border-radius:6px;line-height:1;white-space:nowrap}
+.b-sold{background:#FB923C;color:#2a1100}
+.b-value{background:var(--amber);color:#1a1300}
+.b-rt{background:var(--cyan);color:#001a1f}
+.b-ship{background:#14532D;color:#86EFAC;border:1px solid #166534}
+.fav-btn{position:absolute;top:8px;right:8px;width:36px;height:36px;border-radius:50%;background:rgba(15,17,21,.7);backdrop-filter:blur(6px);display:grid;place-items:center;color:var(--mut);z-index:2;transition:transform .2s var(--ease),color .2s,background .2s}
+.fav-btn:hover{color:#fff;transform:scale(1.1)}
+.fav-btn.on{color:#F43F5E}
+.fav-btn.on svg{fill:#F43F5E}
+.fav-btn.pop{animation:heart .45s var(--ease)}
+@keyframes heart{30%{transform:scale(1.35)}60%{transform:scale(.9)}}
+.quick{position:absolute;left:8px;right:8px;bottom:8px;background:rgba(12,14,18,.86);backdrop-filter:blur(8px);border:1px solid var(--line2);border-radius:11px;padding:8px 10px;display:grid;grid-template-columns:1fr 1fr;gap:3px 10px;font-size:11px;transform:translateY(calc(100% + 12px));opacity:0;transition:transform .4s var(--ease),opacity .3s;z-index:2}
+.card:hover .quick,.card:focus-within .quick{transform:none;opacity:1}
+.quick span{color:var(--dim)}
+.quick b{font-family:var(--mono);font-weight:700;color:var(--txt);font-size:11px}
+.body{padding:14px 14px 14px;display:flex;flex-direction:column;flex:1}
+.meta{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap}
+.tpill{font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:3px 8px;border-radius:99px;color:var(--tc);background:color-mix(in srgb,var(--tc) 13%,transparent);border:1px solid color-mix(in srgb,var(--tc) 30%,transparent)}
+.fpill{font-size:11px;font-weight:700;color:var(--mut);padding:3px 7px;border-radius:99px;background:var(--card2)}
+.card h3{font-size:15px;font-weight:600;margin:2px 0 3px;line-height:1.3}
+.card h3 .brand{font-weight:800}
+.swt{font-size:12.5px;color:var(--mut);margin:0 0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stars{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mut);margin-bottom:8px}
+.st{position:relative;display:inline-block;font-size:13px;letter-spacing:1px;line-height:1;color:#3a404d}
+.st::before{content:"★★★★★"}
+.st i{position:absolute;inset:0 auto 0 0;overflow:hidden;color:var(--amber);font-style:normal;white-space:nowrap}
+.st i::before{content:"★★★★★"}
+.old{font-size:12.5px;color:var(--dim);text-decoration:line-through;display:flex;gap:6px;align-items:center;min-height:18px}
+.off{text-decoration:none;color:var(--green);font-weight:700;font-size:12.5px}
+.price{font-size:25px;font-weight:800;letter-spacing:-.6px;line-height:1.1}
+.cuotas{font-size:12.5px;color:var(--green);margin-top:2px}
+.cuotas b{font-weight:700}
+.ship{font-size:12.5px;color:var(--green);font-weight:700;margin-top:3px}
+.best{margin-top:10px;padding:9px 10px;border-radius:10px;background:var(--bg2);border:1px dashed var(--line2);font-size:12px;color:var(--mut)}
+.best b{color:var(--txt);font-family:var(--mono)}
+.best .st-name{color:var(--amber);font-weight:700}
+.stores{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.sdot{font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:5px;background:var(--card2);color:var(--mut);border:1px solid var(--line)}
+.cfoot{margin-top:auto;padding-top:12px;display:flex;gap:8px}
+.cmp-btn{flex:1;height:36px;border-radius:10px;border:1px solid var(--line2);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;color:var(--mut);transition:.2s var(--ease)}
+.cmp-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.cmp-btn.on{background:rgba(0,229,255,.1);border-color:var(--cyan);color:var(--cyan)}
+.det-btn{height:36px;padding:0 12px;border-radius:10px;background:var(--card2);font-size:13px;font-weight:700;transition:.2s}
+.det-btn:hover{background:var(--line2)}
+.empty{grid-column:1/-1;text-align:center;padding:60px 20px;border:1px dashed var(--line2);border-radius:var(--r);color:var(--mut);animation:cardIn .5s var(--ease)}
+.empty h3{color:var(--txt);margin:12px 0 6px}
+
+/* ---------- OVERLAYS ---------- */
+.overlay{position:fixed;inset:0;z-index:80;background:rgba(5,6,8,.7);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .35s var(--ease);display:flex;align-items:center;justify-content:center;padding:20px}
+.overlay.open{opacity:1;pointer-events:auto}
+.modal{background:var(--card);border:1px solid var(--line2);border-radius:22px;width:min(1040px,100%);max-height:calc(100vh - 40px);overflow:auto;transform:translateY(30px) scale(.96);transition:transform .45s var(--ease);box-shadow:0 40px 80px -20px rgba(0,0,0,.8);position:relative;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+.overlay.open .modal{transform:none}
+.x-btn{position:sticky;top:12px;float:right;margin:12px 12px 0 0;width:38px;height:38px;border-radius:50%;background:var(--card2);border:1px solid var(--line2);display:grid;place-items:center;z-index:5;transition:.2s}
+.x-btn:hover{background:var(--line2);transform:rotate(90deg)}
+.d-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:0}
+.d-media{--tc:var(--amber);padding:30px;background:radial-gradient(100% 80% at 50% 100%,color-mix(in srgb,var(--tc) 18%,transparent),transparent 70%),#15181e;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:18px}
+.d-media .kbwrap{display:grid;place-items:center;min-height:220px}
+.d-media svg.kb{width:100%;max-height:240px;filter:drop-shadow(0 20px 24px rgba(0,0,0,.6));animation:float 5s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-8px)}}
+.d-info{padding:30px 30px 26px}
+.d-info h2{font-size:26px;letter-spacing:-.6px;margin:8px 0 4px;line-height:1.15}
+.d-info .desc{color:var(--mut);font-size:14px;margin:10px 0 16px}
+.d-price{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.d-price .price{font-size:34px}
+.d-actions{display:flex;gap:8px;margin:16px 0 4px;flex-wrap:wrap}
+.sec-t{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--dim);margin:22px 0 10px}
+.spec{width:100%;border-collapse:collapse;font-size:13.5px}
+.spec td{padding:8px 0;border-bottom:1px solid var(--line)}
+.spec td:first-child{color:var(--mut);width:46%}
+.spec td:last-child{font-weight:600;text-align:right}
+.yes{color:var(--green)} .no{color:var(--dim)}
+.bars{display:grid;gap:10px}
+.bar-row{display:grid;grid-template-columns:110px 1fr 36px;gap:10px;align-items:center;font-size:12.5px;color:var(--mut)}
+.bar{height:8px;border-radius:9px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:9px;background:var(--bc,var(--amber));transition:width .9s var(--ease)}
+.bar-row b{font-family:var(--mono);color:var(--txt);text-align:right;font-size:12px}
+.buy{width:100%;border-collapse:separate;border-spacing:0 8px;font-size:13.5px}
+.buy tr{background:var(--bg2)}
+.buy td{padding:12px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.buy td:first-child{border-left:1px solid var(--line);border-radius:12px 0 0 12px}
+.buy td:last-child{border-right:1px solid var(--line);border-radius:0 12px 12px 0;text-align:right}
+.buy tr.best-row td{border-color:rgba(250,204,21,.45);background:rgba(250,204,21,.05)}
+.s-name{font-weight:800;display:flex;align-items:center;gap:7px}
+.s-logo{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0}
+.s-mode{font-size:12px;color:var(--mut)}
+.s-price{font-family:var(--mono);font-weight:700;font-size:15px}
+.s-cuo{font-size:11.5px;color:var(--green)}
+.go{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:9px;background:var(--amber);color:#1a1300;font-weight:800;font-size:12.5px;text-decoration:none;transition:.2s;white-space:nowrap}
+.go:hover{background:#FDE047;transform:translateX(2px)}
+.tag-best{font-size:10px;font-weight:800;color:#1a1300;background:var(--amber);padding:2px 6px;border-radius:5px;margin-left:4px}
+
+/* drawer */
+.drawer-ov{justify-content:flex-end;padding:0}
+.drawer{width:min(420px,100%);height:100%;background:var(--card);border-left:1px solid var(--line2);transform:translateX(100%);transition:transform .45s var(--ease);display:flex;flex-direction:column}
+.overlay.open .drawer{transform:none}
+.dr-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--line)}
+.dr-head h3{margin:0;font-size:18px}
+.dr-body{flex:1;overflow:auto;padding:14px 16px}
+.fav-item{display:grid;grid-template-columns:84px 1fr;gap:12px;padding:10px;border-radius:14px;background:var(--bg2);border:1px solid var(--line);margin-bottom:10px;animation:cardIn .45s var(--ease) both;animation-delay:var(--d,0ms)}
+.fav-item .fi-media{--tc:var(--amber);border-radius:10px;background:radial-gradient(circle at 50% 100%,color-mix(in srgb,var(--tc) 25%,transparent),#1b1e25 70%);display:grid;place-items:center;padding:6px}
+.fav-item svg{width:100%;height:auto}
+.fav-item h4{margin:0 0 2px;font-size:14px}
+.fav-item .fp{font-weight:800;font-size:16px}
+.fi-act{display:flex;gap:6px;margin-top:6px}
+.mini{height:28px;padding:0 10px;border-radius:8px;font-size:12px;font-weight:700;background:var(--card2);border:1px solid var(--line2)}
+.mini:hover{border-color:var(--mut)}
+.dr-empty{text-align:center;color:var(--mut);padding:50px 10px}
+
+/* compare bar */
+.cbar{position:fixed;left:50%;bottom:18px;z-index:60;transform:translate(-50%,140%);transition:transform .5s var(--ease);background:rgba(24,27,34,.92);backdrop-filter:blur(14px);border:1px solid var(--line2);border-radius:18px;padding:10px;display:flex;gap:10px;align-items:center;box-shadow:0 20px 50px -10px rgba(0,0,0,.8);width:min(760px,calc(100% - 24px))}
+.cbar.show{transform:translate(-50%,0)}
+.cslots{display:flex;gap:8px;flex:1;min-width:0}
+.cslot{flex:1;min-width:0;height:48px;border-radius:12px;border:1px dashed var(--line2);display:flex;align-items:center;gap:8px;padding:0 8px;font-size:12px;color:var(--dim)}
+.cslot.full{border-style:solid;border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.05);color:var(--txt);animation:chipIn .35s var(--ease)}
+.cslot .cs-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.cslot svg.kb{width:44px;height:auto;flex-shrink:0}
+.cslot button{width:22px;height:22px;border-radius:50%;flex-shrink:0;color:var(--mut);display:grid;place-items:center}
+.cslot button:hover{background:var(--line2);color:var(--txt)}
+
+/* compare modal */
+.cmp-table{width:100%;border-collapse:collapse;font-size:13.5px;table-layout:fixed}
+.cmp-table th,.cmp-table td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:middle;text-align:left}
+.cmp-table th.rl,.cmp-table td.rl{color:var(--mut);font-weight:600;width:170px;font-size:12.5px}
+.cmp-table thead th{vertical-align:top;border-bottom:1px solid var(--line2)}
+.cmp-table td.win{color:var(--amber);font-weight:700;background:rgba(250,204,21,.06);box-shadow:inset 3px 0 0 var(--amber)}
+.cmp-head{--tc:var(--amber);display:flex;flex-direction:column;gap:6px}
+.cmp-head .ch-m{border-radius:12px;padding:10px;background:radial-gradient(circle at 50% 100%,color-mix(in srgb,var(--tc) 22%,transparent),#15181e 70%);display:grid;place-items:center;height:96px}
+.cmp-head svg.kb{width:100%;max-height:76px}
+.cmp-head h4{margin:2px 0 0;font-size:14.5px;line-height:1.25}
+.cmp-head .price{font-size:20px}
+.cmp-wrap{padding:26px;overflow-x:auto}
+.cmp-wrap h2{margin:0 0 4px;font-size:22px;letter-spacing:-.4px}
+.cmp-wrap > p{margin:0 0 18px;color:var(--mut);font-size:13.5px}
+.cmp-sec td{background:var(--bg2);font-size:11.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--dim)!important;padding:8px 12px}
+.verdict{margin-top:18px;padding:14px 16px;border-radius:14px;background:linear-gradient(90deg,rgba(250,204,21,.08),rgba(0,229,255,.06));border:1px solid var(--line2);font-size:13.5px;color:var(--mut)}
+.verdict b{color:var(--txt)}
+
+/* toast */
+.toasts{position:fixed;top:82px;right:18px;z-index:120;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--card2);border:1px solid var(--line2);border-left:3px solid var(--amber);padding:11px 14px;border-radius:12px;font-size:13.5px;box-shadow:0 14px 30px -10px rgba(0,0,0,.7);animation:toastIn .4s var(--ease);max-width:320px}
+.toast.out{animation:toastOut .3s var(--ease) forwards}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px)}}
+@keyframes toastOut{to{opacity:0;transform:translateX(30px)}}
+
+/* footer */
+footer{border-top:1px solid var(--line);padding:30px 0 120px;color:var(--dim);font-size:13px}
+.f-grid{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.f-stores{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.note{margin-top:18px;padding:12px 14px;border-radius:12px;background:var(--bg2);border:1px solid var(--line);font-size:12.5px;line-height:1.55}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width:1080px){
+  .hero-grid{grid-template-columns:1fr}
+  .hero-copy{padding:8px 0 0}
+}
+@media (max-width:960px){
+  .main{grid-template-columns:1fr}
+  aside.filters{position:fixed;top:0;left:0;bottom:0;width:min(340px,88%);max-height:none;border-radius:0 18px 18px 0;z-index:90;transform:translateX(-105%);transition:transform .45s var(--ease)}
+  aside.filters.open{transform:none;box-shadow:30px 0 60px rgba(0,0,0,.6)}
+  .f-close{display:grid;place-items:center}
+  .btn-filters{display:inline-flex}
+  .f-scrim{display:block;position:fixed;inset:0;background:rgba(5,6,8,.6);z-index:85;opacity:0;pointer-events:none;transition:opacity .35s}
+  .f-scrim.open{opacity:1;pointer-events:auto}
+  .d-grid{grid-template-columns:minmax(0,1fr)}
+  .d-media{border-right:0;border-bottom:1px solid var(--line)}
+}
+@media (max-width:720px){
+  .wrap{padding:0 16px}
+  .top-in{flex-wrap:wrap;height:auto;padding:10px 0;gap:10px}
+  .search{order:3;flex-basis:100%;max-width:none}
+  .logo{margin-right:auto}
+  .hbtn .lbl{display:none}
+  .hbtn{padding:0 11px}
+  .sim{padding:14px}
+  .sim-head{flex-direction:column}
+  .sim-keys{gap:6px}
+  .skey{padding:10px 8px 8px}
+  .stage{height:104px;gap:6px}
+  .gauge{width:10px}
+  .cap{height:42px;font-size:15px}
+  .skey-read{grid-template-columns:1fr}
+  .sim-foot{grid-template-columns:1fr}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+  .media{height:130px}
+  .body{padding:11px}
+  .price{font-size:21px}
+  .card h3{font-size:14px}
+  .best .bt-store{display:block}
+  .stores{display:none}
+  .badge{font-size:9px;padding:3px 5px}
+  .badge:nth-child(n+2){display:none}
+  .fav-btn{width:32px;height:32px}
+  .cfoot{flex-direction:column}
+  .det-btn{display:none}
+  .quick{display:none}
+  .d-info,.d-media{padding:20px}
+  .bar-row{grid-template-columns:90px 1fr 32px}
+  .cmp-wrap{padding:18px 12px}
+  .cmp-table{min-width:620px}
+  .cslot .cs-name{display:none}
+  .cslot{justify-content:center}
+  .overlay{padding:10px}
+  .buy td{padding:9px}
+  .buy tr{display:grid;grid-template-columns:1fr auto;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden}
+  .buy tr.best-row{border-color:rgba(250,204,21,.45)}
+  .buy td,.buy td:first-child,.buy td:last-child{border:0;border-radius:0}
+  .buy td:last-child{grid-column:1/-1;padding-top:0}
+  .buy td:last-child .go{width:100%;justify-content:center}
+  .buy{border-spacing:0}
+  .toasts{left:12px;right:12px;top:auto;bottom:90px}
+  .toast{max-width:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0ms!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap top-in">
+    <a class="logo" href="#" aria-label="KeyMarket AR, inicio">
+      <div class="logo-mark"><span>K</span></div>
+      <div class="logo-text">KeyMarket<em>AR</em></div>
+    </a>
+    <div class="search" id="searchBox">
+      <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" autocomplete="off" placeholder="Buscá por marca, modelo, formato o switch: Redragon, 65%, Hall Effect, silencioso…" aria-label="Buscar teclados">
+      <button class="clear" id="qClear" aria-label="Borrar búsqueda"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="top-actions">
+      <button class="hbtn" id="openFavs" aria-label="Ver favoritos">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-9.3-9.6C1.5 7.4 3.7 4 7.2 4c2 0 3.6 1.1 4.8 2.8C13.2 5.1 14.8 4 16.8 4c3.5 0 5.7 3.4 4.5 6.9-1.8 5-9.3 9.6-9.3 9.6Z"/></svg>
+        <span class="lbl">Favoritos</span><span class="count" id="favCount">0</span>
+      </button>
+      <button class="hbtn cmp" id="openCmp" aria-label="Abrir comparador">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8 4v16M16 4v16M3 8h5M16 16h5M3 16h5M16 8h5"/></svg>
+        <span class="lbl">Comparar</span><span class="count" id="cmpCount">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <span class="kicker"><i></i>Precios actualizados · Argentina</span>
+      <h1>Encontrá tu teclado ideal y <span class="hl">pagalo lo justo.</span></h1>
+      <p class="lead">Membrana, mecánicos y magnéticos Hall Effect de todas las marcas. Filtrá, compará lado a lado y mirá en qué tienda está más barato hoy.</p>
+      <div class="hero-stats">
+        <div><b id="stModels">0</b><span>modelos</span></div>
+        <div><b>7</b><span>tiendas comparadas</span></div>
+        <div><b>3</b><span>tecnologías</span></div>
+      </div>
+      <div class="hero-cta">
+        <button class="btn btn-cy" data-quick="magnetico">Ver magnéticos ⚡</button>
+        <button class="btn btn-sec" data-quick="value">Mejor calidad-precio</button>
+      </div>
+    </div>
+
+    <div class="sim" id="sim" aria-label="Simulador de recorrido de switches">
+      <div class="sim-head">
+        <div>
+          <h2>Simulador de recorrido y actuación</h2>
+          <p>Mantené apretada cada tecla (o usá <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd>) y mirá cuándo actúa cada tecnología.</p>
+        </div>
+        <div class="sim-tools">
+          <button class="chip-btn" id="race">▶ Carrera</button>
+          <button class="chip-btn on" id="sound" aria-pressed="true">🔊 Sonido</button>
+        </div>
+      </div>
+      <div class="sim-keys" id="simKeys"></div>
+      <div class="sim-foot">
+        <div class="graph-wrap"><span class="graph-lbl">Profundidad vs. tiempo</span><canvas id="graph" height="70"></canvas></div>
+        <div class="mag-ctl">
+          <label for="actRange">Actuación magnético <b id="actVal">0,6 mm</b></label>
+          <input type="range" id="actRange" min="0.1" max="4" step="0.1" value="0.6" aria-label="Punto de actuación del switch magnético">
+          <label class="switch"><input type="checkbox" id="rtToggle" checked><span class="tg"></span>Rapid Trigger (reset a 0,1 mm)</label>
+        </div>
+      </div>
+      <div class="sim-result" id="simResult">Tip: en el magnético, soltá apenas la tecla y volvé a apretar: con Rapid Trigger se resetea al instante.</div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <nav class="cats" id="cats" aria-label="Tecnologías"></nav>
+</div>
+
+<div class="wrap main" id="catalogo">
+  <div class="f-scrim" id="fScrim"></div>
+  <aside class="filters" id="filters" aria-label="Filtros">
+    <div class="f-head">
+      <h3>Filtros</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="link-btn" id="clearAll">Limpiar todo</button>
+        <button class="f-close" id="fClose" aria-label="Cerrar filtros"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+    </div>
+    <div id="fgroups"></div>
+  </aside>
+
+  <section>
+    <div class="toolbar">
+      <div class="res-count" id="resCount"></div>
+      <div class="tb-right">
+        <button class="btn btn-sec btn-filters" id="fOpen" style="height:40px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Filtros <span id="fBadge"></span>
+        </button>
+        <select class="sel" id="sortTop" aria-label="Ordenar por"></select>
+      </div>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="grid" id="grid"></div>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="f-grid">
+      <div>
+        <div class="logo"><div class="logo-mark"><span>K</span></div><div class="logo-text">KeyMarket<em>AR</em></div></div>
+        <p style="max-width:420px;margin:10px 0 0">Comparador independiente de teclados. No vendemos productos: te llevamos a la tienda que tenga el mejor precio.</p>
+      </div>
+      <div>
+        <div style="color:var(--mut);font-weight:700">Tiendas comparadas</div>
+        <div class="f-stores" id="fStores"></div>
+      </div>
+    </div>
+    <div class="note">ⓘ Los precios en ARS son <b>orientativos</b> y pueden variar según stock, promociones vigentes y cotización de cada tienda. Las cuotas sin interés dependen del banco y la tarjeta. Verificá siempre el precio final en el sitio del vendedor antes de comprar. Las marcas y nombres de tiendas pertenecen a sus respectivos dueños; este sitio no está afiliado a ellas.</div>
+  </div>
+</footer>
+
+<!-- compare bar -->
+<div class="cbar" id="cbar" role="region" aria-label="Teclados para comparar">
+  <div class="cslots" id="cslots"></div>
+  <button class="btn btn-cy" id="cbarGo" style="height:46px">Comparar</button>
+  <button class="mini" id="cbarClear" style="height:46px" aria-label="Vaciar comparador">Vaciar</button>
+</div>
+
+<!-- detail modal -->
+<div class="overlay" id="detailOv" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="dTitle" id="detail"></div>
+</div>
+
+<!-- compare modal -->
+<div class="overlay" id="cmpOv" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Comparador" id="cmpModal" style="width:min(1180px,100%)"></div>
+</div>
+
+<!-- favs drawer -->
+<div class="overlay drawer-ov" id="favOv" aria-hidden="true">
+  <div class="drawer" role="dialog" aria-modal="true" aria-label="Favoritos">
+    <div class="dr-head"><h3>❤ Tus favoritos</h3><button class="x-btn" style="position:static;margin:0;float:none" data-close aria-label="Cerrar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="dr-body" id="favBody"></div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+
+/* =========================================================
+   DATOS
+   ========================================================= */
+const TECH = {
+  membrana:  { label:'Membrana',  long:'Membrana',               color:'#A78BFA' },
+  mecanico:  { label:'Mecánico',  long:'Mecánico',               color:'#FACC15' },
+  magnetico: { label:'Magnético', long:'Magnético (Hall Effect)', color:'#00E5FF' }
+};
+const BRANDS = ['Logitech','Redragon','Royal Kludge','Machenike','HyperX','Corsair','Aula','MCHOSE','Razer','Asus ROG','Keychron','VSG','Nisuta'];
+const FORMATS = [['100','100% (Full Size)'],['90','90%'],['tkl','TKL (80%)'],['75','75%'],['65','65%'],['60','60%']];
+const FMT = Object.fromEntries(FORMATS);
+const FMT_SHORT = {'100':'100%','90':'90%','tkl':'TKL','75':'75%','65':'65%','60':'60%'};
+const CONNS = [['usb','Cableado USB-C'],['24','Inalámbrico 2.4GHz'],['bt','Bluetooth / Trimodal']];
+const PRICES = [
+  ['all','Todos los precios',0,Infinity],
+  ['a','Menos de $60.000',0,60000],
+  ['b','$60.000 a $120.000',60000,120000],
+  ['c','$120.000 a $220.000',120000,220000],
+  ['d','Más de $220.000',220000,Infinity]
+];
+const SORTS = [['rel','Más relevantes'],['value','Mejor calidad-precio'],['asc','Menor precio'],['desc','Mayor precio']];
+
+const STORES = {
+  compragamer: { name:'Compra Gamer',  short:'CG', color:'#E11D48', url:'https://compragamer.com/' },
+  maximus:     { name:'Maximus',       short:'MAX', color:'#2563EB', url:'https://www.maximus.com.ar/' },
+  mexx:        { name:'Mexx',          short:'MX', color:'#F97316', url:'https://www.mexx.com.ar/' },
+  hypergaming: { name:'Hypergaming',   short:'HG', color:'#7C3AED', url:'https://www.hypergaming.com.ar/' },
+  alltek:      { name:'AllTek',        short:'AT', color:'#0EA5E9', url:'https://www.google.com/search?q=AllTek+Argentina+' },
+  fravega:     { name:'Frávega',       short:'FR', color:'#4F46E5', url:'https://www.fravega.com/l/?keyword=' , search:true },
+  meli:        { name:'Mercado Libre', short:'ML', color:'#EAB308', url:'https://listado.mercadolibre.com.ar/', search:true, slug:true }
+};
+const STORE_ORDER = ['compragamer','maximus','mexx','hypergaming','alltek','fravega','meli'];
+
+/* sc = puntajes 0-100: speed (velocidad de respuesta), silence (100 = muy silencioso), dur (durabilidad) */
+const PRODUCTS = [
+  { id:'logitech-k250', brand:'Logitech', model:'K250 Inalámbrico', tech:'membrana', sw:'Membrana silenciosa de perfil bajo', format:'100', conn:['24'],
+    price:26100, old:29900, rating:4.5, reviews:3120, sold:9800, rgb:false, theme:'dark',
+    specs:{ polling:'125 Hz', act:'≈ 3,0 mm', travel:'3,5 mm', hs:false, rt:false, keycaps:'ABS perfil bajo', weight:'450 g', extra:'Receptor USB 2.4GHz · Pilas AA (hasta 24 meses) · Resistente a salpicaduras' },
+    sc:{ speed:28, silence:86, dur:55 }, use:'Oficina, estudio y hogar', badges:['sold'], stores:['compragamer','fravega','meli'],
+    desc:'El clásico teclado inalámbrico para la compu de casa o la oficina: silencioso, liviano y con años de batería. Ideal si buscás algo simple y confiable.' },
+
+  { id:'logitech-g213', brand:'Logitech', model:'G213 Prodigy RGB', tech:'membrana', sw:'Mech-Dome (membrana táctil)', format:'100', conn:['usb'],
+    price:72000, old:84000, rating:4.6, reviews:5400, sold:7200, rgb:true, theme:'dark',
+    specs:{ polling:'1000 Hz', act:'≈ 2,0 mm', travel:'4,0 mm', hs:false, rt:false, keycaps:'ABS', weight:'1.000 g', extra:'RGB LIGHTSYNC en 5 zonas · Anti-ghosting · Controles multimedia · Resistente a derrames' },
+    sc:{ speed:52, silence:72, dur:70 }, use:'Gaming casual y oficina', badges:[], stores:['compragamer','mexx','meli'],
+    desc:'Membrana con tacto “Mech-Dome” que se siente más firme que un teclado común, controles multimedia dedicados y reposamuñecas integrado.' },
+
+  { id:'hyperx-alloy-core', brand:'HyperX', model:'Alloy Core RGB', tech:'membrana', sw:'Membrana silenciosa', format:'100', conn:['usb'],
+    price:57500, rating:4.6, reviews:4200, sold:6900, rgb:true, theme:'dark',
+    specs:{ polling:'1000 Hz', act:'≈ 2,0 mm', travel:'3,6 mm', hs:false, rt:false, keycaps:'ABS', weight:'1.121 g', extra:'Resistente a derrames · Bloqueo de teclas · Anti-ghosting en teclas clave' },
+    sc:{ speed:50, silence:80, dur:72 }, use:'Gaming de entrada silencioso', badges:['value'], stores:['hypergaming','compragamer','meli'],
+    desc:'De los teclados de membrana más elegidos para arrancar en el gaming: RGB lindo, muy silencioso y robusto ante derrames.' },
+
+  { id:'corsair-k55-pro', brand:'Corsair', model:'K55 RGB Pro', tech:'membrana', sw:'Membrana con amortiguación', format:'100', conn:['usb'],
+    price:95000, old:110000, rating:4.5, reviews:2100, sold:3100, rgb:true, theme:'dark',
+    specs:{ polling:'1000 Hz', act:'≈ 2,2 mm', travel:'3,8 mm', hs:false, rt:false, keycaps:'ABS', weight:'1.100 g', extra:'6 teclas macro · Certificación IP42 · Reposamuñecas desmontable · iCUE' },
+    sc:{ speed:54, silence:76, dur:74 }, use:'Gaming MMO / macros', badges:[], stores:['maximus','mexx','fravega'],
+    desc:'Membrana con 6 teclas macro programables y resistencia IP42 contra polvo y líquidos. Buen aliado para MMO y productividad.' },
+
+  { id:'redragon-shiva', brand:'Redragon', model:'Shiva K512 RGB', tech:'membrana', sw:'Membrana semi-mecánica', format:'100', conn:['usb'],
+    price:42000, rating:4.4, reviews:2800, sold:5200, rgb:true, theme:'dark',
+    specs:{ polling:'1000 Hz', act:'≈ 2,5 mm', travel:'4,0 mm', hs:false, rt:false, keycaps:'ABS', weight:'1.050 g', extra:'6 teclas macro · Reposamuñecas · Controles multimedia · Anti-ghosting' },
+    sc:{ speed:46, silence:70, dur:62 }, use:'Gaming económico', badges:[], stores:['compragamer','alltek','meli'],
+    desc:'Teclado gamer económico con reposamuñecas, macros y RGB. Una opción muy accesible para armar tu primer setup.' },
+
+  { id:'nisuta-gamer', brand:'Nisuta', model:'Teclado Gamer Retroiluminado USB', tech:'membrana', sw:'Membrana estándar', format:'100', conn:['usb'],
+    price:18500, rating:4.2, reviews:950, sold:4100, rgb:true, theme:'dark',
+    specs:{ polling:'125 Hz', act:'≈ 3,0 mm', travel:'3,8 mm', hs:false, rt:false, keycaps:'ABS', weight:'680 g', extra:'Retroiluminación en 3 colores · Teclas multimedia' },
+    sc:{ speed:26, silence:76, dur:45 }, use:'Uso básico y presupuesto ajustado', badges:[], stores:['alltek','fravega','meli'],
+    desc:'La opción más barata del catálogo: retroiluminado, cómodo y suficiente para el día a día.' },
+
+  { id:'machenike-k500', brand:'Machenike', model:'K500-B94', tech:'mecanico', sw:'Switch Red lineal · Hot-swap', format:'90', conn:['usb'],
+    price:56999, old:68000, rating:4.7, reviews:3900, sold:9100, rgb:true, theme:'gray',
+    specs:{ polling:'1000 Hz', act:'2,0 mm', travel:'4,0 mm', hs:true, rt:false, keycaps:'ABS doble inyección', weight:'900 g', extra:'Layout de 94 teclas con numérico compacto · Cable USB-C desmontable' },
+    sc:{ speed:66, silence:52, dur:80 }, use:'Gaming y uso mixto', badges:['sold','value'], stores:['compragamer','mexx','meli'],
+    desc:'Mecánico hot-swap con numérico en formato compacto: tenés todas las teclas en menos espacio. Uno de los más vendidos por calidad-precio.' },
+
+  { id:'redragon-kumara', brand:'Redragon', model:'Kumara K552 RGB', tech:'mecanico', sw:'Outemu Blue (clicky)', format:'tkl', conn:['usb'],
+    price:52000, rating:4.7, reviews:12500, sold:14000, rgb:true, theme:'dark',
+    specs:{ polling:'1000 Hz', act:'2,2 mm', travel:'4,0 mm', hs:false, rt:false, keycaps:'ABS', weight:'960 g', extra:'Chasis de metal · Anti-ghosting total · Switches reemplazables (Outemu)' },
+    sc:{ speed:60, silence:22, dur:76 }, use:'Gaming de entrada (ruidoso)', badges:['sold'], stores:['compragamer','maximus','meli'],
+    desc:'El mecánico más popular de Argentina. Chasis metálico, switches azules con click bien marcado y formato TKL que deja lugar para el mouse.' },
+
+  { id:'redragon-draconic', brand:'Redragon', model:'Draconic K530 Pro', tech:'mecanico', sw:'Switch Brown táctil · Hot-swap', format:'60', conn:['usb','bt'],
+    price:68000, rating:4.5, reviews:1800, sold:2600, rgb:true, theme:'white',
+    specs:{ polling:'1000 Hz', act:'2,0 mm', travel:'4,0 mm', hs:true, rt:false, keycaps:'ABS doble inyección', weight:'580 g', extra:'Bluetooth 5.0 + cable USB-C · Batería 3000 mAh' },
+    sc:{ speed:62, silence:48, dur:72 }, use:'Setups compactos y viaje', badges:[], stores:['mexx','hypergaming','meli'],
+    desc:'60% con Bluetooth y cable: ideal para escritorios chicos o para llevarlo en la mochila. Switches táctiles que no hacen tanto ruido.' },
+
+  { id:'vsg-mintaka', brand:'VSG', model:'Mintaka', tech:'mecanico', sw:'Switch Red lineal · Hot-swap', format:'tkl', conn:['usb'],
+    price:65000, rating:4.4, reviews:760, sold:1900, rgb:true, theme:'dark',
+    specs:{ polling:'1000 Hz', act:'2,0 mm', travel:'4,0 mm', hs:true, rt:false, keycaps:'ABS doble inyección', weight:'870 g', extra:'Cable USB-C desmontable · Software de macros · Anti-ghosting total' },
+    sc:{ speed:64, silence:50, dur:74 }, use:'Gaming competitivo de entrada', badges:[], stores:['compragamer','alltek','meli'],
+    desc:'Marca local con buena relación precio-calidad: TKL mecánico hot-swap, RGB y switches lineales suaves para jugar.' },
+
+  { id:'rk-r65', brand:'Royal Kludge', model:'RK R65', tech:'mecanico', sw:'RK lineal · Hot-swap · Perilla', format:'65', conn:['usb'],
+    price:76800, rating:4.6, reviews:1300, sold:2400, rgb:true, theme:'white',
+    specs:{ polling:'1000 Hz', act:'2,0 mm', travel:'3,8 mm', hs:true, rt:false, keycaps:'PBT doble inyección', weight:'920 g', extra:'Gasket mount · Perilla multimedia · Espumas de amortiguación' },
+    sc:{ speed:66, silence:62, dur:80 }, use:'Entusiastas que buscan buen sonido', badges:['value'], stores:['hypergaming','mexx','meli'],
+    desc:'65% con montaje gasket, espumas y perilla: suena “thocky” y se siente premium sin pagar precio premium.' },
+
+  { id:'rk84', brand:'Royal Kludge', model:'RK84 Trimodal', tech:'mecanico', sw:'RK Brown táctil · Hot-swap', format:'75', conn:['usb','24','bt'],
+    price:92000, old:99000, rating:4.6, reviews:2600, sold:3800, rgb:true, theme:'gray',
+    specs:{ polling:'1000 Hz', act:'2,0 mm', travel:'4,0 mm', hs:true, rt:false, keycaps:'ABS doble inyección', weight:'850 g', extra:'USB-C + 2.4GHz + Bluetooth 5.0 · Batería 3750 mAh' },
+    sc:{ speed:64, silence:50, dur:78 }, use:'Trabajo y gaming inalámbrico', badges:['ship'], stores:['compragamer','maximus','meli'],
+    desc:'Uno de los 75% trimodales más recomendados: conectás hasta 3 dispositivos y cambiás con una combinación de teclas.' },
+
+  { id:'keychron-k2-pro', brand:'Keychron', model:'K2 Pro (QMK/VIA)', tech:'mecanico', sw:'Keychron K Pro Brown · Hot-swap', format:'75', conn:['usb','bt'],
+    price:145000, rating:4.8, reviews:1100, sold:1700, rgb:true, theme:'gray',
+    specs:{ polling:'1000 Hz (cable)', act:'2,0 mm', travel:'4,0 mm', hs:true, rt:false, keycaps:'OSA PBT doble inyección', weight:'794 g', extra:'Programable con QMK/VIA · Compatible Mac y Windows · Bluetooth 5.1' },
+    sc:{ speed:66, silence:58, dur:88 }, use:'Programación y productividad', badges:['ship'], stores:['maximus','hypergaming','meli'],
+    desc:'Un ícono para quienes programan: compatible Mac/Windows, totalmente remapeable con VIA y switches intercambiables.' },
+
+  { id:'razer-bw-v4x', brand:'Razer', model:'BlackWidow V4 X', tech:'mecanico', sw:'Razer Yellow lineal (silencioso)', format:'100', conn:['usb'],
+    price:199999, old:239999, rating:4.7, reviews:1650, sold:1500, rgb:true, theme:'dark',
+    specs:{ polling:'1000 Hz', act:'1,2 mm', travel:'3,5 mm', hs:false, rt:false, keycaps:'ABS doble inyección', weight:'1.250 g', extra:'6 teclas macro · Rueda multimedia · Razer Chroma RGB · Passthrough USB' },
+    sc:{ speed:76, silence:66, dur:90 }, use:'Gaming full size con macros', badges:['ship'], stores:['compragamer','fravega','meli'],
+    desc:'Full size con switches amarillos lineales y amortiguados, 6 macros y rueda de volumen. Rápido, silencioso para ser mecánico y muy bien terminado.' },
+
+  { id:'redragon-fizz-he', brand:'Redragon', model:'Fizz K617-MP Magnético', tech:'magnetico', sw:'Switch magnético lineal · Rapid Trigger', format:'60', conn:['usb'],
+    price:75000, old:89000, rating:4.5, reviews:640, sold:3300, rgb:true, theme:'pink',
+    specs:{ polling:'1000 Hz', act:'0,1 – 3,4 mm ajustable', travel:'3,4 mm', hs:true, rt:true, keycaps:'ABS doble inyección', weight:'560 g', extra:'Rapid Trigger · Actuación por tecla · Cable USB-C' },
+    sc:{ speed:92, silence:56, dur:84 }, use:'FPS competitivo con poco presupuesto', badges:['value','rt'], stores:['compragamer','mexx','meli'],
+    desc:'La forma más barata de entrar al mundo Hall Effect: actuación ajustable y Rapid Trigger en un 60% compacto.' },
+
+  { id:'aula-win60he', brand:'Aula', model:'WIN60 HE', tech:'magnetico', sw:'Switch magnético Jade lineal · Rapid Trigger', format:'60', conn:['usb'],
+    price:105000, rating:4.6, reviews:520, sold:2100, rgb:true, theme:'white',
+    specs:{ polling:'8000 Hz', act:'0,1 – 3,5 mm ajustable', travel:'3,5 mm', hs:true, rt:true, keycaps:'PBT', weight:'620 g', extra:'Rapid Trigger 0,01 mm · SOCD / Snap Tap · Configuración web' },
+    sc:{ speed:96, silence:56, dur:84 }, use:'FPS competitivo (Valorant, CS2)', badges:['rt'], stores:['hypergaming','compragamer','meli'],
+    desc:'60% magnético con polling de 8000 Hz y Rapid Trigger ultra sensible. Rendimiento de gama alta a precio intermedio.' },
+
+  { id:'mchose-ace68', brand:'MCHOSE', model:'Ace 68 HE', tech:'magnetico', sw:'Switch magnético lineal · Rapid Trigger', format:'65', conn:['usb'],
+    price:135000, old:149000, rating:4.8, reviews:420, sold:1600, rgb:true, theme:'gray',
+    specs:{ polling:'8000 Hz', act:'0,1 – 3,4 mm ajustable', travel:'3,4 mm', hs:true, rt:true, keycaps:'PBT doble inyección', weight:'790 g', extra:'Gasket mount · Rapid Trigger 0,01 mm · Dynamic Keystroke (DKS) · SOCD' },
+    sc:{ speed:97, silence:62, dur:86 }, use:'Competitivo + buen sonido', badges:['rt','ship'], stores:['hypergaming','alltek','meli'],
+    desc:'65% magnético con montaje gasket: rapidísimo para jugar y con un sonido muy cuidado. De los favoritos de la comunidad.' },
+
+  { id:'keychron-k10-he', brand:'Keychron', model:'K10 HE', tech:'magnetico', sw:'Gateron magnético Jade · Rapid Trigger', format:'100', conn:['usb','24','bt'],
+    price:225000, rating:4.7, reviews:210, sold:700, rgb:true, theme:'gray',
+    specs:{ polling:'1000 Hz', act:'0,1 – 4,0 mm ajustable', travel:'4,0 mm', hs:true, rt:true, keycaps:'PBT doble inyección', weight:'1.250 g', extra:'Trimodal · Marco de madera · Keychron Launcher web · Batería 4000 mAh' },
+    sc:{ speed:92, silence:64, dur:90 }, use:'Full size para jugar y trabajar', badges:['rt','ship'], stores:['maximus','hypergaming','meli'],
+    desc:'Full size magnético e inalámbrico: rendimiento Hall Effect para jugar y numérico completo para trabajar.' },
+
+  { id:'rog-falchion-ace-he', brand:'Asus ROG', model:'Falchion Ace 75 HE', tech:'magnetico', sw:'ROG HFX magnético · Rapid Trigger', format:'75', conn:['usb'],
+    price:292450, rating:4.8, reviews:160, sold:500, rgb:true, theme:'dark',
+    specs:{ polling:'8000 Hz', act:'0,1 – 3,8 mm ajustable', travel:'3,8 mm', hs:true, rt:true, keycaps:'PBT doble inyección', weight:'780 g', extra:'Rapid Trigger 0,01 mm · Doble puerto USB-C · Panel táctil · Armoury Crate' },
+    sc:{ speed:98, silence:60, dur:94 }, use:'eSports y máximo rendimiento', badges:['rt','ship'], stores:['compragamer','maximus','fravega'],
+    desc:'Lo más alto de la gama: switches magnéticos ROG, 8000 Hz y construcción premium. Para competir sin excusas.' }
+];
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+const $ = (s, el=document) => el.querySelector(s);
+const $$ = (s, el=document) => [...el.querySelectorAll(s)];
+const money = n => '$' + Math.round(n).toLocaleString('es-AR');
+const round100 = n => Math.round(n / 100) * 100;
+const norm = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const hash = s => [...s].reduce((h,c) => (h*31 + c.charCodeAt(0)) >>> 0, 7);
+const store = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
+const load = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch(e){ return d; } };
+const fullName = p => `${p.brand} ${p.model}`;
+const connLabel = p => {
+  if (p.conn.length === 3) return 'Trimodal (USB-C · 2.4GHz · BT)';
+  return p.conn.map(c => ({usb:'USB-C', '24':'2.4GHz', bt:'Bluetooth'}[c])).join(' + ');
+};
+const ICON = {
+  heart:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-9.3-9.6C1.5 7.4 3.7 4 7.2 4c2 0 3.6 1.1 4.8 2.8C13.2 5.1 14.8 4 16.8 4c3.5 0 5.7 3.4 4.5 6.9-1.8 5-9.3 9.6-9.3 9.6Z"/></svg>',
+  x:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+  check:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1a1300" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>',
+  chev:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>',
+  ext:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>',
+  cmp:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8 4v16M16 4v16M3 8h5M16 16h5M3 16h5M16 8h5"/></svg>'
+};
+const BADGE = {
+  sold:  ['b-sold',  'MÁS VENDIDO'],
+  value: ['b-value', 'MEJOR CALIDAD-PRECIO'],
+  rt:    ['b-rt',    'RAPID TRIGGER'],
+  ship:  ['b-ship',  'ENVÍO GRATIS']
+};
+
+/* Ofertas por tienda (derivadas del precio de referencia) */
+function storeUrl(key, p) {
+  const s = STORES[key];
+  const q = `teclado ${p.brand} ${p.model}`;
+  if (key === 'meli') return s.url + norm(q).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  if (key === 'fravega' || key === 'alltek') return s.url + encodeURIComponent(q);
+  return s.url;
+}
+PRODUCTS.forEach(p => {
+  const h = hash(p.id);
+  const [a, b, c] = p.stores;
+  p.offers = [
+    { store:a, price: round100(p.price * (0.88 + (h % 4) / 100)), mode:'Transferencia / depósito', cuotas:null },
+    { store:b, price: p.price, mode:'Precio de lista', cuotas:6 },
+    { store:c, price: round100(p.price * (1.06 + (h % 5) / 100)), mode: c === 'meli' ? 'Mercado Pago' : 'Tarjeta de crédito', cuotas:12 }
+  ];
+  p.best = p.offers.reduce((m, o) => o.price < m.price ? o : m, p.offers[0]);
+  if (p.specs.polling.startsWith('8000') && p.specs.rt) p.rt8k = true;
+  p.free = p.price >= 70000;
+  // calidad-precio: calidad ponderada x rating / precio^0.3
+  const q = p.sc.speed * .4 + p.sc.dur * .4 + p.sc.silence * .2;
+  p.valueRaw = q * p.rating / Math.pow(p.price / 1000, 0.3);
+  p.rel = p.sold * 0.6 + p.reviews * 0.25 + p.rating * 800 + (p.old ? 600 : 0);
+  p.hay = norm([
+    p.brand, p.model, TECH[p.tech].long, p.sw, FMT[p.format], FMT_SHORT[p.format], connLabel(p), p.use, p.specs.keycaps, p.specs.extra,
+    p.tech === 'magnetico' ? 'hall effect he magnetico rapid trigger actuacion ajustable' : '',
+    p.tech === 'mecanico' ? 'mecanico switches' : '',
+    p.tech === 'membrana' ? 'membrana' : '',
+    p.format === 'tkl' ? 'tenkeyless 80% sin numerico' : '',
+    p.format === '100' ? 'full size completo con numerico' : '',
+    p.conn.includes('24') || p.conn.includes('bt') ? 'inalambrico wireless' : 'cableado',
+    p.conn.length === 3 ? 'trimodal' : '',
+    p.sc.silence >= 62 ? 'silencioso' : '',
+    p.sw.toLowerCase().includes('blue') ? 'ruidoso click clicky' : '',
+    p.rgb ? 'rgb' : '', p.specs.hs ? 'hot-swap hotswap' : '', p.specs.polling.replace(/\s/g,''), p.rt8k ? '8000hz 8k' : '',
+    p.stores.map(s => STORES[s].name).join(' ')
+  ].join(' '));
+});
+const vMax = Math.max(...PRODUCTS.map(p => p.valueRaw)), vMin = Math.min(...PRODUCTS.map(p => p.valueRaw));
+PRODUCTS.forEach(p => p.value = Math.round(45 + 55 * (p.valueRaw - vMin) / (vMax - vMin)));
+const byId = Object.fromEntries(PRODUCTS.map(p => [p.id, p]));
+
+/* =========================================================
+   ILUSTRACIÓN SVG DEL TECLADO (según formato)
+   ========================================================= */
+const R60 = [
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,2],
+  [1.5,1,1,1,1,1,1,1,1,1,1,1,1,1.5],
+  [1.75,1,1,1,1,1,1,1,1,1,1,1,2.25],
+  [2.25,1,1,1,1,1,1,1,1,1,1,2.75],
+  [1.25,1.25,1.25,6.25,1.25,1.25,1.25,1.25]
+];
+const ones = n => Array(n).fill(1);
+const FROW15 = [1,-1,1,1,1,1,-0.5,1,1,1,1,-0.5,1,1,1,1];
+function layout(fmt) {
+  const r = R60;
+  switch (fmt) {
+    case '60': return { f:null, rows:r };
+    case '65': return { f:null, rows:[[...r[0],1],[...r[1],1],[...r[2],1],[2.25,...ones(10),1.75,1,1],[1.25,1.25,1.25,6.25,1,1,1,1,1,1]] };
+    case '75': return { f:ones(16), gap:.2, rows:[[...r[0],1],[...r[1],1],[...r[2],1],[2.25,...ones(10),1.75,1,1],[1.25,1.25,1.25,6.25,1,1,1,1,1,1]] };
+    case 'tkl': return { f:[...FROW15,-.25,1,1,1], gap:.45, rows:[[...r[0],-.25,1,1,1],[...r[1],-.25,1,1,1],[...r[2]],[...r[3],-1.25,1],[...r[4],-.25,1,1,1]] };
+    case '90': return { f:[...FROW15,-.25,1,1,1,1], gap:.35, rows:[[...r[0],-.25,1,1,1,1],[...r[1],-.25,1,1,1,1],[...r[2],-.25,1,1,1,1],[2.25,...ones(10),1.75,1,-.25,1,1,1,1],[1.25,1.25,1.25,6.25,1,1,1,1,1,-.25,2,1,1]] };
+    default: return { f:[...FROW15,-.25,1,1,1], gap:.45, rows:[
+      [...r[0],-.25,1,1,1,-.25,1,1,1,1],[...r[1],-.25,1,1,1,-.25,1,1,1,1],[...r[2],-3.5,1,1,1,1],[...r[3],-1.25,1,-1.25,1,1,1,1],[...r[4],-.25,1,1,1,-.25,2,1,1]] };
+  }
+}
+const THEMES = {
+  dark:  { cs:'#1A1D24', k:'#2B303B', k2:'#232730', st:'#3A404D' },
+  gray:  { cs:'#2E333D', k:'#4B5262', k2:'#3B414E', st:'#5D6576' },
+  white: { cs:'#D6DAE1', k:'#F3F4F6', k2:'#E1E4EA', st:'#C4C9D2' },
+  pink:  { cs:'#F1D6E0', k:'#FDF2F6', k2:'#F7E1EA', st:'#E4BFCD' }
+};
+let svgUid = 0;
+function kbSVG(p) {
+  const U = 10, g = 1.4, pad = 4;
+  const L = layout(p.format), th = THEMES[p.theme] || THEMES.dark, tc = TECH[p.tech].color;
+  const rows = L.f ? [L.f, ...L.rows] : L.rows;
+  const width = Math.max(...rows.map(r => r.reduce((s, w) => s + Math.abs(w), 0)));
+  const h = rows.length + (L.f ? (L.gap || 0) : 0);
+  const W = width * U + pad * 2, H = h * U + pad * 2;
+  const id = 'kb' + (++svgUid);
+  let keys = '', y = pad;
+  rows.forEach((row, ri) => {
+    let x = pad;
+    row.forEach((w, ki) => {
+      if (w < 0) { x += -w * U; return; }
+      const acc = (ri === 0 && ki === 0) || w >= 6 || (w >= 2 && ki === row.findIndex(v => v >= 2.2 && v < 3) && ri === rows.length - 3);
+      const fill = acc ? tc : (w > 1 ? th.k2 : th.k);
+      keys += `<rect x="${(x + g/2).toFixed(1)}" y="${(y + g/2).toFixed(1)}" width="${(w*U - g).toFixed(1)}" height="${(U - g).toFixed(1)}" rx="1.8" fill="${fill}" ${acc ? 'fill-opacity="' + (w >= 6 ? .35 : .9) + '"' : ''}/>`;
+      keys += `<rect x="${(x + g/2 + 1.2).toFixed(1)}" y="${(y + g/2 + .8).toFixed(1)}" width="${(w*U - g - 2.4).toFixed(1)}" height="${(U - g - 3).toFixed(1)}" rx="1.3" fill="#fff" fill-opacity="${p.theme === 'white' || p.theme === 'pink' ? .5 : .05}"/>`;
+      x += w * U;
+    });
+    y += U + (ri === 0 && L.f ? (L.gap || 0) * U : 0);
+  });
+  const glow = p.rgb
+    ? `<linearGradient id="${id}g" x1="0" x2="1"><stop offset="0" stop-color="#F43F5E"/><stop offset=".3" stop-color="#FACC15"/><stop offset=".6" stop-color="#22C55E"/><stop offset="1" stop-color="#00E5FF"/></linearGradient>`
+    : `<linearGradient id="${id}g" x1="0" x2="1"><stop offset="0" stop-color="${tc}"/><stop offset="1" stop-color="${tc}"/></linearGradient>`;
+  return `<svg class="kb" viewBox="-3 -3 ${W + 6} ${H + 8}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustración de teclado formato ${FMT_SHORT[p.format]}">
+    <defs>${glow}</defs>
+    <rect x="1" y="4" width="${W - 2}" height="${H}" rx="5" fill="url(#${id}g)" opacity="${p.rgb ? .55 : .35}" filter="blur(0)"/>
+    <rect x="0" y="0" width="${W}" height="${H}" rx="5" fill="${th.cs}" stroke="${th.st}" stroke-width=".8"/>
+    ${keys}
+  </svg>`;
+}
+
+/* =========================================================
+   ESTADO
+   ========================================================= */
+const state = { q:'', tech:new Set(), brand:new Set(), format:new Set(), conn:new Set(), price:'all', sort:'rel' };
+let favs = new Set(load('km_favs', []).filter(id => byId[id]));
+let cmp = load('km_cmp', []).filter(id => byId[id]).slice(0, 3);
+
+function filtered() {
+  const tokens = norm(state.q).split(/\s+/).filter(Boolean);
+  const [, , pmin, pmax] = PRICES.find(x => x[0] === state.price);
+  let list = PRODUCTS.filter(p =>
+    (!state.tech.size || state.tech.has(p.tech)) &&
+    (!state.brand.size || state.brand.has(p.brand)) &&
+    (!state.format.size || state.format.has(p.format)) &&
+    (!state.conn.size || p.conn.some(c => state.conn.has(c))) &&
+    p.price >= pmin && p.price < pmax &&
+    tokens.every(t => p.hay.includes(t))
+  );
+  const s = state.sort;
+  list.sort((a, b) =>
+    s === 'asc' ? a.price - b.price :
+    s === 'desc' ? b.price - a.price :
+    s === 'value' ? b.valueRaw - a.valueRaw :
+    b.rel - a.rel);
+  return list;
+}
+
+/* =========================================================
+   FILTROS (sidebar)
+   ========================================================= */
+function countBy(fn) { const m = {}; PRODUCTS.forEach(p => [].concat(fn(p)).forEach(k => m[k] = (m[k] || 0) + 1)); return m; }
+const cTech = countBy(p => p.tech), cBrand = countBy(p => p.brand), cFmt = countBy(p => p.format), cConn = countBy(p => p.conn);
+
+function optHTML(type, group, value, label, n, extra = '') {
+  return `<label class="opt"><input type="${type}" name="${group}" value="${esc(value)}" data-g="${group}"><span class="box">${ICON.check}</span>${extra}<span>${esc(label)}</span>${n != null ? `<span class="n">${n}</span>` : ''}</label>`;
+}
+function groupHTML(title, inner, closed = false) {
+  return `<div class="fgroup${closed ? ' closed' : ''}"><button class="fg-t" type="button" aria-expanded="${!closed}">${title}${ICON.chev}</button><div class="fg-body"><div>${inner}</div></div></div>`;
+}
+function buildFilters() {
+  $('#fgroups').innerHTML =
+    groupHTML('Tecnología', Object.entries(TECH).map(([k, t]) => optHTML('checkbox','tech',k,t.long,cTech[k],`<span class="tdot" style="background:${t.color}"></span>`)).join('')) +
+    groupHTML('Marca', BRANDS.map(b => optHTML('checkbox','brand',b,b,cBrand[b] || 0)).join('')) +
+    groupHTML('Formato', FORMATS.map(([k,l]) => optHTML('checkbox','format',k,l,cFmt[k] || 0)).join('')) +
+    groupHTML('Conectividad', CONNS.map(([k,l]) => optHTML('checkbox','conn',k,l,cConn[k] || 0)).join('')) +
+    groupHTML('Rango de precio (ARS)', PRICES.map(([k,l]) => optHTML('radio','price',k,l)).join('')) +
+    groupHTML('Ordenar por', SORTS.map(([k,l]) => optHTML('radio','sort',k,l)).join(''));
+  $('#sortTop').innerHTML = SORTS.map(([k,l]) => `<option value="${k}">${l}</option>`).join('');
+  $('#cats').innerHTML = `<button class="cat" data-cat="" style="--c:#E8EAF0"><span class="dot">⌨</span>Todos<small>${PRODUCTS.length}</small></button>` +
+    Object.entries(TECH).map(([k, t]) => `<button class="cat" data-cat="${k}" style="--c:${t.color}"><span class="dot">${k === 'membrana' ? '◍' : k === 'mecanico' ? '⚙' : '⚡'}</span>${k === 'mecanico' ? 'Mecánicos' : k === 'magnetico' ? 'Magnéticos (HE)' : 'Membrana'}<small>${cTech[k]}</small></button>`).join('');
+  $('#fStores').innerHTML = STORE_ORDER.map(k => `<span class="sdot">${STORES[k].name}</span>`).join('');
+}
+function syncInputs() {
+  $$('#fgroups input').forEach(i => {
+    const g = i.dataset.g;
+    i.checked = (g === 'price' || g === 'sort') ? state[g] === i.value : state[g].has(i.value);
+  });
+  $('#sortTop').value = state.sort;
+  $$('#cats .cat').forEach(c => {
+    const k = c.dataset.cat;
+    c.classList.toggle('on', k ? (state.tech.size === 1 && state.tech.has(k)) : state.tech.size === 0);
+  });
+}
+
+/* =========================================================
+   RENDER GRID
+   ========================================================= */
+function cardHTML(p, i) {
+  const t = TECH[p.tech];
+  const badges = [...p.badges.filter(b => b !== 'rt'), ...(p.specs.rt ? ['rt'] : [])].slice(0, 3).map(b => {
+    const [cls, lbl] = BADGE[b];
+    return `<span class="badge ${cls}">${b === 'rt' && p.rt8k ? 'RAPID TRIGGER 8000Hz' : lbl}</span>`;
+  }).join('');
+  const off = p.old ? Math.round((1 - p.price / p.old) * 100) : 0;
+  const inCmp = cmp.includes(p.id);
+  return `<article class="card" data-id="${p.id}" style="--d:${Math.min(i, 14) * 55}ms;--tc:${t.color}" tabindex="0" aria-label="${esc(fullName(p))}">
+    <div class="media">
+      <div class="badges">${badges}</div>
+      <button class="fav-btn${favs.has(p.id) ? ' on' : ''}" data-act="fav" aria-label="${favs.has(p.id) ? 'Quitar de' : 'Agregar a'} favoritos" aria-pressed="${favs.has(p.id)}">${ICON.heart}</button>
+      ${kbSVG(p)}
+      <div class="quick">
+        <span>Actuación</span><b>${esc(p.specs.act)}</b>
+        <span>Polling</span><b>${esc(p.specs.polling)}</b>
+        <span>Hot-swap</span><b>${p.specs.hs ? 'Sí' : 'No'}</b>
+        <span>Peso</span><b>${esc(p.specs.weight)}</b>
+      </div>
+    </div>
+    <div class="body">
+      <div class="meta"><span class="tpill">${t.label}</span><span class="fpill">${FMT_SHORT[p.format]}</span>${p.conn.length > 1 || p.conn[0] !== 'usb' ? `<span class="fpill">${p.conn.length === 3 ? 'Trimodal' : p.conn.includes('bt') ? 'Bluetooth' : '2.4GHz'}</span>` : ''}</div>
+      <h3><span class="brand">${esc(p.brand)}</span> ${esc(p.model)}</h3>
+      <p class="swt" title="${esc(p.sw)}">${esc(p.sw)}</p>
+      <div class="stars"><span class="st" aria-hidden="true"><i style="width:${p.rating / 5 * 100}%"></i></span><span>${p.rating.toFixed(1).replace('.', ',')} (${p.reviews.toLocaleString('es-AR')})</span></div>
+      <div class="old">${p.old ? `${money(p.old)} <span class="off">${off}% OFF</span>` : ''}</div>
+      <div class="price">${money(p.price)}</div>
+      <div class="cuotas">en <b>6x ${money(p.price / 6)}</b> sin interés</div>
+      ${p.free ? '<div class="ship">Envío gratis</div>' : ''}
+      <div class="best">Mejor precio: <b>${money(p.best.price)}</b> <span class="bt-store">en <span class="st-name">${STORES[p.best.store].name}</span></span>
+        <div class="stores">${p.offers.map(o => `<span class="sdot">${STORES[o.store].name}</span>`).join('')}</div>
+      </div>
+      <div class="cfoot">
+        <button class="cmp-btn${inCmp ? ' on' : ''}" data-act="cmp" aria-pressed="${inCmp}">${ICON.cmp}${inCmp ? 'En comparador' : 'Comparar'}</button>
+        <button class="det-btn" data-act="detail">Ver detalle</button>
+      </div>
+    </div>
+  </article>`;
+}
+function renderGrid() {
+  svgUid = 0;
+  const list = filtered();
+  const grid = $('#grid');
+  grid.innerHTML = list.length ? list.map(cardHTML).join('') :
+    `<div class="empty"><div style="font-size:38px">⌨️</div><h3>No encontramos teclados con esos filtros</h3><p>Probá con otra búsqueda o sacá algún filtro.</p><button class="btn btn-pri" id="emptyClear" style="margin-top:10px">Limpiar filtros</button></div>`;
+  $('#resCount').innerHTML = `<b>${list.length}</b>${list.length === 1 ? 'teclado encontrado' : 'teclados encontrados'}`;
+  renderChips();
+}
+function renderChips() {
+  const chips = [];
+  if (state.q) chips.push(['q', '', `“${state.q}”`]);
+  state.tech.forEach(v => chips.push(['tech', v, TECH[v].label]));
+  state.brand.forEach(v => chips.push(['brand', v, v]));
+  state.format.forEach(v => chips.push(['format', v, FMT_SHORT[v]]));
+  state.conn.forEach(v => chips.push(['conn', v, CONNS.find(c => c[0] === v)[1]]));
+  if (state.price !== 'all') chips.push(['price', state.price, PRICES.find(x => x[0] === state.price)[1]]);
+  $('#chips').innerHTML = chips.map(([g, v, l]) => `<span class="fchip">${esc(l)}<button data-g="${g}" data-v="${esc(v)}" aria-label="Quitar filtro ${esc(l)}">${ICON.x}</button></span>`).join('');
+  const n = chips.length;
+  $('#fBadge').textContent = n ? `(${n})` : '';
+}
+function update() { syncInputs(); renderGrid(); }
+function clearAll() {
+  state.q = ''; $('#q').value = ''; $('#searchBox').classList.remove('has');
+  ['tech','brand','format','conn'].forEach(k => state[k].clear());
+  state.price = 'all';
+  update();
+}
+
+/* =========================================================
+   FAVORITOS / COMPARADOR
+   ========================================================= */
+function bump(el) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+function updateCounters(which) {
+  const f = $('#favCount'), c = $('#cmpCount');
+  f.textContent = favs.size; f.classList.toggle('on', favs.size > 0);
+  c.textContent = cmp.length; c.classList.toggle('on', cmp.length > 0);
+  if (which === 'fav') bump(f);
+  if (which === 'cmp') bump(c);
+}
+function toggleFav(id) {
+  const p = byId[id];
+  if (favs.has(id)) { favs.delete(id); toast(`Quitaste <b>${esc(fullName(p))}</b> de favoritos`); }
+  else { favs.add(id); toast(`❤ <b>${esc(fullName(p))}</b> guardado en favoritos`); }
+  store('km_favs', [...favs]);
+  updateCounters('fav');
+  $$(`.card[data-id="${id}"] .fav-btn, [data-fav-id="${id}"]`).forEach(b => {
+    const on = favs.has(id);
+    b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
+    if (b.classList.contains('fav-btn')) { b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); }
+    if (b.dataset.favId) b.innerHTML = `${ICON.heart} ${on ? 'En favoritos' : 'Guardar'}`;
+  });
+  if ($('#favOv').classList.contains('open')) renderFavs();
+}
+function toggleCmp(id) {
+  const i = cmp.indexOf(id);
+  if (i >= 0) cmp.splice(i, 1);
+  else {
+    if (cmp.length >= 3) { toast('El comparador admite hasta <b>3 teclados</b>. Quitá uno para sumar otro.'); return; }
+    cmp.push(id);
+  }
+  store('km_cmp', cmp);
+  updateCounters('cmp');
+  $$(`.card[data-id="${id}"] .cmp-btn, [data-cmp-id="${id}"]`).forEach(b => {
+    const on = cmp.includes(id);
+    b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
+    b.innerHTML = `${ICON.cmp}${on ? 'En comparador' : 'Comparar'}`;
+  });
+  renderCbar();
+  if ($('#cmpOv').classList.contains('open')) { cmp.length ? renderCompare() : closeOv($('#cmpOv')); }
+}
+function renderCbar() {
+  const bar = $('#cbar');
+  bar.classList.toggle('show', cmp.length > 0);
+  let html = '';
+  for (let i = 0; i < 3; i++) {
+    const p = byId[cmp[i]];
+    html += p ? `<div class="cslot full">${kbSVG(p)}<span class="cs-name">${esc(fullName(p))}</span><button data-rm="${p.id}" aria-label="Quitar ${esc(fullName(p))}">${ICON.x}</button></div>`
+              : `<div class="cslot">+ Agregá un teclado</div>`;
+  }
+  $('#cslots').innerHTML = html;
+  $('#cbarGo').disabled = cmp.length < 2;
+  $('#cbarGo').textContent = cmp.length < 2 ? 'Elegí 2+' : `Comparar (${cmp.length})`;
+}
+function renderFavs() {
+  const body = $('#favBody');
+  if (!favs.size) { body.innerHTML = `<div class="dr-empty"><div style="font-size:40px">🤍</div><p>Todavía no guardaste teclados.<br>Tocá el corazón en cualquier tarjeta.</p></div>`; return; }
+  const list = [...favs].map(id => byId[id]);
+  const total = list.reduce((s, p) => s + p.best.price, 0);
+  body.innerHTML = list.map((p, i) => `<div class="fav-item" style="--d:${i * 60}ms">
+      <div class="fi-media" style="--tc:${TECH[p.tech].color}">${kbSVG(p)}</div>
+      <div><h4>${esc(fullName(p))}</h4>
+        <div style="font-size:12px;color:var(--mut)">${TECH[p.tech].label} · ${FMT_SHORT[p.format]}</div>
+        <div class="fp">${money(p.price)}</div>
+        <div style="font-size:11.5px;color:var(--green)">Mejor: ${money(p.best.price)} en ${STORES[p.best.store].name}</div>
+        <div class="fi-act"><button class="mini" data-open="${p.id}">Ver</button><button class="mini" data-cmp-fav="${p.id}">${cmp.includes(p.id) ? 'En comparador' : '+ Comparar'}</button><button class="mini" data-unfav="${p.id}">Quitar</button></div>
+      </div></div>`).join('') +
+    `<div class="note" style="margin-top:6px">Si comprás todos al mejor precio encontrado: <b style="color:var(--txt)">${money(total)}</b></div>`;
+}
+
+/* =========================================================
+   MODALES
+   ========================================================= */
+let lastFocus = null;
+function openOv(ov) {
+  lastFocus = document.activeElement;
+  ov.classList.add('open'); ov.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('lock');
+  setTimeout(() => { const f = ov.querySelector('.x-btn, button'); f && f.focus({ preventScroll:true }); }, 60);
+}
+function closeOv(ov) {
+  ov.classList.remove('open'); ov.setAttribute('aria-hidden', 'true');
+  if (!$$('.overlay.open').length) document.body.classList.remove('lock');
+  if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll:true });
+}
+function barsHTML(p) {
+  const rows = [['Velocidad', p.sc.speed, TECH[p.tech].color], ['Silencio', p.sc.silence, '#A78BFA'], ['Durabilidad', p.sc.dur, '#22C55E'], ['Calidad-precio', p.value, '#FACC15']];
+  return `<div class="bars">${rows.map(([l, v, c]) => `<div class="bar-row"><span>${l}</span><div class="bar"><i data-w="${v}" style="--bc:${c}"></i></div><b>${v}</b></div>`).join('')}</div>`;
+}
+function animateBars(root) { requestAnimationFrame(() => requestAnimationFrame(() => $$('.bar i', root).forEach(i => i.style.width = i.dataset.w + '%'))); }
+
+function openDetail(id) {
+  const p = byId[id], t = TECH[p.tech];
+  const off = p.old ? Math.round((1 - p.price / p.old) * 100) : 0;
+  const offers = [...p.offers].sort((a, b) => a.price - b.price);
+  $('#detail').innerHTML = `
+    <button class="x-btn" data-close aria-label="Cerrar">${ICON.x}</button>
+    <div class="d-grid">
+      <div class="d-media" style="--tc:${t.color}">
+        <div class="kbwrap">${kbSVG(p)}</div>
+        <div>
+          <div class="sec-t" style="margin-top:0">Rendimiento</div>
+          ${barsHTML(p)}
+        </div>
+        <div>
+          <div class="sec-t">Ficha técnica</div>
+          <table class="spec">
+            <tr><td>Tecnología</td><td style="color:${t.color}">${t.long}</td></tr>
+            <tr><td>Switch</td><td>${esc(p.sw)}</td></tr>
+            <tr><td>Formato</td><td>${FMT[p.format]}</td></tr>
+            <tr><td>Conectividad</td><td>${connLabel(p)}</td></tr>
+            <tr><td>Polling rate</td><td class="mono">${esc(p.specs.polling)}</td></tr>
+            <tr><td>Punto de actuación</td><td class="mono">${esc(p.specs.act)}</td></tr>
+            <tr><td>Recorrido total</td><td class="mono">${esc(p.specs.travel)}</td></tr>
+            <tr><td>Rapid Trigger</td><td class="${p.specs.rt ? 'yes' : 'no'}">${p.specs.rt ? '✔ Sí' : '—'}</td></tr>
+            <tr><td>Hot-swap</td><td class="${p.specs.hs ? 'yes' : 'no'}">${p.specs.hs ? '✔ Sí' : 'No'}</td></tr>
+            <tr><td>Keycaps</td><td>${esc(p.specs.keycaps)}</td></tr>
+            <tr><td>Peso</td><td class="mono">${esc(p.specs.weight)}</td></tr>
+            <tr><td>Iluminación</td><td>${p.rgb ? 'RGB' : 'Sin iluminación'}</td></tr>
+          </table>
+          <p style="font-size:12.5px;color:var(--mut);margin:10px 0 0">${esc(p.specs.extra)}</p>
+        </div>
+      </div>
+      <div class="d-info">
+        <div class="meta"><span class="tpill" style="--tc:${t.color}">${t.label}</span><span class="fpill">${FMT_SHORT[p.format]}</span>${p.badges.map(b => `<span class="badge ${BADGE[b][0]}">${b === 'rt' && p.rt8k ? 'RAPID TRIGGER 8000Hz' : BADGE[b][1]}</span>`).join('')}</div>
+        <h2 id="dTitle">${esc(fullName(p))}</h2>
+        <div class="stars"><span class="st"><i style="width:${p.rating / 5 * 100}%"></i></span><span>${p.rating.toFixed(1).replace('.', ',')} · ${p.reviews.toLocaleString('es-AR')} opiniones · +${p.sold.toLocaleString('es-AR')} vendidos</span></div>
+        <p class="desc">${esc(p.desc)}</p>
+        <div class="old">${p.old ? `${money(p.old)} <span class="off">${off}% OFF</span>` : ''}</div>
+        <div class="d-price"><span class="price">${money(p.price)}</span><span style="color:var(--mut);font-size:13px">precio de referencia</span></div>
+        <div class="cuotas">en <b>6x ${money(p.price / 6)}</b> sin interés · o <b>12x ${money(offers[offers.length - 1].price / 12)}</b> en ${STORES[offers[offers.length - 1].store].name}</div>
+        ${p.free ? '<div class="ship">🚚 Envío gratis a todo el país</div>' : ''}
+        <div class="d-actions">
+          <button class="btn btn-sec" data-fav-id="${p.id}">${ICON.heart} ${favs.has(p.id) ? 'En favoritos' : 'Guardar'}</button>
+          <button class="btn btn-sec cmp-btn${cmp.includes(p.id) ? ' on' : ''}" style="flex:0 0 auto;height:44px;padding:0 16px" data-cmp-id="${p.id}">${ICON.cmp}${cmp.includes(p.id) ? 'En comparador' : 'Comparar'}</button>
+        </div>
+        <div class="sec-t">Dónde comprar</div>
+        <table class="buy">
+          ${offers.map((o, i) => {
+            const s = STORES[o.store];
+            return `<tr class="${i === 0 ? 'best-row' : ''}">
+              <td><div class="s-name"><span class="s-logo" style="background:${s.color}">${s.short}</span>${s.name}${i === 0 ? '<span class="tag-best">MEJOR</span>' : ''}</div><div class="s-mode">${o.mode}</div></td>
+              <td><div class="s-price">${money(o.price)}</div><div class="s-cuo">${o.cuotas ? `${o.cuotas}x ${money(o.price / o.cuotas)} sin interés` : 'Un pago · ahorrás ' + money(p.price - o.price)}</div></td>
+              <td><a class="go" href="${storeUrl(o.store, p)}" target="_blank" rel="noopener noreferrer">Ir a la tienda ${ICON.ext}</a></td>
+            </tr>`;
+          }).join('')}
+        </table>
+        <p style="font-size:11.5px;color:var(--dim);margin:6px 0 0">Precios orientativos. La diferencia entre tiendas suele deberse a descuentos por transferencia y al costo de financiación en cuotas.</p>
+        <div class="sec-t">Uso recomendado</div>
+        <p style="margin:0;font-weight:600">🎯 ${esc(p.use)}</p>
+      </div>
+    </div>`;
+  const ov = $('#detailOv');
+  ov.querySelector('.modal').scrollTop = 0;
+  openOv(ov);
+  animateBars($('#detail'));
+}
+
+function openCompare() {
+  if (cmp.length < 2) { toast(cmp.length ? 'Agregá al menos <b>un teclado más</b> para comparar.' : 'Sumá teclados con el botón <b>Comparar</b> de cada tarjeta.'); return; }
+  renderCompare();
+  openOv($('#cmpOv'));
+}
+function renderCompare() {
+  const ps = cmp.map(id => byId[id]);
+  const actNum = p => parseFloat(p.specs.act.replace('≈', '').replace(',', '.').trim());
+  const wNum = p => parseFloat(p.specs.weight.replace('.', '').replace(',', '.'));
+  const polNum = p => parseInt(p.specs.polling, 10);
+  const noise = v => v >= 75 ? 'Muy bajo' : v >= 60 ? 'Bajo' : v >= 45 ? 'Medio' : 'Alto';
+  // filas: [label, fn(valor mostrado), fnNum para ganador, 'max'|'min'|null]
+  const rows = [
+    ['sec','Precio'],
+    ['Precio de referencia', p => money(p.price), p => p.price, 'min'],
+    ['Mejor precio encontrado', p => `${money(p.best.price)}<div style="font-size:11.5px;color:var(--mut);font-weight:500">${STORES[p.best.store].name}</div>`, p => p.best.price, 'min'],
+    ['Cuotas', p => `6x ${money(p.price / 6)}`, null],
+    ['sec','Rendimiento'],
+    ['Velocidad', p => barCell(p.sc.speed, TECH[p.tech].color), p => p.sc.speed, 'max'],
+    ['Ruido', p => `${barCell(p.sc.silence, '#A78BFA')}<div style="font-size:11.5px;color:var(--mut);margin-top:3px">Ruido ${noise(p.sc.silence).toLowerCase()}</div>`, p => p.sc.silence, 'max'],
+    ['Durabilidad', p => barCell(p.sc.dur, '#22C55E'), p => p.sc.dur, 'max'],
+    ['Calidad-precio', p => barCell(p.value, '#FACC15'), p => p.value, 'max'],
+    ['sec','Especificaciones'],
+    ['Tecnología', p => `<span style="color:${TECH[p.tech].color};font-weight:700">${TECH[p.tech].long}</span>`, null],
+    ['Switch', p => esc(p.sw), null],
+    ['Formato', p => FMT[p.format], null],
+    ['Conectividad', p => connLabel(p), p => p.conn.length, 'max'],
+    ['Polling rate', p => esc(p.specs.polling), polNum, 'max'],
+    ['Actuación', p => esc(p.specs.act), actNum, 'min'],
+    ['Rapid Trigger', p => p.specs.rt ? '<span class="yes">✔ Sí</span>' : '<span class="no">No</span>', p => p.specs.rt ? 1 : 0, 'max'],
+    ['Hot-swap', p => p.specs.hs ? '<span class="yes">✔ Sí</span>' : '<span class="no">No</span>', p => p.specs.hs ? 1 : 0, 'max'],
+    ['Keycaps', p => esc(p.specs.keycaps), null],
+    ['Peso', p => esc(p.specs.weight), null],
+    ['Calificación', p => `★ ${p.rating.toFixed(1).replace('.', ',')} <span style="color:var(--dim)">(${p.reviews.toLocaleString('es-AR')})</span>`, p => p.rating, 'max'],
+    ['sec','Para quién'],
+    ['Uso recomendado', p => `<b>${esc(p.use)}</b>`, null]
+  ];
+  function barCell(v, c) { return `<div style="display:flex;align-items:center;gap:8px"><div class="bar" style="flex:1"><i data-w="${v}" style="--bc:${c}"></i></div><b class="mono" style="font-size:12px">${v}</b></div>`; }
+  const body = rows.map(r => {
+    if (r[0] === 'sec') return `<tr class="cmp-sec"><td colspan="${ps.length + 1}">${r[1]}</td></tr>`;
+    const [label, show, num, dir] = r;
+    let win = new Set();
+    if (num && dir) {
+      const vals = ps.map(num);
+      const best = dir === 'max' ? Math.max(...vals) : Math.min(...vals);
+      if (vals.some(v => v !== best)) vals.forEach((v, i) => v === best && win.add(i));
+    }
+    return `<tr><td class="rl">${label}</td>${ps.map((p, i) => `<td class="${win.has(i) ? 'win' : ''}">${show(p)}</td>`).join('')}</tr>`;
+  }).join('');
+  // veredicto
+  const fastest = [...ps].sort((a, b) => b.sc.speed - a.sc.speed)[0];
+  const quiet = [...ps].sort((a, b) => b.sc.silence - a.sc.silence)[0];
+  const val = [...ps].sort((a, b) => b.value - a.value)[0];
+  const cheap = [...ps].sort((a, b) => a.best.price - b.best.price)[0];
+  $('#cmpModal').innerHTML = `
+    <button class="x-btn" data-close aria-label="Cerrar">${ICON.x}</button>
+    <div class="cmp-wrap">
+      <h2>Comparador lado a lado</h2>
+      <p>Comparando ${ps.length} teclados. La celda resaltada en amarillo es la mejor de cada fila.</p>
+      <table class="cmp-table">
+        <thead><tr><th class="rl"></th>${ps.map(p => `<th><div class="cmp-head" style="--tc:${TECH[p.tech].color}">
+          <div class="ch-m">${kbSVG(p)}</div>
+          <h4>${esc(fullName(p))}</h4>
+          <div style="display:flex;gap:6px"><button class="mini" data-open="${p.id}">Ver ficha</button><button class="mini" data-rm="${p.id}">Quitar</button></div>
+        </div></th>`).join('')}</tr></thead>
+        <tbody>${body}</tbody>
+      </table>
+      <div class="verdict">
+        ⚡ Más rápido: <b>${esc(fullName(fastest))}</b> &nbsp;·&nbsp; 🤫 Más silencioso: <b>${esc(fullName(quiet))}</b> &nbsp;·&nbsp;
+        💰 Mejor calidad-precio: <b>${esc(fullName(val))}</b> &nbsp;·&nbsp; 🏷️ Más barato hoy: <b>${esc(fullName(cheap))}</b> (${money(cheap.best.price)} en ${STORES[cheap.best.store].name})
+      </div>
+    </div>`;
+  animateBars($('#cmpModal'));
+}
+
+function openFavs() { renderFavs(); openOv($('#favOv')); }
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+function toast(html) {
+  const el = document.createElement('div');
+  el.className = 'toast'; el.innerHTML = html;
+  $('#toasts').appendChild(el);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 320); }, 2600);
+  const all = $$('#toasts .toast'); if (all.length > 3) all[0].remove();
+}
+
+/* =========================================================
+   EVENTOS
+   ========================================================= */
+function bind() {
+  let deb;
+  $('#q').addEventListener('input', e => {
+    $('#searchBox').classList.toggle('has', !!e.target.value);
+    clearTimeout(deb);
+    deb = setTimeout(() => { state.q = e.target.value.trim(); renderGrid(); }, 140);
+  });
+  $('#q').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#catalogo').scrollIntoView({ behavior:'smooth' }); } });
+  $('#qClear').addEventListener('click', () => { $('#q').value = ''; state.q = ''; $('#searchBox').classList.remove('has'); renderGrid(); $('#q').focus(); });
+
+  $('#fgroups').addEventListener('change', e => {
+    const i = e.target; if (!i.dataset.g) return;
+    const g = i.dataset.g;
+    if (g === 'price' || g === 'sort') state[g] = i.value;
+    else i.checked ? state[g].add(i.value) : state[g].delete(i.value);
+    update();
+  });
+  $('#fgroups').addEventListener('click', e => {
+    const b = e.target.closest('.fg-t'); if (!b) return;
+    const g = b.parentElement; g.classList.toggle('closed');
+    b.setAttribute('aria-expanded', !g.classList.contains('closed'));
+  });
+  $('#sortTop').addEventListener('change', e => { state.sort = e.target.value; update(); });
+  $('#clearAll').addEventListener('click', clearAll);
+  $('#chips').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const { g, v } = b.dataset;
+    if (g === 'q') { state.q = ''; $('#q').value = ''; $('#searchBox').classList.remove('has'); }
+    else if (g === 'price') state.price = 'all';
+    else state[g].delete(v);
+    update();
+  });
+  $('#cats').addEventListener('click', e => {
+    const c = e.target.closest('.cat'); if (!c) return;
+    state.tech.clear(); if (c.dataset.cat) state.tech.add(c.dataset.cat);
+    update();
+  });
+  $$('[data-quick]').forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.quick;
+    if (k === 'value') state.sort = 'value';
+    else { state.tech.clear(); state.tech.add(k); }
+    update();
+    $('#catalogo').scrollIntoView({ behavior:'smooth' });
+  }));
+
+  // grid
+  $('#grid').addEventListener('click', e => {
+    if (e.target.closest('#emptyClear')) { clearAll(); return; }
+    const card = e.target.closest('.card'); if (!card) return;
+    const act = e.target.closest('[data-act]')?.dataset.act;
+    if (act === 'fav') return toggleFav(card.dataset.id);
+    if (act === 'cmp') return toggleCmp(card.dataset.id);
+    openDetail(card.dataset.id);
+  });
+  $('#grid').addEventListener('keydown', e => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('card')) { e.preventDefault(); openDetail(e.target.dataset.id); }
+  });
+
+  // header
+  $('#openFavs').addEventListener('click', openFavs);
+  $('#openCmp').addEventListener('click', openCompare);
+  $('#cbarGo').addEventListener('click', openCompare);
+  $('#cbarClear').addEventListener('click', () => { [...cmp].forEach(id => toggleCmp(id)); });
+
+  // overlays: cerrar + acciones delegadas
+  $$('.overlay').forEach(ov => ov.addEventListener('click', e => {
+    if (e.target === ov || e.target.closest('[data-close]')) return closeOv(ov);
+    const t = e.target.closest('[data-open],[data-rm],[data-fav-id],[data-cmp-id],[data-unfav],[data-cmp-fav]');
+    if (!t) return;
+    if (t.dataset.open) { if (ov.id !== 'detailOv') closeOv(ov); setTimeout(() => openDetail(t.dataset.open), ov.id !== 'detailOv' ? 180 : 0); }
+    else if (t.dataset.rm) toggleCmp(t.dataset.rm);
+    else if (t.dataset.favId) toggleFav(t.dataset.favId);
+    else if (t.dataset.cmpId) toggleCmp(t.dataset.cmpId);
+    else if (t.dataset.unfav) toggleFav(t.dataset.unfav);
+    else if (t.dataset.cmpFav) { toggleCmp(t.dataset.cmpFav); renderFavs(); }
+  }));
+  $('#cslots').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) toggleCmp(b.dataset.rm); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      const open = $$('.overlay.open'); if (open.length) return closeOv(open[open.length - 1]);
+      if ($('#filters').classList.contains('open')) closeFilters();
+    }
+  });
+
+  // filtros móvil
+  $('#fOpen').addEventListener('click', () => { $('#filters').classList.add('open'); $('#fScrim').classList.add('open'); document.body.classList.add('lock'); });
+  $('#fClose').addEventListener('click', closeFilters);
+  $('#fScrim').addEventListener('click', closeFilters);
+}
+function closeFilters() { $('#filters').classList.remove('open'); $('#fScrim').classList.remove('open'); if (!$$('.overlay.open').length) document.body.classList.remove('lock'); }
+
+/* =========================================================
+   SIMULADOR DE SWITCHES
+   ========================================================= */
+const SIM = {
+  mem: { name:'Membrana', key:'A', color:'#A78BFA', travel:4, act:3.2, reset:2.6, down:d => d < 1.8 ? 19 : 46, up:30, under:'<div class="dome"></div>' },
+  mec: { name:'Mecánico', key:'S', color:'#FACC15', travel:4, act:2.0, reset:1.6, down:() => 55, up:70, under:'<div class="spring"></div>' },
+  mag: { name:'Magnético', key:'D', color:'#00E5FF', travel:4, act:0.6, reset:0.5, down:() => 55, up:70, rt:true, sens:0.1, under:'<div class="field"></div><div class="magnet"></div><div class="sensor"></div>' }
+};
+const SKEYS = ['mem','mec','mag'];
+const fmtMM = v => v.toFixed(1).replace('.', ',') + ' mm';
+let soundOn = true, actx = null, noiseBuf = null;
+
+function buildSim() {
+  $('#simKeys').innerHTML = SKEYS.map(k => {
+    const s = SIM[k];
+    return `<div class="skey" data-k="${k}" style="--kc:${s.color}" role="button" aria-label="Tecla ${s.name}, atajo ${s.key}">
+      <div class="skey-top"><span class="skey-name">${s.name}</span><span class="led"></span></div>
+      <div class="stage">
+        <div class="gauge"><div class="gauge-fill"></div><div class="gauge-rst"></div><div class="gauge-act"></div></div>
+        <div class="mech"><div class="cap">${s.key}</div><div class="under">${s.under}</div></div>
+      </div>
+      <div class="skey-read">
+        <div><span>Actuación</span><b class="r-act">${fmtMM(s.act)}</b></div>
+        <div><span>Hasta actuar</span><b class="r-time big">— ms</b></div>
+        <div><span>Reset</span><b class="r-rst">${k === 'mag' ? 'RT 0,1 mm' : fmtMM(s.reset)}</b></div>
+        <div><span>Pulsaciones</span><b class="r-cnt">0</b></div>
+      </div>
+    </div>`;
+  }).join('');
+  SKEYS.forEach(k => {
+    const s = SIM[k];
+    Object.assign(s, { d:0, pressed:false, on:false, t0:0, tr:0, peak:0, trough:0, armed:false, count:0, bottomed:false });
+    s.el = $(`.skey[data-k="${k}"]`);
+    s.el.addEventListener('pointerdown', e => { e.preventDefault(); s.el.setPointerCapture?.(e.pointerId); press(k); });
+    ['pointerup','pointercancel','lostpointercapture'].forEach(ev => s.el.addEventListener(ev, () => release(k)));
+    setMarkers(k);
+  });
+  document.addEventListener('keydown', e => {
+    if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (/input|textarea|select/i.test(document.activeElement?.tagName || '') || $$('.overlay.open').length) return;
+    const k = SKEYS.find(k => SIM[k].key === e.key.toUpperCase()); if (k) press(k);
+  });
+  document.addEventListener('keyup', e => { const k = SKEYS.find(k => SIM[k].key === e.key.toUpperCase()); if (k) release(k); });
+  window.addEventListener('blur', () => SKEYS.forEach(release));
+
+  const range = $('#actRange');
+  const onRange = () => {
+    const v = parseFloat(range.value);
+    SIM.mag.act = v; SIM.mag.reset = Math.max(0.05, v - 0.1);
+    $('#actVal').textContent = fmtMM(v);
+    range.style.setProperty('--v', ((v - 0.1) / 3.9 * 100) + '%');
+    $('.r-act', SIM.mag.el).textContent = fmtMM(v);
+    setMarkers('mag');
+  };
+  range.addEventListener('input', onRange); onRange();
+  $('#rtToggle').addEventListener('change', e => {
+    SIM.mag.rt = e.target.checked;
+    $('.r-rst', SIM.mag.el).textContent = SIM.mag.rt ? 'RT 0,1 mm' : fmtMM(SIM.mag.reset);
+    setMarkers('mag');
+  });
+  $('#sound').addEventListener('click', e => { soundOn = !soundOn; e.currentTarget.classList.toggle('on', soundOn); e.currentTarget.setAttribute('aria-pressed', soundOn); e.currentTarget.textContent = soundOn ? '🔊 Sonido' : '🔇 Sonido'; });
+  $('#race').addEventListener('click', race);
+  initGraph();
+  requestAnimationFrame(tick);
+}
+function setMarkers(k) {
+  const s = SIM[k];
+  s.el.style.setProperty('--act', (s.act / s.travel * 100) + '%');
+  const showRst = !(k === 'mag' && s.rt);
+  s.el.style.setProperty('--rst', showRst ? (s.reset / s.travel * 100) + '%' : '-10%');
+}
+function press(k) {
+  const s = SIM[k]; if (s.pressed) return;
+  ensureAudio();
+  s.pressed = true; s.t0 = 1; s.tr = 0; s.since = 0; s.bottomed = false;
+}
+function release(k) {
+  const s = SIM[k]; if (!s.pressed) return;
+  s.pressed = false; s.tr = 1; s.since = 0;
+}
+function actuate(k, now) {
+  const s = SIM[k];
+  s.on = true; s.peak = s.d; s.armed = true; s.count++;
+  s.el.classList.add('on');
+  if (s.t0) { s.lastT = s.since * 1000; $('.r-time', s.el).textContent = Math.max(1, Math.round(s.lastT)) + ' ms'; s.t0 = 0; }
+  $('.r-cnt', s.el).textContent = s.count;
+  if (k === 'mec') sound('click');
+}
+function deactuate(k, now) {
+  const s = SIM[k];
+  s.on = false; s.trough = s.d;
+  s.el.classList.remove('on');
+  if (s.tr) { const ms = Math.max(1, Math.round(s.since * 1000)); $('.r-rst', s.el).textContent = `${ms} ms`; s.tr = 0; }
+}
+function evalAct(k, now) {
+  const s = SIM[k];
+  if (k === 'mag' && s.rt) {
+    if (!s.on) {
+      s.trough = Math.min(s.trough, s.d);
+      if (s.d <= 0.02) s.armed = false;
+      if (s.d >= s.act || (s.armed && s.d - s.trough >= s.sens)) actuate(k, now);
+    } else {
+      s.peak = Math.max(s.peak, s.d);
+      if (s.peak - s.d >= s.sens) deactuate(k, now);
+    }
+  } else {
+    if (!s.on && s.d >= s.act) actuate(k, now);
+    else if (s.on && s.d <= s.reset) deactuate(k, now);
+  }
+}
+let lastT = performance.now();
+function tick(now) {
+  const dt = Math.min(0.04, (now - lastT) / 1000); lastT = now;
+  // sub-pasos para que el tiempo de actuación sea preciso
+  const steps = 4, h = dt / steps;
+  for (const k of SKEYS) {
+    const s = SIM[k];
+    for (let i = 0; i < steps; i++) {
+      const t = now;
+      s.since = (s.since || 0) + h; // tiempo simulado desde la última pulsación / liberación
+      if (s.pressed) {
+        s.d = Math.min(s.travel, s.d + s.down(s.d) * h);
+        if (s.d >= s.travel && !s.bottomed) { s.bottomed = true; sound(k === 'mem' ? 'thud' : k === 'mec' ? 'clack' : 'thock'); }
+      } else s.d = Math.max(0, s.d - s.up * h);
+      evalAct(k, t);
+    }
+    s.el.style.setProperty('--p', (s.d / s.travel).toFixed(3));
+  }
+  pushGraph(); drawGraph();
+  requestAnimationFrame(tick);
+}
+function race() {
+  SKEYS.forEach(k => { const s = SIM[k]; s.lastT = null; s.d = 0; s.on = false; s.armed = false; s.el.classList.remove('on'); $('.r-time', s.el).textContent = '— ms'; });
+  SKEYS.forEach(press);
+  setTimeout(() => SKEYS.forEach(release), 220);
+  setTimeout(() => {
+    const res = SKEYS.filter(k => SIM[k].lastT != null).sort((a, b) => SIM[a].lastT - SIM[b].lastT);
+    if (!res.length) return;
+    const w = SIM[res[0]];
+    $('#simResult').innerHTML = `🏁 Ganó <b style="color:${w.color}">${w.name}</b>: ` + res.map(k => `${SIM[k].name} <b>${Math.round(SIM[k].lastT)} ms</b>`).join(' · ') +
+      (res[0] === 'mag' ? ` → con el magnético actuás <b>${Math.round(SIM.mem.lastT / SIM.mag.lastT)}x</b> antes que con membrana.` : '');
+  }, 520);
+}
+
+/* gráfico */
+let gctx, gW = 0, gH = 70, hist = [];
+const HMAX = 220;
+function initGraph() {
+  const c = $('#graph'); gctx = c.getContext('2d');
+  const fit = () => { const dpr = window.devicePixelRatio || 1; gW = c.clientWidth; c.width = gW * dpr; c.height = gH * dpr; gctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+  fit(); window.addEventListener('resize', fit);
+}
+function pushGraph() { hist.push(SKEYS.map(k => [SIM[k].d, SIM[k].on])); if (hist.length > HMAX) hist.shift(); }
+function drawGraph() {
+  if (!gctx || !gW) return;
+  gctx.clearRect(0, 0, gW, gH);
+  const top = 16, bot = gH - 6, sx = gW / (HMAX - 1);
+  gctx.strokeStyle = 'rgba(255,255,255,.06)'; gctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) { const y = top + (bot - top) * i / 4; gctx.beginPath(); gctx.moveTo(0, y); gctx.lineTo(gW, y); gctx.stroke(); }
+  const off = HMAX - hist.length;
+  SKEYS.forEach((k, ki) => {
+    const col = SIM[k].color;
+    for (let i = 1; i < hist.length; i++) {
+      const a = hist[i - 1][ki], b = hist[i][ki];
+      if (a[0] === 0 && b[0] === 0) continue;
+      gctx.beginPath();
+      gctx.moveTo((off + i - 1) * sx, top + (bot - top) * a[0] / 4);
+      gctx.lineTo((off + i) * sx, top + (bot - top) * b[0] / 4);
+      gctx.strokeStyle = col; gctx.globalAlpha = b[1] ? 1 : .35; gctx.lineWidth = b[1] ? 2.6 : 1.5;
+      gctx.stroke();
+    }
+  });
+  gctx.globalAlpha = 1;
+}
+
+/* sonido (WebAudio, sin archivos externos) */
+function ensureAudio() {
+  if (!soundOn) return;
+  try {
+    if (!actx) {
+      actx = new (window.AudioContext || window.webkitAudioContext)();
+      noiseBuf = actx.createBuffer(1, actx.sampleRate * .2, actx.sampleRate);
+      const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    if (actx.state === 'suspended') actx.resume();
+  } catch (e) { actx = null; }
+}
+function sound(type) {
+  if (!soundOn || !actx) return;
+  const t = actx.currentTime;
+  const P = {
+    click: { f:'highpass', fq:3200, g:.35, d:.018, tone:4200, tg:.05 },
+    clack: { f:'bandpass', fq:1600, g:.3, d:.045, tone:null },
+    thud:  { f:'lowpass',  fq:600,  g:.5, d:.07,  tone:120, tg:.12 },
+    thock: { f:'lowpass',  fq:1100, g:.4, d:.06,  tone:190, tg:.14 }
+  }[type];
+  const src = actx.createBufferSource(); src.buffer = noiseBuf;
+  const flt = actx.createBiquadFilter(); flt.type = P.f; flt.frequency.value = P.fq;
+  const g = actx.createGain(); g.gain.setValueAtTime(P.g, t); g.gain.exponentialRampToValueAtTime(.001, t + P.d);
+  src.connect(flt).connect(g).connect(actx.destination); src.start(t); src.stop(t + P.d + .02);
+  if (P.tone) {
+    const o = actx.createOscillator(), og = actx.createGain();
+    o.type = type === 'click' ? 'square' : 'sine'; o.frequency.setValueAtTime(P.tone, t);
+    if (type !== 'click') o.frequency.exponentialRampToValueAtTime(P.tone * .6, t + P.d);
+    og.gain.setValueAtTime(P.tg, t); og.gain.exponentialRampToValueAtTime(.001, t + P.d);
+    o.connect(og).connect(actx.destination); o.start(t); o.stop(t + P.d + .02);
+  }
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+buildFilters();
+bind();
+buildSim();
+update();
+updateCounters();
+renderCbar();
+// contador animado de modelos
+(() => { const el = $('#stModels'), N = PRODUCTS.length, t0 = performance.now();
+  const step = now => { const p = Math.min(1, (now - t0) / 900); el.textContent = Math.round(N * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step); })();
+})();
+</script>
+</body>
+</html>
