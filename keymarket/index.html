@@ -194,8 +194,21 @@ aside.filters{position:sticky;top:84px;align-self:start;max-height:calc(100vh - 
 @keyframes cardIn{from{opacity:0;translate:0 22px;scale:.97}to{opacity:1;translate:0 0;scale:1}}
 .card:hover{transform:translateY(-6px);border-color:color-mix(in srgb,var(--tc) 45%,var(--line));box-shadow:0 22px 44px -18px rgba(0,0,0,.8),0 12px 36px -14px color-mix(in srgb,var(--tc) 45%,transparent)}
 .media{height:176px;position:relative;display:grid;place-items:center;background:radial-gradient(120% 90% at 50% 110%,color-mix(in srgb,var(--tc) 22%,transparent),transparent 60%),linear-gradient(180deg,#1c2028,#15181e);overflow:hidden}
-.media svg.kb{width:86%;height:auto;max-height:120px;transition:transform .5s var(--ease);filter:drop-shadow(0 14px 16px rgba(0,0,0,.55))}
-.card:hover .media svg.kb{transform:translateY(-10px) scale(1.04) rotate(-1.5deg)}
+.media .pic{position:absolute;inset:0;width:auto;aspect-ratio:auto;border-radius:0}
+.media .pic.noimg svg.kb{width:86%;max-height:120px;filter:drop-shadow(0 14px 16px rgba(0,0,0,.55))}
+.media .pic img{padding:14px 18px 20px}
+.card:hover .media .pic img{transform:scale(1.07)}
+.card:hover .media .pic.noimg svg.kb{transform:translateY(-10px) scale(1.04) rotate(-1.5deg)}
+/* foto real sobre panel claro (los fondos blancos se funden con multiply) */
+.pic{position:relative;display:grid;place-items:center;width:100%;aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:radial-gradient(110% 90% at 50% 35%,#FFFFFF 0%,#EEF0F3 60%,#DCDFE5 100%)}
+.pic::after{content:"";position:absolute;left:12%;right:12%;bottom:0;height:3px;border-radius:3px 3px 0 0;background:var(--tc,transparent);opacity:.9}
+.pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:8%;mix-blend-mode:multiply;opacity:0;transform:scale(.97);transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.pic img.ok{opacity:1;transform:none}
+.pic > svg.kb{opacity:.0;transition:opacity .3s}
+.pic.noimg{background:radial-gradient(120% 90% at 50% 110%,color-mix(in srgb,var(--tc,#FACC15) 22%,transparent),transparent 60%),linear-gradient(180deg,#1c2028,#15181e)}
+.pic.noimg::after{display:none}
+.pic.noimg img{display:none}
+.pic.noimg > svg.kb{opacity:1;width:88%;height:auto;transition:transform .5s var(--ease)}
 .badges{position:absolute;top:10px;left:10px;display:flex;flex-direction:column;align-items:flex-start;gap:5px;z-index:2}
 .badge{font-size:10px;font-weight:800;letter-spacing:.5px;padding:4px 7px;border-radius:6px;line-height:1;white-space:nowrap}
 .b-sold{background:#FB923C;color:#2a1100}
@@ -254,7 +267,10 @@ aside.filters{position:sticky;top:84px;align-self:start;max-height:calc(100vh - 
 .d-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:0}
 .d-media{--tc:var(--amber);padding:30px;background:radial-gradient(100% 80% at 50% 100%,color-mix(in srgb,var(--tc) 18%,transparent),transparent 70%),#15181e;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:18px}
 .d-media .kbwrap{display:grid;place-items:center;min-height:220px}
-.d-media svg.kb{width:100%;max-height:240px;filter:drop-shadow(0 20px 24px rgba(0,0,0,.6));animation:float 5s ease-in-out infinite}
+.d-media .pic{border-radius:18px;aspect-ratio:4/3;box-shadow:0 24px 50px -24px rgba(0,0,0,.8)}
+.d-media .pic img{padding:6%;animation:float 5s ease-in-out infinite}
+.d-media .pic img:not(.ok){animation:none}
+.d-media .pic.noimg svg.kb{max-height:240px;animation:float 5s ease-in-out infinite}
 @keyframes float{50%{transform:translateY(-8px)}}
 .d-info{padding:30px 30px 26px}
 .d-info h2{font-size:26px;letter-spacing:-.6px;margin:8px 0 4px;line-height:1.15}
@@ -296,7 +312,7 @@ aside.filters{position:sticky;top:84px;align-self:start;max-height:calc(100vh - 
 .dr-head h3{margin:0;font-size:18px}
 .dr-body{flex:1;overflow:auto;padding:14px 16px}
 .fav-item{display:grid;grid-template-columns:84px 1fr;gap:12px;padding:10px;border-radius:14px;background:var(--bg2);border:1px solid var(--line);margin-bottom:10px;animation:cardIn .45s var(--ease) both;animation-delay:var(--d,0ms)}
-.fav-item .fi-media{--tc:var(--amber);border-radius:10px;background:radial-gradient(circle at 50% 100%,color-mix(in srgb,var(--tc) 25%,transparent),#1b1e25 70%);display:grid;place-items:center;padding:6px}
+.fav-item .fi-media{--tc:var(--amber);border-radius:10px;display:grid;place-items:center}
 .fav-item svg{width:100%;height:auto}
 .fav-item h4{margin:0 0 2px;font-size:14px}
 .fav-item .fp{font-weight:800;font-size:16px}
@@ -312,7 +328,8 @@ aside.filters{position:sticky;top:84px;align-self:start;max-height:calc(100vh - 
 .cslot{flex:1;min-width:0;height:48px;border-radius:12px;border:1px dashed var(--line2);display:flex;align-items:center;gap:8px;padding:0 8px;font-size:12px;color:var(--dim)}
 .cslot.full{border-style:solid;border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.05);color:var(--txt);animation:chipIn .35s var(--ease)}
 .cslot .cs-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
-.cslot svg.kb{width:44px;height:auto;flex-shrink:0}
+.cslot .pic{width:54px;flex-shrink:0;border-radius:7px}
+.cslot .pic img{padding:4px}
 .cslot button{width:22px;height:22px;border-radius:50%;flex-shrink:0;color:var(--mut);display:grid;place-items:center}
 .cslot button:hover{background:var(--line2);color:var(--txt)}
 
@@ -324,7 +341,8 @@ aside.filters{position:sticky;top:84px;align-self:start;max-height:calc(100vh - 
 .cmp-table td.win{color:var(--amber);font-weight:700;background:rgba(250,204,21,.06);box-shadow:inset 3px 0 0 var(--amber)}
 .cmp-head{--tc:var(--amber);display:flex;flex-direction:column;gap:6px}
 .cmp-head .ch-m{border-radius:12px;padding:10px;background:radial-gradient(circle at 50% 100%,color-mix(in srgb,var(--tc) 22%,transparent),#15181e 70%);display:grid;place-items:center;height:96px}
-.cmp-head svg.kb{width:100%;max-height:76px}
+.cmp-head .ch-m{padding:0;height:auto;background:none}
+.cmp-head .pic{aspect-ratio:16/10;border-radius:12px}
 .cmp-head h4{margin:2px 0 0;font-size:14.5px;line-height:1.25}
 .cmp-head .price{font-size:20px}
 .cmp-wrap{padding:26px;overflow-x:auto}
@@ -355,7 +373,8 @@ a.hbtn{text-decoration:none}
 .aw-head p{margin:1px 0 0;font-size:12px;color:var(--dim)}
 .aw-win{display:grid;grid-template-columns:104px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px 10px 10px;border-radius:14px;background:var(--bg2);border:1px solid var(--line);cursor:pointer;transition:border-color .2s;position:relative;text-align:left;width:100%}
 .aw-win:hover{border-color:var(--tc)}
-.aw-win .kbx{border-radius:10px;padding:6px;background:radial-gradient(circle at 50% 100%,color-mix(in srgb,var(--tc) 28%,transparent),#15181e 72%)}
+.aw-win .kbx{display:block;border-radius:10px}
+.aw-win .pic img{padding:6%}
 .aw-win svg.kb{width:100%;height:auto;display:block}
 .aw-tag{font-size:10px;font-weight:800;letter-spacing:.6px;color:var(--tc);display:block;margin-bottom:2px}
 .aw-name{font-weight:700;font-size:14px;line-height:1.25}
@@ -398,7 +417,9 @@ a.hbtn{text-decoration:none}
 @keyframes rowIn{from{opacity:0;transform:translateX(-12px)}}
 .medal{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-weight:800;font-family:var(--mono);background:var(--card2);color:var(--mut);font-size:12.5px}
 .rt-name{display:flex;align-items:center;gap:12px;min-width:270px}
-.rt-kb{--tc:var(--amber);width:54px;flex-shrink:0;padding:5px;border-radius:9px;background:radial-gradient(circle at 50% 100%,color-mix(in srgb,var(--tc) 28%,transparent),#15181e 72%)}
+.rt-kb{--tc:var(--amber);width:66px;flex-shrink:0;border-radius:8px}
+.rt-kb .pic{border-radius:8px}
+.rt-kb .pic img{padding:4px}
 .rt-kb svg{width:100%;height:auto;display:block}
 .rt-sub{font-size:11.5px;color:var(--mut);display:flex;align-items:center;gap:6px;margin-top:2px;white-space:nowrap}
 .tdots{display:inline-flex;gap:4px}
@@ -640,7 +661,7 @@ footer{border-top:1px solid var(--line);padding:30px 0 120px;color:var(--dim);fo
         <div class="f-stores" id="fStores"></div>
       </div>
     </div>
-    <div class="note">ⓘ Los precios en ARS son <b>orientativos</b> y pueden variar según stock, promociones vigentes y cotización de cada tienda. Las cuotas sin interés dependen del banco y la tarjeta. Verificá siempre el precio final en el sitio del vendedor antes de comprar. Las marcas y nombres de tiendas pertenecen a sus respectivos dueños; este sitio no está afiliado a ellas.</div>
+    <div class="note">ⓘ Los precios en ARS son <b>orientativos</b> y pueden variar según stock, promociones vigentes y cotización de cada tienda. Las cuotas sin interés dependen del banco y la tarjeta. Verificá siempre el precio final en el sitio del vendedor antes de comprar. Las fotos son imágenes oficiales de cada fabricante o tienda, enlazadas desde su sitio de origen. Las marcas y nombres de tiendas pertenecen a sus respectivos dueños; este sitio no está afiliado a ellas.</div>
   </div>
 </footer>
 
@@ -710,11 +731,11 @@ const STORE_ORDER = ['compragamer','maximus','mexx','hypergaming','alltek','frav
 
 /* sc = puntajes 0-100: speed (velocidad de respuesta), silence (100 = muy silencioso), dur (durabilidad) */
 const PRODUCTS = [
-  { id:'logitech-k250', brand:'Logitech', model:'K250 Inalámbrico', tech:'membrana', sw:'Membrana silenciosa de perfil bajo', format:'100', conn:['24'],
+  { id:'logitech-k250', brand:'Logitech', model:'K250 Compacto Bluetooth', tech:'membrana', sw:'Membrana silenciosa de perfil bajo', format:'75', conn:['bt'],
     price:26100, old:29900, rating:4.5, reviews:3120, sold:9800, rgb:false, theme:'dark',
-    specs:{ polling:'125 Hz', act:'≈ 3,0 mm', travel:'3,5 mm', hs:false, rt:false, keycaps:'ABS perfil bajo', weight:'450 g', extra:'Receptor USB 2.4GHz · Pilas AA (hasta 24 meses) · Resistente a salpicaduras' },
+    specs:{ polling:'125 Hz', act:'≈ 3,0 mm', travel:'3,5 mm', hs:false, rt:false, keycaps:'ABS perfil bajo', weight:'450 g', extra:'Bluetooth · Diseño compacto sin numérico · Funciona a pilas' },
     sc:{ speed:28, silence:86, dur:55 }, use:'Oficina, estudio y hogar', badges:['sold'], stores:['compragamer','fravega','meli'],
-    desc:'El clásico teclado inalámbrico para la compu de casa o la oficina: silencioso, liviano y con años de batería. Ideal si buscás algo simple y confiable.' },
+    desc:'Teclado Bluetooth compacto y silencioso para la compu, la notebook o la tablet. Ideal si buscás algo simple, liviano y sin cables.' },
 
   { id:'logitech-g213', brand:'Logitech', model:'G213 Prodigy RGB', tech:'membrana', sw:'Mech-Dome (membrana táctil)', format:'100', conn:['usb'],
     price:72000, old:84000, rating:4.6, reviews:5400, sold:7200, rgb:true, theme:'dark',
@@ -740,11 +761,11 @@ const PRODUCTS = [
     sc:{ speed:46, silence:70, dur:62 }, use:'Gaming económico', badges:[], stores:['compragamer','alltek','meli'],
     desc:'Teclado gamer económico con reposamuñecas, macros y RGB. Una opción muy accesible para armar tu primer setup.' },
 
-  { id:'nisuta-gamer', brand:'Nisuta', model:'Teclado Gamer Retroiluminado USB', tech:'membrana', sw:'Membrana estándar', format:'100', conn:['usb'],
+  { id:'nisuta-gamer', brand:'Nisuta', model:'NSKBG5RL Gamer RGB', tech:'membrana', sw:'Membrana estándar', format:'100', conn:['usb'],
     price:18500, rating:4.2, reviews:950, sold:4100, rgb:true, theme:'dark',
-    specs:{ polling:'125 Hz', act:'≈ 3,0 mm', travel:'3,8 mm', hs:false, rt:false, keycaps:'ABS', weight:'680 g', extra:'Retroiluminación en 3 colores · Teclas multimedia' },
+    specs:{ polling:'125 Hz', act:'≈ 3,0 mm', travel:'3,8 mm', hs:false, rt:false, keycaps:'ABS', weight:'680 g', extra:'RGB con 17 modos de iluminación · Teclas multimedia · USB' },
     sc:{ speed:26, silence:76, dur:45 }, use:'Uso básico y presupuesto ajustado', badges:[], stores:['alltek','fravega','meli'],
-    desc:'La opción más barata del catálogo: retroiluminado, cómodo y suficiente para el día a día.' },
+    desc:'Teclado gamer de marca nacional con iluminación RGB, muy económico y suficiente para el día a día.' },
 
   { id:'machenike-k500', brand:'Machenike', model:'K500-B94', tech:'mecanico', sw:'Switch Red lineal · Hot-swap', format:'90', conn:['usb'],
     price:56999, old:68000, rating:4.7, reviews:3900, sold:9100, rgb:true, theme:'gray',
@@ -764,11 +785,11 @@ const PRODUCTS = [
     sc:{ speed:62, silence:48, dur:72 }, use:'Setups compactos y viaje', badges:[], stores:['mexx','hypergaming','meli'],
     desc:'60% con Bluetooth y cable: ideal para escritorios chicos o para llevarlo en la mochila. Switches táctiles que no hacen tanto ruido.' },
 
-  { id:'vsg-mintaka', brand:'VSG', model:'Mintaka', tech:'mecanico', sw:'Switch Red lineal · Hot-swap', format:'tkl', conn:['usb'],
+  { id:'vsg-mintaka', brand:'VSG', model:'Mintaka 60%', tech:'mecanico', sw:'Kailh Brown táctil', format:'60', conn:['usb'],
     price:65000, rating:4.4, reviews:760, sold:1900, rgb:true, theme:'dark',
-    specs:{ polling:'1000 Hz', act:'2,0 mm', travel:'4,0 mm', hs:true, rt:false, keycaps:'ABS doble inyección', weight:'870 g', extra:'Cable USB-C desmontable · Software de macros · Anti-ghosting total' },
-    sc:{ speed:64, silence:50, dur:74 }, use:'Gaming competitivo de entrada', badges:[], stores:['compragamer','alltek','meli'],
-    desc:'Marca local con buena relación precio-calidad: TKL mecánico hot-swap, RGB y switches lineales suaves para jugar.' },
+    specs:{ polling:'1000 Hz', act:'2,0 mm', travel:'4,0 mm', hs:false, rt:false, keycaps:'ABS doble inyección', weight:'620 g', extra:'Formato 60% · Cable desmontable · Anti-ghosting total' },
+    sc:{ speed:62, silence:56, dur:74 }, use:'Setups compactos de marca local', badges:[], stores:['compragamer','alltek','meli'],
+    desc:'Marca local con buena relación precio-calidad: 60% mecánico con switches táctiles Kailh Brown y RGB.' },
 
   { id:'rk-r65', brand:'Royal Kludge', model:'RK R65', tech:'mecanico', sw:'RK lineal · Hot-swap · Perilla', format:'65', conn:['usb'],
     price:76800, rating:4.6, reviews:1300, sold:2400, rgb:true, theme:'white',
@@ -794,9 +815,9 @@ const PRODUCTS = [
     sc:{ speed:76, silence:66, dur:90 }, use:'Gaming full size con macros', badges:['ship'], stores:['compragamer','fravega','meli'],
     desc:'Full size con switches amarillos lineales y amortiguados, 6 macros y rueda de volumen. Rápido, silencioso para ser mecánico y muy bien terminado.' },
 
-  { id:'redragon-fizz-he', brand:'Redragon', model:'Fizz K617-MP Magnético', tech:'magnetico', sw:'Switch magnético lineal · Rapid Trigger', format:'60', conn:['usb'],
-    price:75000, old:89000, rating:4.5, reviews:640, sold:3300, rgb:true, theme:'pink',
-    specs:{ polling:'1000 Hz', act:'0,1 – 3,4 mm ajustable', travel:'3,4 mm', hs:true, rt:true, keycaps:'ABS doble inyección', weight:'560 g', extra:'Rapid Trigger · Actuación por tecla · Cable USB-C' },
+  { id:'redragon-fizz-he', brand:'Redragon', model:'Fizz K617 HE Magnético', tech:'magnetico', sw:'Switch magnético lineal · Rapid Trigger', format:'60', conn:['usb'],
+    price:75000, old:89000, rating:4.5, reviews:640, sold:3300, rgb:true, theme:'dark',
+    specs:{ polling:'8000 Hz', act:'0,1 – 3,4 mm ajustable', travel:'3,4 mm', hs:true, rt:true, keycaps:'ABS doble inyección', weight:'560 g', extra:'Rapid Trigger · Actuación por tecla · Cable USB-C' },
     sc:{ speed:92, silence:56, dur:84 }, use:'FPS competitivo con poco presupuesto', badges:['value','rt'], stores:['compragamer','mexx','meli'],
     desc:'La forma más barata de entrar al mundo Hall Effect: actuación ajustable y Rapid Trigger en un 60% compacto.' },
 
@@ -892,11 +913,11 @@ const PRODUCTS = [
     sc:{ speed:66, silence:62, dur:86 }, use:'Programación y custom accesible', badges:[], stores:['maximus','hypergaming','meli'],
     desc:'La puerta de entrada al mundo custom: 100% programable, hot-swap y con perilla, a precio razonable.' },
 
-  { id:'vsg-quasar', brand:'VSG', model:'Quasar', tech:'mecanico', sw:'Switch Blue clicky · Hot-swap', format:'60', conn:['usb'],
+  { id:'vsg-quasar', brand:'VSG', model:'Quasar TKL', tech:'mecanico', sw:'Outemu Red lineal', format:'tkl', conn:['usb'],
     price:45000, rating:4.3, reviews:610, sold:1800, rgb:true, theme:'dark',
-    specs:{ polling:'1000 Hz', act:'2,2 mm', travel:'4,0 mm', hs:true, rt:false, keycaps:'ABS', weight:'600 g', extra:'Cable USB-C desmontable · RGB con 18 efectos' },
-    sc:{ speed:58, silence:30, dur:68 }, use:'Setups compactos económicos', badges:[], stores:['compragamer','alltek','meli'],
-    desc:'60% mecánico hot-swap de marca local, económico y con mucho RGB.' },
+    specs:{ polling:'1000 Hz', act:'2,0 mm', travel:'4,0 mm', hs:false, rt:false, keycaps:'ABS', weight:'780 g', extra:'Controles multimedia · RGB · Anti-ghosting' },
+    sc:{ speed:60, silence:50, dur:68 }, use:'Gaming económico en formato TKL', badges:[], stores:['compragamer','fravega','meli'],
+    desc:'TKL mecánico de marca local con switches Outemu Red, controles multimedia y RGB a precio muy accesible.' },
 
   { id:'rk61', brand:'Royal Kludge', model:'RK61 Trimodal', tech:'mecanico', sw:'RK Red lineal · Hot-swap', format:'60', conn:['usb','24','bt'],
     price:55000, rating:4.5, reviews:3400, sold:5200, rgb:true, theme:'white',
@@ -947,9 +968,9 @@ const PRODUCTS = [
     sc:{ speed:90, silence:58, dur:78 }, use:'Magnético económico para FPS', badges:['value','rt'], stores:['compragamer','mexx','meli'],
     desc:'Uno de los magnéticos más baratos con switches Gateron y Rapid Trigger. Ideal para probar la tecnología.' },
 
-  { id:'attack-shark-x68he', brand:'Attack Shark', model:'X68HE', tech:'magnetico', sw:'Switch magnético lineal · Rapid Trigger', format:'65', conn:['usb'],
+  { id:'attack-shark-x68he', brand:'Attack Shark', model:'X68 HE', tech:'magnetico', sw:'Switch magnético lineal · Rapid Trigger', format:'65', conn:['usb'],
     price:82000, rating:4.5, reviews:530, sold:1500, rgb:true, theme:'dark',
-    specs:{ polling:'1000 Hz', act:'0,1 – 3,5 mm ajustable', travel:'3,5 mm', hs:true, rt:true, keycaps:'ABS doble inyección', weight:'640 g', extra:'Rapid Trigger · SOCD · Gasket mount' },
+    specs:{ polling:'8000 Hz', act:'0,1 – 3,5 mm ajustable', travel:'3,5 mm', hs:true, rt:true, keycaps:'ABS doble inyección', weight:'640 g', extra:'Rapid Trigger · SOCD · Gasket mount' },
     sc:{ speed:90, silence:56, dur:78 }, use:'FPS competitivo económico', badges:['rt'], stores:['alltek','hypergaming','meli'],
     desc:'65% magnético accesible con gasket y Rapid Trigger, muy recomendado para Valorant y CS2.' },
 
@@ -1044,6 +1065,52 @@ PRODUCTS.forEach(p => p.score = Math.round((6 + 3.8 * (p.scoreRaw - sMin) / (sMa
 [...PRODUCTS].sort((a, b) => b.scoreRaw - a.scoreRaw).forEach((p, i) => p.rankAll = i + 1);
 Object.keys(TECH).forEach(t => PRODUCTS.filter(p => p.tech === t).sort((a, b) => b.scoreRaw - a.scoreRaw).forEach((p, i) => p.rankTech = i + 1));
 const fmtScore = v => v.toFixed(1).replace('.', ',');
+/* Fotos reales: imágenes oficiales de fabricantes y tiendas, enlazadas desde su origen.
+   Si alguna no carga, se muestra la ilustración del formato como respaldo. */
+const IMG = {
+  'logitech-k250':        'https://resource.logitech.com/w_900,c_limit,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/keyboards/k250/gallery/k-250-graphite-top-02.png',
+  'logitech-g213':        'https://resource.logitechg.com/c_fill,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/gaming/en/non-braid/g213-finch/g213-gallery-1-nb.png',
+  'hyperx-alloy-core':    'https://hyperx.com/cdn/shop/files/hyperx_alloy_core_rgb_us_1_main_renamed_0_1200x.jpg?v=1784821560',
+  'corsair-k55-pro':      'https://assets.corsair.com/image/upload/v1665120228/akamai/pdp/k55-rgb-pro/pro/k55_rgb_pro_top.png',
+  'redragon-shiva':       'https://redragonshop.com/cdn/shop/products/redragonmembranegaming.png?v=1609237229&width=900',
+  'nisuta-gamer':         'https://cdn.nisuta.com/products/NSKBG5RL/1.jpg',
+  'machenike-k500':       'https://m.media-amazon.com/images/I/71rCztl3gvL._AC_SL800_.jpg',
+  'redragon-kumara':      'https://m.media-amazon.com/images/I/71FSIp+tDNL._AC_SL800_.jpg',
+  'redragon-draconic':    'https://redragonshop.com/cdn/shop/products/redragondraconic.png?v=1762457650&width=900',
+  'vsg-mintaka':          'https://ar.vsglatam.com/cdn/shop/products/Mintaka-02_1024x1024.png?v=1659475445',
+  'rk-r65':               'https://m.media-amazon.com/images/I/61hOhuiqrTL._AC_SL800_.jpg',
+  'rk84':                 'https://m.media-amazon.com/images/I/61727jRrnlL._AC_SL800_.jpg',
+  'keychron-k2-pro':      'https://www.keychron.com/cdn/shop/products/Keychron-K2-Pro-QMK-VIA-custom-mechanical-keyboard-75-percent-layout-aluminum-white-Mac-Windows-Linux-hot-swappable-Keychron-K-Pro-switch-brown.jpg?v=1690876205&width=600',
+  'razer-bw-v4x':         'https://m.media-amazon.com/images/I/71qoXjgRb-L._AC_UF894,1000_QL80_.jpg',
+  'redragon-fizz-he':     'https://redragonshop.com/cdn/shop/files/RedragonK617HERapidTriggerGamingKeyboard_1_60f3bfea-956f-4f28-8fc2-c5870124f9bf.png?v=1761099698&width=900',
+  'aula-win60he':         'https://www.aulagaming.com/cdn/shop/files/win60-1_16c9a841-9bed-4b7d-9beb-a4b90e93b62e.webp?v=1763537342',
+  'mchose-ace68':         'https://www.mchose.store/cdn/shop/files/mchose-official-keyboard-black-topographic-ttc-uranus-magnetic-switch-esports-mchose-ace-68-hall-effect-magnetic-switch-gaming-keyboard-1174256597.png?v=1754474474&width=900',
+  'keychron-k10-he':      'https://i5.walmartimages.com/seo/Keychron-K10-HE-100-TKL-Wireless-RGB-Hall-Effect-Magnetic-Switch-Keyboard-Rapid-Trigger-QMK-2-4G-BT_64de83c0-ae06-4a39-8651-950cb27f6127.1f37e1b5320c9f6b3e30cb1f3430a30f.jpeg?odnHeight=800&odnWidth=800&odnBg=FFFFFF',
+  'rog-falchion-ace-he':  'https://dlcdnwebimgs.asus.com/gain/ABD68970-AA02-47CE-9D1B-E59EE60C1ACD/w800',
+  'logitech-mx-keys-s':   'https://resource.logitech.com/w_900,c_limit,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/keyboards/mx-keys-s/migration-assets-for-delorean-2025/gallery/mx-keys-s-top-view-graphite-us.png',
+  'logitech-k380':        'https://i5.walmartimages.com/seo/Logitech-K380-Multi-Device-Bluetooth-Keyboard-Rose_91ebf358-f9a3-4d20-a38b-54f3f86ae439.fa96efc0124894264e00f41521cf7b3f.jpeg?odnHeight=800&odnWidth=800&odnBg=FFFFFF',
+  'razer-cynosa-v2':      'https://m.media-amazon.com/images/I/51ygA+w32pL._AC_UF894,1000_QL80_.jpg',
+  'steelseries-apex3-tkl':'https://i5.walmartimages.com/seo/SteelSeries-Apex-3-TKL-RGB-Gaming-Keyboard-Tenkeyless-Water-Dust-Resistant-PC-and-USB-A_876430c2-eed8-404a-aa55-1c66193daf8e.8c617e57ba48bc49d003f917f85cb535.jpeg?odnHeight=800&odnWidth=800&odnBg=FFFFFF',
+  'genius-kb116':         'https://acdn-us.mitiendanube.com/stores/001/474/949/products/kb-116-11-c3dfff74cd7f7ab40c16295105633011-1024-1024.webp',
+  'redragon-karura':      'https://i5.walmartimages.com/asr/96c9bac2-9d9d-49c4-9f28-07811b4b1761.af3a85a49944620ba552a4484bcd44cb.jpeg?odnHeight=768&odnWidth=768&odnBg=FFFFFF',
+  'aula-f75':             'https://m.media-amazon.com/images/I/61EtsD0mfLL._AC_SL800_.jpg',
+  'akko-5075b':           'https://en.akkogear.com/wp-content/uploads/2023/07/BlackSilver-5075B-Plus.png',
+  'hyperx-origins-core':  'https://row.hyperx.com/cdn/shop/products/hyperx_alloy_origins_core_no_1_top_down.jpg?v=1663701487&width=900',
+  'corsair-k70-pro':      'https://assets.corsair.com/image/upload/c_pad,q_auto,h_1024,w_1024,f_auto/products/Gaming-Keyboards/CH-9109414-NA/Gallery/K70_RGB_PRO_PBT_01.webp',
+  'keychron-v1':          'https://www.keychron.com/cdn/shop/products/Keychron-V1-Custom-Mechanical-Keyboard-frosted-black-knob-K-Pro-blue.jpg?v=1657878904&width=600',
+  'vsg-quasar':           'https://images.fravega.com/f1000/28df563cfa043ecc325c813b658b1083.jpg',
+  'rk61':                 'https://m.media-amazon.com/images/I/61ORs8vthLL._AC_SL800_.jpg',
+  'rog-strix-scope-ii-96':'https://dlcdnwebimgs.asus.com/gain/9E1FA5D0-65AB-4188-84DE-A80058422939/w800',
+  'logitech-gpro-x-tkl':  'https://i5.walmartimages.com/seo/Logitech-G-PRO-X-TKL-Lightspeed-Wireless-Gaming-Keyboard-Ultra-Portable-Tenkeyless-Design-LIGHTSYNC-RGB-PBT-keycaps-Tactile-Switches-GX-Brown-Black_900ee4a7-f870-4222-967e-8f7baae51a09.8faee37c2145f9abc83325b4db656355.jpeg?odnHeight=768&odnWidth=768&odnBg=FFFFFF',
+  'wooting-80he':         'https://wooting-website.ams3.cdn.digitaloceanspaces.com/products/keyboards/80HE/case-styles/pcr-abs-black.webp',
+  'wooting-60he':         'https://mechanicalkeyboards.com/cdn/shop/files/22138-D33E5-Wooting-60HE.png?v=1721058249&width=1080',
+  'steelseries-apex-pro-tkl': 'https://images.ctfassets.net/hmm5mo4qf4mf/10Ha85UPT5m40kjCWNdEfl/e02775f70a9cdbaa5cea5f93655e6ba4/apex_pro_tkl_wl_gen_3_black_img_buy_01.png__1920x1080_crop-fit_optimize_subsampling-2-3770.png?fm=webp&q=90&fit=scale&w=1000',
+  'aula-hero68he':        'https://www.aulagaming.com/cdn/shop/files/h68.png2_WH_850x850px.webp?v=1753169596',
+  'ajazz-ak680-max':      'https://i5.walmartimages.com/seo/AJAZZAK680-MAX-8-1K-Magnetic-Rice-Axis-Hifi-Version-ABS-Black-Three-Modes-Aluminum-Fixed-Version-RGB-DIY_63c74aaf-819f-45d2-bfb9-ed6895d68bbc.2244db6c325ae85b17d5076f8959b455.jpeg',
+  'attack-shark-x68he':   'https://attackshark.com/cdn/shop/files/1500X68.jpg?v=1752039873&width=600',
+  'keychron-q1-he':       'https://www.keychron.com/cdn/shop/files/Keychron-Q1-HE-QMK-Wireless-Custom-Keyboard-Shell-White.jpg?v=1754623218&width=800'
+};
+PRODUCTS.forEach(p => p.img = IMG[p.id] || '');
 const byId = Object.fromEntries(PRODUCTS.map(p => [p.id, p]));
 
 /* =========================================================
@@ -1076,6 +1143,11 @@ const THEMES = {
   white: { cs:'#D6DAE1', k:'#F3F4F6', k2:'#E1E4EA', st:'#C4C9D2' },
   pink:  { cs:'#F1D6E0', k:'#FDF2F6', k2:'#F7E1EA', st:'#E4BFCD' }
 };
+/* Foto real con respaldo: si la imagen no carga, queda la ilustración del formato */
+function pic(p, eager = false) {
+  if (!p.img) return `<span class="pic noimg">${kbSVG(p)}</span>`;
+  return `<span class="pic">${kbSVG(p)}<img src="${esc(p.img)}" alt="${esc(fullName(p))}" ${eager ? '' : 'loading="lazy"'} decoding="async" referrerpolicy="no-referrer" onload="this.classList.add('ok')" onerror="this.parentNode.classList.add('noimg')"></span>`;
+}
 let svgUid = 0;
 function kbSVG(p) {
   const U = 10, g = 1.4, pad = 4;
@@ -1189,7 +1261,7 @@ function cardHTML(p, i) {
     <div class="media">
       <div class="badges">${badges}</div>
       <button class="fav-btn${favs.has(p.id) ? ' on' : ''}" data-act="fav" aria-label="${favs.has(p.id) ? 'Quitar de' : 'Agregar a'} favoritos" aria-pressed="${favs.has(p.id)}">${ICON.heart}</button>
-      ${kbSVG(p)}
+      ${pic(p, i < 8)}
       <div class="quick">
         <span>Actuación</span><b>${esc(p.specs.act)}</b>
         <span>Polling</span><b>${esc(p.specs.polling)}</b>
@@ -1292,7 +1364,7 @@ function renderCbar() {
   let html = '';
   for (let i = 0; i < 3; i++) {
     const p = byId[cmp[i]];
-    html += p ? `<div class="cslot full">${kbSVG(p)}<span class="cs-name">${esc(fullName(p))}</span><button data-rm="${p.id}" aria-label="Quitar ${esc(fullName(p))}">${ICON.x}</button></div>`
+    html += p ? `<div class="cslot full">${pic(p)}<span class="cs-name">${esc(fullName(p))}</span><button data-rm="${p.id}" aria-label="Quitar ${esc(fullName(p))}">${ICON.x}</button></div>`
               : `<div class="cslot">+ Agregá un teclado</div>`;
   }
   $('#cslots').innerHTML = html;
@@ -1305,7 +1377,7 @@ function renderFavs() {
   const list = [...favs].map(id => byId[id]);
   const total = list.reduce((s, p) => s + p.best.price, 0);
   body.innerHTML = list.map((p, i) => `<div class="fav-item" style="--d:${i * 60}ms">
-      <div class="fi-media" style="--tc:${TECH[p.tech].color}">${kbSVG(p)}</div>
+      <div class="fi-media" style="--tc:${TECH[p.tech].color}">${pic(p)}</div>
       <div><h4>${esc(fullName(p))}</h4>
         <div style="font-size:12px;color:var(--mut)">${TECH[p.tech].label} · ${FMT_SHORT[p.format]}</div>
         <div class="fp">${money(p.price)}</div>
@@ -1344,7 +1416,7 @@ function openDetail(id) {
     <button class="x-btn" data-close aria-label="Cerrar">${ICON.x}</button>
     <div class="d-grid">
       <div class="d-media" style="--tc:${t.color}">
-        <div class="kbwrap">${kbSVG(p)}</div>
+        <div class="kbwrap">${pic(p, true)}</div>
         <div>
           <div class="sec-t" style="margin-top:0">Rendimiento</div>
           ${barsHTML(p)}
@@ -1465,7 +1537,7 @@ function renderCompare() {
       <p>Comparando ${ps.length} teclados. La celda resaltada en amarillo es la mejor de cada fila.</p>
       <table class="cmp-table">
         <thead><tr><th class="rl"></th>${ps.map(p => `<th><div class="cmp-head" style="--tc:${TECH[p.tech].color}">
-          <div class="ch-m">${kbSVG(p)}</div>
+          <div class="ch-m">${pic(p, true)}</div>
           <h4>${esc(fullName(p))}</h4>
           <div style="display:flex;gap:6px"><button class="mini" data-open="${p.id}">Ver ficha</button><button class="mini" data-rm="${p.id}">Quitar</button></div>
         </div></th>`).join('')}</tr></thead>
@@ -1862,7 +1934,7 @@ function renderAwards() {
     return `<article class="award${a.big ? ' big' : ''}" style="--tc:${tc};--d:${ai * 70}ms">
       <div class="aw-head"><span class="aw-ico">${a.ico}</span><div><h3>${a.t}</h3><p>${a.d}</p></div></div>
       <button class="aw-win" data-open="${w.id}" aria-label="Ganador: ${esc(fullName(w))}. Ver ficha">
-        <span class="kbx">${kbSVG(w)}</span>
+        <span class="kbx">${pic(w)}</span>
         <span class="aw-name"><span class="aw-tag">🥇 GANADOR</span>${esc(fullName(w))}<small>${TECH[w.tech].label} · ${FMT_SHORT[w.format]} · desde ${money(w.best.price)}</small></span>
         <span class="aw-score">${wv}<small>${wl}</small></span>
       </button>
@@ -1893,7 +1965,7 @@ function renderRankTable() {
       const t = TECH[p.tech], inCmp = cmp.includes(p.id);
       return `<tr data-open="${p.id}" tabindex="0" style="--d:${Math.min(i, 18) * 28}ms">
         <td>${medal(i)}</td>
-        <td><div class="rt-name"><span class="rt-kb" style="--tc:${t.color}">${kbSVG(p)}</span><div><b>${esc(p.brand)}</b> ${esc(p.model)}<div class="rt-sub"><span class="tdot" style="background:${t.color}"></span>${t.label} · ${FMT_SHORT[p.format]}${p.specs.rt ? ' · Rapid Trigger' : ''}</div></div></div></td>
+        <td><div class="rt-name"><span class="rt-kb" style="--tc:${t.color}">${pic(p)}</span><div><b>${esc(p.brand)}</b> ${esc(p.model)}<div class="rt-sub"><span class="tdot" style="background:${t.color}"></span>${t.label} · ${FMT_SHORT[p.format]}${p.specs.rt ? ' · Rapid Trigger' : ''}</div></div></div></td>
         <td>${scoreBar(fmtScore(p.score), (p.score - 5.5) / 4.5 * 100, '#FACC15')}</td>
         <td>${scoreBar(p.value, p.value, '#22C55E')}</td>
         <td class="num" style="color:${t.color}">${p.sc.speed}</td>
