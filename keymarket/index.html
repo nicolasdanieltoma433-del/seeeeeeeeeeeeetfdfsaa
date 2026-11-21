@@ -443,6 +443,57 @@ a.hbtn{text-decoration:none}
   .table-wrap{max-height:none}
 }
 
+/* ---------- TECLADO INTERACTIVO ---------- */
+.vk-sec{border-top:1px solid var(--line);padding:24px 30px 30px;background:radial-gradient(70% 60% at 50% 100%,color-mix(in srgb,var(--tc) 9%,transparent),transparent 70%)}
+.vk-head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.vk-head h3{margin:0;font-size:20px;letter-spacing:-.4px}
+.vk-head p{margin:4px 0 0;color:var(--mut);font-size:13px;max-width:640px}
+.vk-head p b{color:var(--txt)}
+.vk-ctl{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.vk-act{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--mut);min-width:170px}
+.vk-act b{color:var(--cyan);font-family:var(--mono);margin-left:6px}
+.vk-screen{position:relative;min-height:46px;padding:12px 16px;border-radius:12px;background:#0b0d11;border:1px solid var(--line);font-family:var(--mono);font-size:15px;color:var(--txt);white-space:pre-wrap;word-break:break-all;line-height:1.5}
+.vk-screen .caret{display:inline-block;width:9px;height:18px;vertical-align:-3px;background:var(--tc);margin-left:1px;animation:blink 1s steps(1) infinite}
+.vk-ph{position:absolute;left:16px;top:12px;color:var(--dim);pointer-events:none}
+.vk-ph + .x{display:none}
+@keyframes blink{50%{opacity:0}}
+.vk-scroll{overflow-x:auto;padding:22px 6px 30px;margin:0 -6px;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+.vk-case{--rh:180;position:relative;min-width:calc(var(--units) * 30px);padding:14px 14px 16px;border-radius:20px;background:linear-gradient(180deg,color-mix(in srgb,var(--cs) 92%,#fff),var(--cs) 30%,color-mix(in srgb,var(--cs) 85%,#000));box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 0 0 1px rgba(0,0,0,.35),0 34px 50px -28px rgba(0,0,0,.95);transform:perspective(1700px) rotateX(10deg);transform-origin:50% 100%;user-select:none;-webkit-user-select:none}
+.vk-case.rgb::before{content:"";position:absolute;inset:auto 4% -10px;height:22px;border-radius:50%;filter:blur(14px);background:linear-gradient(90deg,#F43F5E,#FACC15,#22C55E,#00E5FF,#A78BFA);opacity:.55;z-index:-1;animation:hueShift 6s linear infinite}
+@keyframes hueShift{to{filter:blur(14px) hue-rotate(360deg)}}
+.vk-keys{container-type:inline-size}
+.vk-row{display:flex;height:calc(100cqw / var(--units))}
+.vk-row.frow{margin-bottom:calc(100cqw / var(--units) * .28)}
+.vk-sp{flex-shrink:0}
+.k{flex-shrink:0;height:100%;padding:calc(100cqw / var(--units) * .045);border:0;background:none;cursor:pointer;touch-action:pan-x;-webkit-tap-highlight-color:transparent;position:relative;font:inherit}
+.k:focus{outline:none}
+.kc{position:relative;display:flex;align-items:flex-start;justify-content:flex-start;width:100%;height:100%;overflow:hidden;padding:11% 13%;border-radius:calc(100cqw / var(--units) * .14);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--kf) 88%,#fff),var(--kf) 55%);color:var(--kt);
+  font-size:clamp(7px,calc(100cqw / var(--units) * .24),13px);font-weight:600;line-height:1.1;white-space:nowrap;
+  box-shadow:0 calc(100cqw / var(--units) * .085) 0 color-mix(in srgb,var(--kf) 55%,#000),inset 0 -2px 0 rgba(0,0,0,.16),0 4px 6px -2px rgba(0,0,0,.35);
+  transition:transform var(--rel) cubic-bezier(.2,.8,.3,1),box-shadow var(--rel) ease-out,color .15s}
+.k.mod .kc{background:linear-gradient(180deg,color-mix(in srgb,var(--kf2) 88%,#fff),var(--kf2) 55%)}
+.k.acc .kc{color:var(--tc)}
+.kc em{font-style:normal;margin:auto;opacity:.35;font-weight:800;letter-spacing:.5px}
+.k.on .kc{transform:translateY(var(--depth));box-shadow:0 1px 0 color-mix(in srgb,var(--kf) 55%,#000),inset 0 2px 5px rgba(0,0,0,.28);transition:transform var(--pt) var(--pe),box-shadow var(--pt) var(--pe)}
+.kc::after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle at 50% 60%,var(--tc),transparent 75%);opacity:0;transition:opacity .2s}
+.k.act .kc::after{opacity:.75;transition:opacity .03s}
+.k.act .kc{color:#fff;text-shadow:0 0 8px var(--tc)}
+.kc::before{content:"";position:absolute;inset:0;border-radius:inherit;background:hsl(var(--rh) 95% 60%);opacity:0}
+.k.rip .kc::before{animation:rip .55s ease-out var(--dly,0ms) both}
+@keyframes rip{0%{opacity:0}25%{opacity:.55}100%{opacity:0}}
+.k.lock .kc{box-shadow:0 calc(100cqw / var(--units) * .085) 0 color-mix(in srgb,var(--kf) 55%,#000),inset 0 0 0 2px var(--tc)}
+.vk-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.vk-stats div{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.vk-stats span{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--dim)}
+.vk-stats b{font-family:var(--mono);font-size:16px}
+@media (max-width:720px){
+  .vk-sec{padding:20px 14px 24px}
+  .vk-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .vk-stats div:last-child{grid-column:1/-1}
+  .vk-case{transform:none}
+}
+
 /* toast */
 .toasts{position:fixed;top:82px;right:18px;z-index:120;display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .toast{background:var(--card2);border:1px solid var(--line2);border-left:3px solid var(--amber);padding:11px 14px;border-radius:12px;font-size:13.5px;box-shadow:0 14px 30px -10px rgba(0,0,0,.7);animation:toastIn .4s var(--ease);max-width:320px}
@@ -1398,6 +1449,7 @@ function openOv(ov) {
   setTimeout(() => { const f = ov.querySelector('.x-btn, button'); f && f.focus({ preventScroll:true }); }, 60);
 }
 function closeOv(ov) {
+  if (ov.id === 'detailOv' && vk) vkReleaseAll();
   ov.classList.remove('open'); ov.setAttribute('aria-hidden', 'true');
   if (!$$('.overlay.open').length) document.body.classList.remove('lock');
   if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll:true });
@@ -1452,6 +1504,7 @@ function openDetail(id) {
         <div class="d-actions">
           <button class="btn btn-sec" data-fav-id="${p.id}">${ICON.heart} ${favs.has(p.id) ? 'En favoritos' : 'Guardar'}</button>
           <button class="btn btn-sec cmp-btn${cmp.includes(p.id) ? ' on' : ''}" style="flex:0 0 auto;height:44px;padding:0 16px" data-cmp-id="${p.id}">${ICON.cmp}${cmp.includes(p.id) ? 'En comparador' : 'Comparar'}</button>
+          <button class="btn btn-cy" data-try>⌨ Probar teclas</button>
         </div>
         <div class="sec-t">Dónde comprar</div>
         <table class="buy">
@@ -1468,11 +1521,13 @@ function openDetail(id) {
         <div class="sec-t">Uso recomendado</div>
         <p style="margin:0;font-weight:600">🎯 ${esc(p.use)}</p>
       </div>
-    </div>`;
+    </div>
+    ${vkSection(p)}`;
   const ov = $('#detailOv');
   ov.querySelector('.modal').scrollTop = 0;
   openOv(ov);
   animateBars($('#detail'));
+  initVK(p);
 }
 
 function openCompare() {
@@ -1719,7 +1774,7 @@ function buildSim() {
     $('.r-rst', SIM.mag.el).textContent = SIM.mag.rt ? 'RT 0,1 mm' : fmtMM(SIM.mag.reset);
     setMarkers('mag');
   });
-  $('#sound').addEventListener('click', e => { soundOn = !soundOn; e.currentTarget.classList.toggle('on', soundOn); e.currentTarget.setAttribute('aria-pressed', soundOn); e.currentTarget.textContent = soundOn ? '🔊 Sonido' : '🔇 Sonido'; });
+  $('#sound').addEventListener('click', () => setSound(!soundOn));
   $('#race').addEventListener('click', race);
   initGraph();
   requestAnimationFrame(tick);
@@ -1866,6 +1921,221 @@ function sound(type) {
     og.gain.setValueAtTime(P.tg, t); og.gain.exponentialRampToValueAtTime(.001, t + P.d);
     o.connect(og).connect(actx.destination); o.start(t); o.stop(t + P.d + .02);
   }
+}
+
+
+/* =========================================================
+   TECLADO INTERACTIVO (ficha de detalle)
+   ========================================================= */
+const K = (code, l, w = 1) => ({ code, l, w });
+const GAP = w => ({ gap:w });
+const FK = n => K('F' + n, 'F' + n);
+const NUM_ROW = [K('Backquote','|'), ...'1234567890'.split('').map(d => K('Digit' + d, d)), K('Minus',"'"), K('Equal','¿'), K('Backspace','⌫ Borrar',2)];
+const Q_ROW   = [K('Tab','Tab ⇥',1.5), ...'QWERTYUIOP'.split('').map(c => K('Key' + c, c)), K('BracketLeft','´'), K('BracketRight','+'), K('Backslash','}',1.5)];
+const A_ROW   = [K('CapsLock','Bloq Mayús',1.75), ...'ASDFGHJKL'.split('').map(c => K('Key' + c, c)), K('Semicolon','Ñ'), K('Quote','{'), K('Enter','Enter ↵',2.25)];
+const Z_ROW   = sh => [K('ShiftLeft','⇧ Shift',2.25), ...'ZXCVBNM'.split('').map(c => K('Key' + c, c)), K('Comma',','), K('Period','.'), K('Slash','-'), K('ShiftRight','⇧ Shift',sh)];
+const MOD_FULL = [K('ControlLeft','Ctrl',1.25), K('MetaLeft','⊞',1.25), K('AltLeft','Alt',1.25), K('Space','',6.25), K('AltRight','AltGr',1.25), K('Fn','Fn',1.25), K('ContextMenu','☰',1.25), K('ControlRight','Ctrl',1.25)];
+const MOD_65   = [K('ControlLeft','Ctrl',1.25), K('MetaLeft','⊞',1.25), K('AltLeft','Alt',1.25), K('Space','',6.25), K('AltRight','AltGr'), K('Fn','Fn'), K('ControlRight','Ctrl')];
+const MOD_96   = [K('ControlLeft','Ctrl',1.25), K('MetaLeft','⊞',1.25), K('AltLeft','Alt',1.25), K('Space','',6.25), K('AltRight','AltGr'), K('ControlRight','Ctrl')];
+const ARROWS = [K('ArrowLeft','←'), K('ArrowDown','↓'), K('ArrowRight','→')];
+const F_ROW15 = [K('Escape','Esc'), GAP(1), FK(1), FK(2), FK(3), FK(4), GAP(.5), FK(5), FK(6), FK(7), FK(8), GAP(.5), FK(9), FK(10), FK(11), FK(12)];
+const NAV_F = [GAP(.25), K('PrintScreen','ImpPt'), K('ScrollLock','Bloq'), K('Pause','Pausa')];
+function vkLayout(fmt) {
+  switch (fmt) {
+    case '60': return { f:null, rows:[NUM_ROW, Q_ROW, A_ROW, Z_ROW(2.75), MOD_FULL] };
+    case '65': return { f:null, rows:[[...NUM_ROW, K('Delete','Supr')], [...Q_ROW, K('PageUp','RePág')], [...A_ROW, K('PageDown','AvPág')], [...Z_ROW(1.75), K('ArrowUp','↑'), K('End','Fin')], [...MOD_65, ...ARROWS]] };
+    case '75': return { f:[K('Escape','Esc'), ...[1,2,3,4,5,6,7,8,9,10,11,12].map(FK), K('PrintScreen','ImpPt'), K('Insert','Ins'), K('Delete','Supr')],
+      rows:[[...NUM_ROW, K('Home','Inicio')], [...Q_ROW, K('PageUp','RePág')], [...A_ROW, K('PageDown','AvPág')], [...Z_ROW(1.75), K('ArrowUp','↑'), K('End','Fin')], [...MOD_65, ...ARROWS]] };
+    case 'tkl': return { f:[...F_ROW15, ...NAV_F],
+      rows:[[...NUM_ROW, GAP(.25), K('Insert','Ins'), K('Home','Inicio'), K('PageUp','RePág')], [...Q_ROW, GAP(.25), K('Delete','Supr'), K('End','Fin'), K('PageDown','AvPág')], [...A_ROW], [...Z_ROW(2.75), GAP(1.25), K('ArrowUp','↑')], [...MOD_FULL, GAP(.25), ...ARROWS]] };
+    case '90': return { f:[K('Escape','Esc'), GAP(.25), FK(1), FK(2), FK(3), FK(4), GAP(.25), FK(5), FK(6), FK(7), FK(8), GAP(.25), FK(9), FK(10), FK(11), FK(12), GAP(.25), K('Insert','Ins'), K('Delete','Supr'), K('PageUp','RePág'), K('PageDown','AvPág')],
+      rows:[[...NUM_ROW, GAP(.25), K('NumLock','Num'), K('NumpadDivide','/'), K('NumpadMultiply','*'), K('NumpadSubtract','-')],
+            [...Q_ROW, GAP(.25), K('Numpad7','7'), K('Numpad8','8'), K('Numpad9','9'), K('NumpadAdd','+')],
+            [...A_ROW, GAP(.25), K('Numpad4','4'), K('Numpad5','5'), K('Numpad6','6')],
+            [...Z_ROW(1.75), K('ArrowUp','↑'), GAP(.25), K('Numpad1','1'), K('Numpad2','2'), K('Numpad3','3'), K('NumpadEnter','↵')],
+            [...MOD_96, ...ARROWS, GAP(.25), K('Numpad0','0'), K('NumpadDecimal','.')]] };
+    default: return { f:[...F_ROW15, ...NAV_F],
+      rows:[[...NUM_ROW, GAP(.25), K('Insert','Ins'), K('Home','Inicio'), K('PageUp','RePág'), GAP(.25), K('NumLock','Num'), K('NumpadDivide','/'), K('NumpadMultiply','*'), K('NumpadSubtract','-')],
+            [...Q_ROW, GAP(.25), K('Delete','Supr'), K('End','Fin'), K('PageDown','AvPág'), GAP(.25), K('Numpad7','7'), K('Numpad8','8'), K('Numpad9','9'), K('NumpadAdd','+')],
+            [...A_ROW, GAP(3.5), K('Numpad4','4'), K('Numpad5','5'), K('Numpad6','6')],
+            [...Z_ROW(2.75), GAP(1.25), K('ArrowUp','↑'), GAP(1.25), K('Numpad1','1'), K('Numpad2','2'), K('Numpad3','3'), K('NumpadEnter','↵')],
+            [...MOD_FULL, GAP(.25), ...ARROWS, GAP(.25), K('Numpad0','0',2), K('NumpadDecimal','.')]] };
+  }
+}
+const mmNum = str => { const m = String(str).replace(/,/g, '.').match(/[\d.]+/g); return m ? m.map(Number) : [0]; };
+/* comportamiento físico estimado por tecnología */
+function vkProfile(p) {
+  const travel = mmNum(p.specs.travel)[0] || 4;
+  const acts = mmNum(p.specs.act);
+  const clicky = /blue|clicky/i.test(p.sw);
+  if (p.tech === 'magnetico') return { travel, act:.6, actMin:acts[0] || .1, actMax:acts[1] || travel, speed:55, pt:28, pe:'cubic-bezier(.2,.7,.3,1)', rel:40, snd:'thock', clicky:false };
+  if (p.tech === 'mecanico')  return { travel, act:acts[0] || 2, speed:55, pt:45, pe:'cubic-bezier(.4,0,.6,1)', rel:65, snd:clicky ? 'clack' : 'clack', clicky };
+  const scissor = travel < 2.2;
+  return { travel, act:acts[0] || 2.5, speed:scissor ? 30 : 26, pt:scissor ? 60 : 120, pe:'cubic-bezier(.55,0,.8,.2)', rel:scissor ? 90 : 170, snd:'thud', clicky:false };
+}
+function vkSection(p) {
+  const L = vkLayout(p.format), th = THEMES[p.theme] || THEMES.dark, pr = vkProfile(p), t = TECH[p.tech];
+  const rows = L.f ? [L.f, ...L.rows] : L.rows;
+  const units = Math.max(...rows.map(r => r.reduce((a, k) => a + (k.gap || k.w), 0)));
+  const light = p.theme === 'white' || p.theme === 'pink';
+  const rowsHTML = rows.map((r, ri) => {
+    let x = 0;
+    return `<div class="vk-row${L.f && ri === 0 ? ' frow' : ''}">${r.map(k => {
+      if (k.gap) { x += k.gap; return `<span class="vk-sp" style="width:${(k.gap / units * 100).toFixed(4)}%"></span>`; }
+      const cx = x + k.w / 2; x += k.w;
+      const acc = k.code === 'Escape' || k.code === 'Enter' || k.code === 'Space';
+      return `<button type="button" class="k${acc ? ' acc' : ''}${k.w > 1.6 ? ' mod' : ''}" tabindex="-1" data-code="${k.code}" data-x="${cx}" data-y="${ri}" style="width:${(k.w / units * 100).toFixed(4)}%" aria-label="${esc(k.l || 'Espacio')}"><span class="kc">${k.code === 'Space' ? `<em>${esc(p.brand)}</em>` : esc(k.l)}</span></button>`;
+    }).join('')}</div>`;
+  }).join('');
+  const magCtl = p.tech === 'magnetico' ? `
+      <label class="vk-act">Actuación <b id="vkActVal">${fmtMM(pr.act)}</b>
+        <input type="range" id="vkAct" min="${pr.actMin}" max="${pr.actMax}" step="0.1" value="${pr.act}" aria-label="Punto de actuación"></label>
+      <label class="switch"><input type="checkbox" id="vkRT" checked><span class="tg"></span>Rapid Trigger</label>` : '';
+  return `<section class="vk-sec" id="vkSec" style="--tc:${t.color}">
+    <div class="vk-head">
+      <div>
+        <h3>⌨ Probá el ${esc(fullName(p))}</h3>
+        <p>Tocá las teclas o escribí con tu teclado. Simulamos el recorrido (${esc(p.specs.travel)}), el punto de actuación y el sonido del switch <b>${esc(p.sw.split('·')[0].trim())}</b>${p.rgb ? ', con efecto de luces RGB' : ''}.</p>
+      </div>
+      <div class="vk-ctl">${magCtl}
+        <button class="chip-btn${soundOn ? ' on' : ''}" data-sound aria-pressed="${soundOn}">${soundOn ? '🔊 Sonido' : '🔇 Sonido'}</button>
+      </div>
+    </div>
+    <div class="vk-screen" id="vkScreen" aria-live="off"><span id="vkText"></span><i class="caret"></i><span class="vk-ph" id="vkPh">Escribí algo para probarlo…</span></div>
+    <div class="vk-scroll">
+      <div class="vk-case ${p.tech}${p.rgb ? ' rgb' : ''}" id="vkCase" style="--units:${units};--cs:${th.cs};--kf:${th.k};--kf2:${th.k2};--kt:${light ? '#3B4150' : '#D4D8E0'};--depth:calc(100cqw / ${units} * ${(0.15 * Math.min(pr.travel, 4) / 4).toFixed(3)});--pt:${pr.pt}ms;--pe:${pr.pe};--rel:${pr.rel}ms">
+        <div class="vk-keys">${rowsHTML}</div>
+      </div>
+    </div>
+    <div class="vk-stats">
+      <div><span>Pulsaciones</span><b id="vkCount">0</b></div>
+      <div><span>Última tecla</span><b id="vkLast">—</b></div>
+      <div><span>Actuación</span><b id="vkActS">${p.tech === 'magnetico' ? fmtMM(pr.act) : esc(p.specs.act)}</b></div>
+      <div><span>Respuesta estimada</span><b id="vkMs" style="color:var(--tc)">—</b></div>
+      <div><span>Palabras por minuto</span><b id="vkWpm">—</b></div>
+    </div>
+  </section>`;
+}
+
+let vk = null;
+function vkActMs() { return vk.pr.act / vk.pr.speed * 1000; }
+function initVK(p) {
+  const sec = $('#vkSec'); if (!sec) { vk = null; return; }
+  const keys = {};
+  $$('.k', sec).forEach(el => keys[el.dataset.code] = el);
+  vk = { p, pr:vkProfile(p), keys, down:new Map(), caps:false, text:'', count:0, chars:0, t0:0, hue:Math.random() * 360, rt:true };
+  const caseEl = $('#vkCase');
+  caseEl.addEventListener('pointerdown', e => {
+    const k = e.target.closest('.k'); if (!k) return;
+    e.preventDefault(); k.setPointerCapture?.(e.pointerId);
+    vkPress(k.dataset.code, null, 'ptr' + e.pointerId);
+  });
+  ['pointerup','pointercancel','lostpointercapture'].forEach(ev => caseEl.addEventListener(ev, e => {
+    const k = e.target.closest && e.target.closest('.k'); if (k) vkRelease(k.dataset.code, 'ptr' + e.pointerId);
+  }));
+  caseEl.addEventListener('contextmenu', e => e.preventDefault());
+  const r = $('#vkAct');
+  if (r) {
+    const upd = () => { vk.pr.act = parseFloat(r.value); $('#vkActVal').textContent = fmtMM(vk.pr.act); $('#vkActS').textContent = fmtMM(vk.pr.act);
+      r.style.setProperty('--v', ((r.value - r.min) / (r.max - r.min) * 100) + '%'); };
+    r.addEventListener('input', upd); upd();
+    $('#vkRT').addEventListener('change', e => { vk.rt = e.target.checked; caseEl.style.setProperty('--rel', (vk.rt ? vk.pr.rel : vk.pr.rel * 2.2) + 'ms'); });
+  }
+  $('[data-sound]', sec).addEventListener('click', () => setSound(!soundOn));
+  $('[data-try]', $('#detail'))?.addEventListener('click', () => sec.scrollIntoView({ behavior:'smooth', block:'center' }));
+}
+function vkCharFor(code, label, key) {
+  if (key != null) return key.length === 1 ? key : null;          // teclado físico: respeta tu distribución
+  if (code === 'Space') return ' ';
+  if (!label || label.length !== 1 || /[←↑→↓↵]/.test(label)) return null;
+  const shift = vk.down.has('ShiftLeft') || vk.down.has('ShiftRight');
+  return /[A-ZÑ]/.test(label) ? ((vk.caps !== shift) ? label : label.toLowerCase()) : label;
+}
+function vkPress(code, key, src) {
+  if (!vk) return;
+  const el = vk.keys[code]; if (!el) return;
+  const srcs = vk.down.get(code) || new Set();
+  if (srcs.size) { srcs.add(src); return; }
+  srcs.add(src); vk.down.set(code, srcs);
+  ensureAudio();
+  el.classList.add('on'); el.classList.remove('act');
+  const actMs = vkActMs();
+  clearTimeout(el._t1); clearTimeout(el._t2);
+  el._actAt = performance.now() + actMs;
+  el._t1 = setTimeout(() => { el.classList.add('act'); if (vk && vk.pr.clicky) sound('click'); }, actMs);
+  el._t2 = setTimeout(() => sound(vk ? vk.pr.snd : 'clack'), Math.max(actMs, vk.pr.pt));
+  vk.count++;
+  // texto
+  if (code === 'CapsLock') { vk.caps = !vk.caps; el.classList.toggle('lock', vk.caps); }
+  else if (code === 'Backspace') { vk.text = vk.text.slice(0, -1); }
+  else if (code === 'Enter' || code === 'NumpadEnter') { vk.text += ' ↵ '; }
+  else {
+    const ch = vkCharFor(code, el.textContent.trim(), key);
+    if (ch) { vk.text += ch; vk.chars++; if (!vk.t0) vk.t0 = performance.now(); }
+  }
+  if (vk.text.length > 160) vk.text = vk.text.slice(-160);
+  if (vk.p.rgb) vkRipple(el);
+  vkStats(el, actMs);
+}
+function vkRelease(code, src) {
+  if (!vk) return;
+  const el = vk.keys[code], srcs = vk.down.get(code); if (!el || !srcs) return;
+  srcs.delete(src); if (srcs.size) return;
+  vk.down.delete(code);
+  el.classList.remove('on');
+  if (!el.classList.contains('act')) {           // toque muy corto: igual llega a actuar
+    clearTimeout(el._t1); el.classList.add('act');
+    if (vk.pr.clicky) sound('click');
+  }
+  const hold = vk.p.tech === 'magnetico' && vk.rt ? 0 : (vk.p.tech === 'magnetico' ? 90 : vk.p.tech === 'mecanico' ? 45 : 110);
+  setTimeout(() => { if (!el.classList.contains('on')) el.classList.remove('act'); }, hold + 40);
+}
+function vkReleaseAll() { if (!vk) return; [...vk.down.keys()].forEach(c => { const el = vk.keys[c]; el && el.classList.remove('on', 'act'); }); vk.down.clear(); vk = null; }
+function vkRipple(src) {
+  const x0 = +src.dataset.x, y0 = +src.dataset.y;
+  vk.hue = (vk.hue + 47) % 360;
+  const kc = $('#vkCase'); kc.style.setProperty('--rh', vk.hue.toFixed(0));
+  Object.values(vk.keys).forEach(el => {
+    const d = Math.hypot(+el.dataset.x - x0, (+el.dataset.y - y0) * 1.1);
+    el.style.setProperty('--dly', Math.round(d * 32) + 'ms');
+    el.classList.remove('rip');
+  });
+  void kc.offsetWidth;
+  Object.values(vk.keys).forEach(el => el.classList.add('rip'));
+}
+function vkStats(el, actMs) {
+  $('#vkText').textContent = vk.text;
+  $('#vkPh').style.display = vk.text ? 'none' : '';
+  $('#vkCount').textContent = vk.count;
+  const lbl = el.getAttribute('aria-label');
+  $('#vkLast').textContent = lbl.length > 10 ? lbl.slice(0, 10) : lbl;
+  $('#vkMs').textContent = Math.max(1, Math.round(actMs)) + ' ms';
+  if (vk.chars >= 10) {
+    const min = (performance.now() - vk.t0) / 60000;
+    $('#vkWpm').textContent = min > 0.05 ? Math.round(vk.chars / 5 / min) : '—';
+  }
+}
+document.addEventListener('keydown', e => {
+  if (!vk || !$('#detailOv').classList.contains('open') || e.code === 'Escape') return;
+  if (/input|textarea|select/i.test(document.activeElement?.tagName || '')) return;
+  if (!vk.keys[e.code]) return;
+  const combo = (e.ctrlKey || e.metaKey) && !/Control|Meta/.test(e.code);
+  if (!combo && e.code !== 'Tab') e.preventDefault();
+  if (e.repeat) return;
+  const sec = $('#vkSec'), r = sec.getBoundingClientRect();
+  if (r.top > innerHeight - 120 || r.bottom < 120) sec.scrollIntoView({ behavior:'smooth', block:'center' });
+  vkPress(e.code, combo ? null : e.key, 'kb');
+});
+document.addEventListener('keyup', e => {
+  if (!vk || !vk.keys[e.code]) return;
+  if (e.code === 'Space' || e.code === 'Enter') e.preventDefault();
+  vkRelease(e.code, 'kb');
+});
+window.addEventListener('blur', () => { if (vk) [...vk.down.keys()].forEach(c => { vk.down.set(c, new Set(['x'])); vkRelease(c, 'x'); }); });
+function setSound(on) {
+  soundOn = on;
+  [$('#sound'), ...$$('[data-sound]')].forEach(b => { if (!b) return; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.textContent = on ? '🔊 Sonido' : '🔇 Sonido'; });
+  if (on) ensureAudio();
 }
 
 /* =========================================================
