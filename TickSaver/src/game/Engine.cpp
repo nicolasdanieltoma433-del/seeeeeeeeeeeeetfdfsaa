@@ -68,7 +68,8 @@ Slot Engine::slotFor(bool isPlayer1) const {
 float Engine::percent() const { return m_layer->getCurrentPercent(); }
 
 bool Engine::playing() const {
-    return m_layer->m_started && m_layer->m_player1 && !m_layer->m_player1->m_isDead && !m_deadThisAttempt;
+    return m_layer->m_started && m_layer->m_player1 && !m_layer->m_player1->m_isDead && !m_deadThisAttempt &&
+           !m_layer->m_hasCompletedLevel && !m_layer->m_levelEndAnimationStarted;
 }
 
 SlotParams Engine::paramsFor(Slot slot) const {
@@ -98,10 +99,30 @@ SlotParams Engine::paramsFor(Slot slot) const {
 }
 
 void Engine::inject(Slot slot, bool push) {
+    auto const& cfg = settings::get();
+    bool twoPlayer = m_layer->m_level && m_layer->m_level->m_twoPlayerMode;
+
+    // Reinyección directa (por defecto): pushButton/releaseButton sobre los
+    // jugadores, exactamente lo que hizo el fantasma en la simulación. Se
+    // aplica en ESTE paso, sin depender de cómo 2.2091 procesa la cola de
+    // inputs con click-between-steps.
+    if (cfg.directInject && !twoPlayer) {
+        std::array<PlayerObject*, 2> players{};
+        int n = m_sim.realTargets(slot, true, players);
+        for (int i = 0; i < n; ++i) {
+            auto* p = players[static_cast<std::size_t>(i)];
+            if (push) p->pushButton(PlayerButton::Jump);
+            else p->releaseButton(PlayerButton::Jump);
+        }
+        if (cfg.debugLog) log::debug("[TickSaver] reinyeccion directa {} en tick {}", push ? "press" : "release", m_tick);
+        return;
+    }
+
+    // Ruta del juego: handleButton original (2 jugadores, o si el usuario
+    // desactivó la reinyección directa). Nuestro hook la deja pasar.
     InjectGuard guard;
-    // Llamada calificada: pasa por la ruta normal del juego (grabación de
-    // replays, routing de dual / 2 jugadores...) y nuestro hook la deja pasar.
     m_layer->GJBaseGameLayer::handleButton(push, static_cast<int>(PlayerButton::Jump), m_lastIsPlayer1[idx(slot)]);
+    if (cfg.debugLog) log::debug("[TickSaver] reinyeccion por handleButton {} en tick {}", push ? "press" : "release", m_tick);
 }
 
 // ------------------------------------------------------------------ input ---
@@ -127,9 +148,11 @@ bool Engine::onButton(bool down, int button, bool isPlayer1) {
         m_scheduler.setPreserveHold(cfg.preserveHold);
         m_sim.setDebugLog(cfg.debugLog);
         m_sim.setCorrectBoth(cfg.correctBoth);
-        m_sim.ensureBudget(cfg.simBudgetPerTick);  // el chequeo del click propio siempre tiene CPU
 
+        // El chequeo del click recién apretado usa su propio presupuesto.
+        m_sim.setPriority(true);
         auto result = m_scheduler.onPhysicalPress(slot, applyTick, params, m_sim);
+        m_sim.setPriority(false);
         if (result.releaseFirst) inject(slot, false);
         processEvents();
         return result.forwardNow;
@@ -164,7 +187,7 @@ void Engine::beforeStep(bool isHalfTick) {
         m_validatePending = false;
     }
 
-    m_sim.beginTick(m_lastDt, cfg.simBudgetPerTick);
+    m_sim.beginTick(m_lastDt, cfg.simBudgetMs);
     m_sim.setDebugLog(cfg.debugLog);
     m_sim.setCorrectBoth(cfg.correctBoth);
     m_scheduler.setPreserveHold(cfg.preserveHold);
@@ -188,7 +211,8 @@ void Engine::beforeStep(bool isHalfTick) {
     m_inputThisTick = false;
 
     if (cfg.debugLog && m_tick % kTicksPerSecond == 0) {
-        log::debug("[TickSaver] tick {} dt={:.4f} pasos fantasma este tick={}", m_tick, m_lastDt, m_sim.stepsUsedThisTick());
+        log::debug("[TickSaver] tick {} dt={:.4f} pasos fantasma={} cpu frame={:.2f} ms", m_tick, m_lastDt,
+                   m_sim.stepsUsedThisTick(), m_sim.usedMsThisFrame());
     }
 }
 
@@ -221,17 +245,22 @@ void Engine::markAssisted() {
     m_savedTestMode = m_layer->m_isTestMode;
     m_layer->m_isTestMode = true;
     m_forcedTestMode = true;
+    if (m_hud) m_hud->setAssisted(true);
+    if (settings::get().debugLog) log::info("[TickSaver] modo seguro: este intento no guarda progreso");
 }
 
 void Engine::restoreTestMode() {
     if (!m_forcedTestMode) return;
     m_layer->m_isTestMode = m_savedTestMode;
     m_forcedTestMode = false;
+    if (m_hud) m_hud->setAssisted(false);
 }
 
 // ----------------------------------------------------------- ciclo de vida
 
 void Engine::onLevelReady() {
+    m_sim.prepare();  // fantasmas creados acá, nunca en medio de un paso de física
+
     auto hud = ui::HudNode::create();
     if (!hud) return;
     hud->applyConfig(settings::get());
@@ -262,8 +291,16 @@ void Engine::onRealDeath(PlayerObject*) {
     m_stats.recordStreak(m_session.bestStreakThisAttempt());
     m_dirty = true;
 
-    if (settings::get().showDeathSummary) showDeathSummary(pct);
-    saveStats(false);
+    // destroyPlayer corre en medio del paso de física: crear UI o escribir a
+    // disco ahí es arriesgado. Lo hacemos en el próximo frame.
+    WeakRef<PlayLayer> layer(m_layer);
+    geode::queueInMainThread([layer, pct] {
+        auto alive = layer.lock();
+        auto* engine = Engine::current();
+        if (!alive || !engine || !engine->owns(alive.data())) return;
+        if (settings::get().showDeathSummary) engine->showDeathSummary(pct);
+        engine->saveStats(false);
+    });
 }
 
 void Engine::onLevelComplete() {
@@ -280,7 +317,11 @@ void Engine::onQuit() {
 }
 
 void Engine::onConfigChanged() {
-    if (m_hud) m_hud->applyConfig(settings::get());
+    auto const& cfg = settings::get();
+    if (m_hud) m_hud->applyConfig(cfg);
+    // Si apagás el modo seguro en medio de un intento que ya fue asistido,
+    // ese mismo intento vuelve a poder guardar progreso.
+    if (!cfg.safeMode) restoreTestMode();
 }
 
 void Engine::resetStats() {

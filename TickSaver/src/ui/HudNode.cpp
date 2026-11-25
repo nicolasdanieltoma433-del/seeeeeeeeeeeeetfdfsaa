@@ -63,6 +63,12 @@ bool HudNode::init() {
     m_holdLabel->setVisible(false);
     this->addChild(m_holdLabel);
 
+    m_assistedLabel = CCLabelBMFont::create("INTENTO ASISTIDO: NO GUARDA", "bigFont.fnt");
+    m_assistedLabel->setScale(.22f);
+    m_assistedLabel->setPosition({0.f, 12.f});
+    m_assistedLabel->setVisible(false);
+    this->addChild(m_assistedLabel);
+
     return true;
 }
 
@@ -78,6 +84,7 @@ void HudNode::applyConfig(Config const& cfg) {
     m_streakLabel->setColor(c3(role(p, PaletteRole::Streak)));
     m_caption->setColor(c3(role(p, PaletteRole::Text)));
     m_holdLabel->setColor(c3(role(p, PaletteRole::Early)));
+    m_assistedLabel->setColor(c3(role(p, PaletteRole::Danger)));
     redrawBar();
 }
 
@@ -152,10 +159,13 @@ void HudNode::setHolding(int ticksHeld) {
     if (ticksHeld > 0) m_holdLabel->setString(fmt::format("esperando +{}t", ticksHeld).c_str());
 }
 
+void HudNode::setAssisted(bool assisted) { m_assistedLabel->setVisible(assisted); }
+
 void HudNode::resetAttempt() {
     m_streakLabel->setString("x0");
     m_streakLabel->setOpacity(120);
     setHolding(0);
+    setAssisted(false);
 }
 
 void HudNode::spawnToast(std::string const& text, RGBA color) {

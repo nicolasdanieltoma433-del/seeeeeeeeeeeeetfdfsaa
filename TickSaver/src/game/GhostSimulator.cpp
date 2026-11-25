@@ -9,6 +9,7 @@
 #include <Geode/binding/PlayerObject.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 
 using namespace geode::prelude;
@@ -59,20 +60,33 @@ GhostSimulator::~GhostSimulator() {
     }
 }
 
-void GhostSimulator::beginTick(float stepDt, int budget) {
-    if (stepDt > 0.f) m_dt = stepDt;
-    m_budget = budget;
-    m_stepsUsed = 0;
+void GhostSimulator::prepare() {
+    ghostAt(0);
+    ghostAt(1);
 }
 
-void GhostSimulator::ensureBudget(int minimum) { m_budget = std::max(m_budget, minimum); }
+void GhostSimulator::refreshFrame() {
+    auto frame = CCDirector::get()->getTotalFrames();
+    if (frame != m_frame) {
+        m_frame = frame;
+        m_usedUs = 0.0;
+    }
+}
+
+void GhostSimulator::beginTick(float stepDt, float budgetMs) {
+    if (stepDt > 0.f) m_dt = stepDt;
+    m_budgetUs = std::max(0.1, static_cast<double>(budgetMs)) * 1000.0;
+    m_stepsUsed = 0;
+    refreshFrame();
+}
 
 PlayerObject* GhostSimulator::ghostAt(std::size_t index) {
     if (index >= m_ghosts.size()) return nullptr;
     if (!m_ghosts[index]) {
-        // Mismos parámetros que usa GD para sus jugadores, pero con
-        // playLayer = false: no se registra como jugador del nivel.
-        auto* ghost = PlayerObject::create(1, 1, m_layer, m_layer->m_objectLayer, false);
+        // Mismos parámetros que usa GD para los jugadores de un nivel. El
+        // último (playLayer) en true: con false el PlayerObject se comporta
+        // como uno del editor, y eso dentro de un PlayLayer no es seguro.
+        auto* ghost = PlayerObject::create(1, 1, m_layer, m_layer->m_objectLayer, true);
         if (!ghost) return nullptr;
         m_layer->m_objectLayer->addChild(ghost, -100);
         silence(ghost);
@@ -82,33 +96,42 @@ PlayerObject* GhostSimulator::ghostAt(std::size_t index) {
     return m_ghosts[index].data();
 }
 
-int GhostSimulator::collectTargets(Slot slot, std::array<Target, 2>& out) {
+int GhostSimulator::realTargets(Slot slot, bool forInjection, std::array<PlayerObject*, 2>& out) const {
     auto* p1 = m_layer->m_player1;
     auto* p2 = m_layer->m_player2;
     bool dual = m_layer->m_gameState.m_isDualMode && p2;
     bool twoPlayer = m_layer->m_level && m_layer->m_level->m_twoPlayerMode;
 
     int n = 0;
-    auto add = [&](PlayerObject* real, std::size_t ghostIndex) {
-        if (!real || real->m_isDead) return;
-        if (auto* g = ghostAt(ghostIndex)) out[static_cast<std::size_t>(n++)] = {real, g};
+    auto add = [&](PlayerObject* p) {
+        if (p && !p->m_isDead) out[static_cast<std::size_t>(n++)] = p;
     };
 
     if (!dual) {
-        add(p1, 0);  // un solo jugador: cualquier botón mueve al P1
+        add(p1);  // un solo jugador: cualquier botón mueve al P1
     }
     else if (twoPlayer) {
-        // 2 jugadores: cada botón controla a su jugador
-        if (slot == Slot::P1) add(p1, 0);
-        else add(p2, 1);
+        add(slot == Slot::P1 ? p1 : p2);  // 2 jugadores: cada botón a su jugador
     }
     else {
-        // dual con un solo jugador humano: el click mueve a los dos, así que
-        // el click sólo es "bueno" si sobreviven ambos.
-        add(p1, 0);
-        if (m_correctBoth) add(p2, 1);
+        // dual con un solo jugador humano: el click mueve a los dos. Para
+        // reinyectar siempre van los dos; para juzgar, P2 sólo si se pide.
+        add(p1);
+        if (forInjection || m_correctBoth) add(p2);
     }
     return n;
+}
+
+int GhostSimulator::collectTargets(Slot slot, std::array<Target, 2>& out) {
+    std::array<PlayerObject*, 2> reals{};
+    int n = realTargets(slot, false, reals);
+    int written = 0;
+    for (int i = 0; i < n; ++i) {
+        auto* real = reals[static_cast<std::size_t>(i)];
+        std::size_t ghostIndex = real == m_layer->m_player2 ? 1 : 0;
+        if (auto* g = ghostAt(ghostIndex)) out[static_cast<std::size_t>(written++)] = {real, g};
+    }
+    return written;
 }
 
 void GhostSimulator::sync(PlayerObject* ghost, PlayerObject* real) {
@@ -140,6 +163,17 @@ void GhostSimulator::sync(PlayerObject* ghost, PlayerObject* real) {
     ghost->m_isSecondPlayer = real->m_isSecondPlayer;
     ghost->m_isLocked = real->m_isLocked;
     ghost->m_holdingButtons = real->m_holdingButtons;
+    ghost->m_fallSpeed = real->m_fallSpeed;
+    ghost->m_playerSpeedAC = real->m_playerSpeedAC;
+    // Flags de física según la versión del nivel (2.1 vs 2.2). Si el
+    // fantasma usara otra física que el jugador real, predeciría muertes
+    // que no existen y retendría clicks que estaban bien.
+    ghost->m_enable22Changes = real->m_enable22Changes;
+    ghost->m_enableImpulseFix = real->m_enableImpulseFix;
+    ghost->m_fixGravityBug = real->m_fixGravityBug;
+    ghost->m_reverseSync = real->m_reverseSync;
+    ghost->m_disablePlayerSqueeze = real->m_disablePlayerSqueeze;
+    ghost->m_ignoreDamage = false;
     ghost->m_isDead = false;
 
     silence(ghost);  // copyAttributes puede haber copiado visibilidad/efectos
@@ -155,10 +189,15 @@ void GhostSimulator::step(PlayerObject* ghost) {
     ghost->update(m_dt);
     ghost->updateRotation(m_dt);
     ++m_stepsUsed;
-    --m_budget;
 }
 
 SimOutcome GhostSimulator::run(Slot slot, bool press, int holdTicks, int idleTicks) {
+    using Clock = std::chrono::steady_clock;
+
+    refreshFrame();
+    double limitUs = m_priority ? m_budgetUs : m_budgetUs - m_usedUs;
+    if (limitUs <= 0.0) return SimOutcome::Skipped;
+
     std::array<Target, 2> targets{};
     int n = collectTargets(slot, targets);
     if (n == 0) return SimOutcome::Inconclusive;
@@ -170,15 +209,18 @@ SimOutcome GhostSimulator::run(Slot slot, bool press, int holdTicks, int idleTic
     for (int i = 0; i < n; ++i) {
         auto ui = static_cast<std::size_t>(i);
         prof[ui] = profileFor(detectMode(targets[ui].real));
-        window[ui] = press ? prof[ui].window : idleTicks;
+        window[ui] = press ? windowFor(prof[ui], holdTicks) : idleTicks;
         maxWindow = std::max(maxWindow, window[ui]);
     }
-    if (m_budget < maxWindow * n) return SimOutcome::Skipped;
 
     for (int i = 0; i < n; ++i) sync(targets[static_cast<std::size_t>(i)].ghost, targets[static_cast<std::size_t>(i)].real);
 
+    auto start = Clock::now();
+    auto elapsedUs = [&] { return std::chrono::duration<double, std::micro>(Clock::now() - start).count(); };
+
     SimOutcome result = SimOutcome::Survives;
     int endedAt = maxWindow;
+    int steps = 0;
     {
         sim::Scope scope;  // al salir de este bloque se restauran orbes/pads
         if (press) {
@@ -197,6 +239,7 @@ SimOutcome GhostSimulator::run(Slot slot, bool press, int holdTicks, int idleTic
 
                 if (press && k == holdTicks) g->releaseButton(PlayerButton::Jump);
                 step(g);
+                ++steps;
 
                 if (sim::died(g)) {
                     result = SimOutcome::Dies;
@@ -218,16 +261,24 @@ SimOutcome GhostSimulator::run(Slot slot, bool press, int holdTicks, int idleTic
                 if (k + 1 >= window[ui]) done[ui] = true;
                 allDone = allDone && done[ui];
             }
+            if (result != SimOutcome::Survives) break;
             if (allDone) {
+                endedAt = k;
+                break;
+            }
+            // Presupuesto de tiempo: medir cada 4 pasos para no pagar el reloj siempre.
+            if ((steps & 3) == 0 && elapsedUs() > limitUs) {
+                result = SimOutcome::Skipped;
                 endedAt = k;
                 break;
             }
         }
     }
+    m_usedUs += elapsedUs();
 
     if (m_debug) {
-        log::debug("[TickSaver] sim {} slot={} hold={} -> {} (paso {}{}{})", press ? "press" : "idle",
-                   static_cast<int>(slot) + 1, holdTicks, outcomeName(result), endedAt,
+        log::debug("[TickSaver] sim {} slot={} hold={} -> {} (paso {}/{}, {:.2f} ms){}{}", press ? "press" : "idle",
+                   static_cast<int>(slot) + 1, holdTicks, outcomeName(result), endedAt, maxWindow, elapsedUs() / 1000.0,
                    result == SimOutcome::Inconclusive ? ", motivo: " : "",
                    result == SimOutcome::Inconclusive ? sim::inconclusiveReason() : "");
     }

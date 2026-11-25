@@ -2,6 +2,8 @@
 
 #include <Geode/binding/PlayerObject.hpp>
 
+#include <algorithm>
+
 namespace ts {
 
 Mode detectMode(PlayerObject* p) {
@@ -19,20 +21,23 @@ Mode detectMode(PlayerObject* p) {
 }
 
 ModeProfile const& profileFor(Mode mode) {
-    // Valores iniciales razonables; afinarlos en juego con el setting
-    // "debug-log" (registra cada simulación y su resultado).
-    //                         window  landing  margin  hold
+    //                         window landing margin hold  holdBased afterRelease
     static constexpr ModeProfile kProfiles[kModeCount] = {
-        /* Cube   */ {120, true, 6, 8},
-        /* Ship   */ {48, false, 0, 14},
-        /* Ball   */ {90, true, 6, 4},
-        /* Ufo    */ {60, false, 0, 6},
-        /* Wave   */ {36, false, 0, 10},
-        /* Robot  */ {120, true, 6, 12},
-        /* Spider */ {60, true, 6, 4},
-        /* Swing  */ {48, false, 0, 6},
+        /* Cube   */ {120, true, 6, 8, false, 0},
+        /* Ship   */ {40, false, 0, 14, true, 6},
+        /* Ball   */ {60, true, 6, 4, false, 0},
+        /* Ufo    */ {20, false, 0, 6, false, 0},
+        /* Wave   */ {30, false, 0, 10, true, 4},
+        /* Robot  */ {120, true, 6, 12, false, 0},
+        /* Spider */ {40, true, 4, 4, false, 0},
+        /* Swing  */ {20, false, 0, 6, false, 0},
     };
     return kProfiles[idx(mode)];
+}
+
+int windowFor(ModeProfile const& profile, int holdTicks) {
+    if (!profile.holdBased) return profile.window;
+    return std::clamp(holdTicks + profile.afterRelease, 6, profile.window);
 }
 
 } // namespace ts

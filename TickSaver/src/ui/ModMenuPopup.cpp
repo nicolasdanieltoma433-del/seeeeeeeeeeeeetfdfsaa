@@ -297,24 +297,28 @@ void ModMenuPopup::buildRegion() {
 
 void ModMenuPopup::buildOptions() {
     auto const& c = cfg();
-    addToggleRow("Modo adaptativo (aprende de vos)", 150.f, c.adaptive, [](bool on) {
+    addToggleRow("Modo adaptativo (aprende de vos)", 154.f, c.adaptive, [](bool on) {
         settings::update([on](Config& x) { x.adaptive = on; });
     });
-    addToggleRow("Corregir a los dos jugadores", 124.f, c.correctBoth, [](bool on) {
+    addToggleRow("Corregir a los dos jugadores", 132.f, c.correctBoth, [](bool on) {
         settings::update([on](Config& x) { x.correctBoth = on; });
     });
-    addToggleRow("Conservar duracion del hold", 98.f, c.preserveHold, [](bool on) {
+    addToggleRow("Conservar duracion del hold", 110.f, c.preserveHold, [](bool on) {
         settings::update([on](Config& x) { x.preserveHold = on; });
     });
-    addToggleRow("Log de depuracion", 72.f, c.debugLog, [](bool on) {
+    addToggleRow("Reinyeccion directa (recomendado)", 88.f, c.directInject, [](bool on) {
+        settings::update([on](Config& x) { x.directInject = on; });
+    });
+    addToggleRow("Log de depuracion", 66.f, c.debugLog, [](bool on) {
         settings::update([on](Config& x) { x.debugLog = on; });
     });
-    addToggleRow("Validar fantasma", 46.f, c.validateSim, [](bool on) {
+    addToggleRow("Validar fantasma", 44.f, c.validateSim, [](bool on) {
         settings::update([on](Config& x) { x.validateSim = on; });
     });
-    addSliderRow("Presupuesto sim.", 16.f, 100.f, 5000.f, 100.f, static_cast<float>(c.simBudgetPerTick),
-                 [](int v) { return std::to_string(v); },
-                 [](int v) { settings::update([v](Config& x) { x.simBudgetPerTick = v; }); });
+    // En décimas de ms para que el slider sea entero: 5..100 = 0.5..10 ms.
+    addSliderRow("CPU por frame", 16.f, 5.f, 100.f, 5.f, std::round(c.simBudgetMs * 10.f),
+                 [](int v) { return fmt::format("{:.1f} ms", static_cast<double>(v) / 10.0); },
+                 [](int v) { settings::update([v](Config& x) { x.simBudgetMs = static_cast<float>(v) / 10.f; }); });
 }
 
 void ModMenuPopup::buildHud() {

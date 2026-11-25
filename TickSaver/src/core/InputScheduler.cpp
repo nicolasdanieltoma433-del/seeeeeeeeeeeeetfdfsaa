@@ -16,12 +16,17 @@ PressResult InputScheduler::onPhysicalPress(Slot slot, Tick now, SlotParams cons
         result.releaseFirst = true;
     }
 
-    // Re-press mientras el anterior sigue retenido: no creamos otro pendiente,
-    // simplemente el jugador vuelve a estar "mantenido".
     if (s.pending) {
-        s.released = false;
-        result.forwardNow = false;
-        return result;
+        if (!s.released) {
+            // Segundo dedo con el primero todavía apretado: sigue "mantenido".
+            result.forwardNow = false;
+            return result;
+        }
+        // El click retenido ya era un tap completo y el jugador volvió a
+        // clickear: el tap viejo se descarta y el nuevo se evalúa desde cero.
+        // (Antes se fundían en un hold largo: en wave eso se sentía como un
+        // click que "no clickea".)
+        s = SlotState{};
     }
 
     ClickEvent ev;

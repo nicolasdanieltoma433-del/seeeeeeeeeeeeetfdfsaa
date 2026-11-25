@@ -195,6 +195,26 @@ static void testDisableWhileHolding() {
     CHECK(ev.size() == 1 && ev[0].kind == ClickKind::Unchecked);
 }
 
+static void testRetapDropsOldTap() {
+    std::puts("[scheduler] un tap nuevo reemplaza al tap retenido (no se funden en un hold)");
+    Tick now = 0;
+    MockPredictor pred;
+    pred.clock = &now;
+    pred.press = [](Slot, Tick, int) { return SimOutcome::Dies; };
+    InputScheduler s;
+    s.onPhysicalPress(Slot::P1, now, params(30)[0], pred);
+    s.onPhysicalRelease(Slot::P1, 1);
+    CHECK(s.isHolding(Slot::P1));
+    now = 3;
+    pred.press = [](Slot, Tick, int) { return SimOutcome::Survives; };
+    auto r = s.onPhysicalPress(Slot::P1, now, params(30)[0], pred);
+    CHECK(r.forwardNow);           // el tap nuevo es bueno: pasa en el acto
+    CHECK(!s.isHolding(Slot::P1)); // y el viejo se descartó
+    std::vector<InjectCmd> out;
+    for (now = 4; now < 40; ++now) s.onTick(now, params(30), pred, out);
+    CHECK(out.empty());            // nunca se reinyecta el tap descartado
+}
+
 static void testTwoSlotsIndependent() {
     std::puts("[scheduler] 2 jugadores: cada slot se corrige por separado");
     Tick now = 0;
@@ -362,6 +382,7 @@ int main() {
     testIdleWouldKill();
     testDisabledAndSkipped();
     testDisableWhileHolding();
+    testRetapDropsOldTap();
     testTwoSlotsIndependent();
     testRepressFlushesRelease();
     testConfigCodeRoundtrip();

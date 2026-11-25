@@ -15,7 +15,9 @@
 //    portal de modo/dual/tp   -> se corta la simulación como "inconclusa"
 //    triggers por contacto,
 //    monedas/items, eventos,
-//    checkpoints, partículas,
+//    checkpoints (también los
+//    automáticos de práctica),
+//    partículas,
 //    estelas, contador saltos -> bloqueados
 // ============================================================================
 
@@ -102,6 +104,11 @@ class $modify(TSGuardPlayLayer, PlayLayer) {
         if (ts::sim::active()) return ts::sim::markInconclusive("final del nivel");
         PlayLayer::playEndAnimationToPos(position);
     }
+
+    void storeCheckpoint(CheckpointObject* checkpoint) {
+        if (ts::sim::active()) return;  // nunca guardar un checkpoint durante una simulación
+        PlayLayer::storeCheckpoint(checkpoint);
+    }
 };
 
 class $modify(TSGuardPlayer, PlayerObject) {
@@ -113,6 +120,11 @@ class $modify(TSGuardPlayer, PlayerObject) {
     void incrementJumps() {
         if (isSimGhost(this)) return;  // estadísticas de saltos del perfil
         PlayerObject::incrementJumps();
+    }
+
+    void tryPlaceCheckpoint() {
+        if (ts::sim::isGhost(this)) return;  // checkpoints automáticos de práctica
+        PlayerObject::tryPlaceCheckpoint();
     }
 
     void playerDestroyed(bool noEffects) {

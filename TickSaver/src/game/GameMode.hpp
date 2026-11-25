@@ -3,6 +3,11 @@
 //  TickSaver · game/GameMode.hpp
 //  Detección del modo de juego de un PlayerObject y "perfil" de simulación
 //  de cada modo (cuánto mirar hacia adelante, cuándo dar por bueno un click).
+//
+//  Regla clave: la ventana sólo debe cubrir lo que depende de ESTE click.
+//  Si mira demasiado lejos, el fantasma "muere" por inputs futuros que no
+//  conocemos y el mod retiene clicks que estaban bien (se siente como que
+//  el click no entra).
 // ============================================================================
 
 #include "../core/Types.hpp"
@@ -13,21 +18,25 @@ namespace ts {
 
 Mode detectMode(PlayerObject* player);
 
-// Cómo se evalúa un click en cada modo.
 struct ModeProfile {
     // Ventana máxima de simulación en ticks (240 = 1 s).
     int window;
-    // Modos "de salto" (cubo, robot, bola, araña): el click se da por bueno
-    // cuando el fantasma vuelve a tocar suelo/techo + `landingMargin` ticks.
-    // Así no penalizamos un click correcto por el obstáculo siguiente (que
-    // depende del PRÓXIMO click, no de este).
+    // Modos de salto (cubo, robot, bola, araña): el click es bueno cuando el
+    // fantasma vuelve a apoyarse vivo + `landingMargin` ticks.
     bool endOnLanding;
     int landingMargin;
-    // Hold por defecto para el fantasma mientras el modo adaptativo no tiene
-    // datos. Muy importante en nave/wave: mantener = subir.
+    // Hold supuesto mientras el modo adaptativo no tenga datos.
     int defaultHold;
+    // Modos de mantener (nave, wave): la ventana termina `afterRelease`
+    // ticks después del soltar supuesto. Lo que pase después depende de tu
+    // próximo click, no de este.
+    bool holdBased;
+    int afterRelease;
 };
 
 ModeProfile const& profileFor(Mode mode);
+
+// Ventana efectiva para un hold dado.
+int windowFor(ModeProfile const& profile, int holdTicks);
 
 } // namespace ts

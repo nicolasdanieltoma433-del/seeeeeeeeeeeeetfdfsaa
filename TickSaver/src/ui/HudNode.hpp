@@ -25,6 +25,8 @@ public:
     void applyConfig(Config const& cfg);
     void onClick(ClickEvent const& ev, int streak, bool streakIncreased);
     void setHolding(int ticksHeld);
+    // Cartel "INTENTO ASISTIDO: NO GUARDA" (modo seguro activo en este intento).
+    void setAssisted(bool assisted);
     void resetAttempt();
 
 protected:
@@ -38,6 +40,7 @@ private:
     cocos2d::CCLabelBMFont* m_streakLabel = nullptr;
     cocos2d::CCLabelBMFont* m_caption = nullptr;
     cocos2d::CCLabelBMFont* m_holdLabel = nullptr;
+    cocos2d::CCLabelBMFont* m_assistedLabel = nullptr;
     cocos2d::CCDrawNode* m_bar = nullptr;
     cocos2d::CCNode* m_barRoot = nullptr;
 

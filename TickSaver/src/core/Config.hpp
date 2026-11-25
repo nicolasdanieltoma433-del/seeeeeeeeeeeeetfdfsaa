@@ -77,7 +77,13 @@ struct Config {
     Palette palette = defaultPalette();
 
     // --- Avanzado (no se exporta en el código TS2) ---------------------------
-    int simBudgetPerTick = 600;  // pasos de fantasma máximos por tick
+    // Tiempo de CPU por frame para simular fantasmas. Con niveles pesados
+    // (miles de objetos) cada paso de colisión cuesta más, por eso el límite
+    // es en tiempo y no en cantidad de pasos.
+    float simBudgetMs = 2.f;
+    // Reinyectar el click retrasado con PlayerObject::pushButton (igual que
+    // hace el fantasma) en vez de pasar por handleButton.
+    bool directInject = true;
     bool debugLog = false;
     bool validateSim = false;
 

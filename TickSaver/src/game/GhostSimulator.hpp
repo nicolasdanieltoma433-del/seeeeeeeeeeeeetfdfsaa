@@ -12,10 +12,13 @@
 //    4. si PlayLayer::destroyPlayer recibe al fantasma -> Dies.
 //  Los hooks de GhostGuardHooks.cpp impiden que eso toque el nivel real.
 //
+//  Costo: cada paso es un checkCollisions completo. En niveles pesados
+//  (Slaughterhouse y similares) eso es caro, así que hay un presupuesto de
+//  TIEMPO por frame (setting "Presupuesto de simulacion", en ms). Si se
+//  agota, la simulación devuelve Skipped y el juego no se traba.
+//
 //  Limitación conocida: durante la simulación el nivel está "congelado"
-//  (no corren triggers ni objetos móviles). Con ventanas cortas y la
-//  reevaluación en cada tick (InputScheduler) el error es pequeño, pero en
-//  zonas con muchos move triggers la predicción puede fallar.
+//  (no corren triggers ni objetos móviles).
 // ============================================================================
 
 #include "../core/InputScheduler.hpp"
@@ -36,17 +39,25 @@ public:
     GhostSimulator(GhostSimulator const&) = delete;
     GhostSimulator& operator=(GhostSimulator const&) = delete;
 
-    // Una vez por tick: dt real del paso y presupuesto de pasos de fantasma.
-    void beginTick(float stepDt, int budget);
-    // Cuando el press llega entre ticks (desde handleButton) el presupuesto
-    // del tick en curso puede no haberse renovado todavía.
-    void ensureBudget(int minimum);
+    // Crea los dos fantasmas. Se llama al terminar de cargar el nivel: crear
+    // PlayerObjects en medio de un paso de física no es seguro.
+    void prepare();
+
+    // Una vez por tick: dt real del paso y presupuesto (ms por frame).
+    void beginTick(float stepDt, float budgetMs);
+
+    // Los chequeos de un click recién apretado tienen su propio presupuesto
+    // (no compiten con las reevaluaciones de clicks retenidos).
+    void setPriority(bool priority) { m_priority = priority; }
 
     SimOutcome simulatePress(Slot slot, int holdTicks) override;
     SimOutcome simulateIdle(Slot slot, int ticks) override;
 
+    // Jugadores REALES que mueve un click de este slot (para reinyectar).
+    // Devuelve cuántos escribió en `out`.
+    int realTargets(Slot slot, bool forInjection, std::array<PlayerObject*, 2>& out) const;
+
     // --- Validación (setting "validate-sim") -------------------------------
-    // Antes del paso: predice 1 tick sin input. Después: compara con el real.
     void validationBefore();
     void validationAfter();
 
@@ -54,6 +65,7 @@ public:
     // Dual de un jugador: si es false sólo se exige que sobreviva el P1.
     void setCorrectBoth(bool v) { m_correctBoth = v; }
     int stepsUsedThisTick() const { return m_stepsUsed; }
+    double usedMsThisFrame() const { return m_usedUs / 1000.0; }
 
 private:
     struct Target {
@@ -63,6 +75,7 @@ private:
 
     int collectTargets(Slot slot, std::array<Target, 2>& out);
     PlayerObject* ghostAt(std::size_t index);
+    void refreshFrame();
     void sync(PlayerObject* ghost, PlayerObject* real);
     void step(PlayerObject* ghost);
     SimOutcome run(Slot slot, bool press, int holdTicks, int idleTicks);
@@ -70,8 +83,14 @@ private:
     PlayLayer* m_layer;
     std::array<geode::Ref<PlayerObject>, 2> m_ghosts{};
     float m_dt = 0.25f;  // se reemplaza por el dt real en el primer tick
-    int m_budget = 0;
+
+    // presupuesto
+    unsigned int m_frame = ~0u;
+    double m_usedUs = 0.0;
+    double m_budgetUs = 2000.0;
+    bool m_priority = false;
     int m_stepsUsed = 0;
+
     bool m_debug = false;
     bool m_correctBoth = true;
 

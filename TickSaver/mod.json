@@ -6,10 +6,14 @@
     },
     "id": "tuusuario.ticksaver",
     "name": "TickSaver",
-    "version": "v0.2.0",
+    "version": "v0.2.1",
     "developer": "TuUsuario",
     "description": "Asistente de practica: retrasa los clicks tempranos para salvar el intento",
-    "tags": ["cheat", "gameplay", "utility"],
+    "tags": [
+        "cheat",
+        "gameplay",
+        "utility"
+    ],
     "settings": {
         "title-general": {
             "type": "title",
@@ -26,7 +30,15 @@
             "name": "Preset",
             "description": "Suave/Normal/Fuerte/Maximo cambian cuantos ticks se puede retrasar un click. Wave da mas margen a wave, nave y swing. Entrenar da poca ayuda y activa el modo adaptativo. Si cambias un valor a mano pasa a Personalizado.",
             "default": "Normal",
-            "one-of": ["Suave", "Normal", "Fuerte", "Maximo", "Wave", "Entrenar", "Personalizado"]
+            "one-of": [
+                "Suave",
+                "Normal",
+                "Fuerte",
+                "Maximo",
+                "Wave",
+                "Entrenar",
+                "Personalizado"
+            ]
         },
         "max-ticks": {
             "type": "int",
@@ -35,28 +47,106 @@
             "default": 6,
             "min": 0,
             "max": 240,
-            "control": { "slider": true, "arrows": true, "arrow-step": 1, "input": true }
+            "control": {
+                "slider": true,
+                "arrows": true,
+                "arrow-step": 1,
+                "input": true
+            }
         },
-
         "title-modes": {
             "type": "title",
             "name": "Ticks por modo (0 = usar el maximo general)"
         },
-        "ticks-cube":   { "type": "int", "name": "Cubo",  "default": 0, "min": 0, "max": 240, "control": { "slider": true, "input": true } },
-        "ticks-ship":   { "type": "int", "name": "Nave",  "default": 0, "min": 0, "max": 240, "control": { "slider": true, "input": true } },
-        "ticks-ball":   { "type": "int", "name": "Bola",  "default": 0, "min": 0, "max": 240, "control": { "slider": true, "input": true } },
-        "ticks-ufo":    { "type": "int", "name": "UFO",   "default": 0, "min": 0, "max": 240, "control": { "slider": true, "input": true } },
-        "ticks-wave":   { "type": "int", "name": "Wave",  "default": 5, "min": 0, "max": 240, "control": { "slider": true, "input": true } },
-        "ticks-robot":  { "type": "int", "name": "Robot", "default": 0, "min": 0, "max": 240, "control": { "slider": true, "input": true } },
-        "ticks-spider": { "type": "int", "name": "Arana", "default": 0, "min": 0, "max": 240, "control": { "slider": true, "input": true } },
-        "ticks-swing":  {
+        "ticks-cube": {
+            "type": "int",
+            "name": "Cubo",
+            "default": 0,
+            "min": 0,
+            "max": 240,
+            "control": {
+                "slider": true,
+                "input": true
+            }
+        },
+        "ticks-ship": {
+            "type": "int",
+            "name": "Nave",
+            "default": 0,
+            "min": 0,
+            "max": 240,
+            "control": {
+                "slider": true,
+                "input": true
+            }
+        },
+        "ticks-ball": {
+            "type": "int",
+            "name": "Bola",
+            "default": 0,
+            "min": 0,
+            "max": 240,
+            "control": {
+                "slider": true,
+                "input": true
+            }
+        },
+        "ticks-ufo": {
+            "type": "int",
+            "name": "UFO",
+            "default": 0,
+            "min": 0,
+            "max": 240,
+            "control": {
+                "slider": true,
+                "input": true
+            }
+        },
+        "ticks-wave": {
+            "type": "int",
+            "name": "Wave",
+            "default": 5,
+            "min": 0,
+            "max": 240,
+            "control": {
+                "slider": true,
+                "input": true
+            }
+        },
+        "ticks-robot": {
+            "type": "int",
+            "name": "Robot",
+            "default": 0,
+            "min": 0,
+            "max": 240,
+            "control": {
+                "slider": true,
+                "input": true
+            }
+        },
+        "ticks-spider": {
+            "type": "int",
+            "name": "Arana",
+            "default": 0,
+            "min": 0,
+            "max": 240,
+            "control": {
+                "slider": true,
+                "input": true
+            }
+        },
+        "ticks-swing": {
             "type": "int",
             "name": "Swing",
             "description": "El swing tiene sus propios ticks porque su fisica es mucho mas sensible.",
-            "default": 4, "min": 0, "max": 240,
-            "control": { "slider": true, "input": true }
+            "default": 4,
+            "min": 0,
+            "max": 240,
+            "control": {
+                "slider": true,
+                "input": true
+            }
         },
-
         "title-region": {
             "type": "title",
             "name": "Tramo dificil"
@@ -67,10 +157,42 @@
             "description": "Suma ticks extra solo entre dos porcentajes del nivel (por ejemplo 40% a 60%).",
             "default": false
         },
-        "region-start": { "type": "int", "enable-if": "region-enabled", "name": "Desde (%)", "default": 40, "min": 0, "max": 100, "control": { "slider": true, "input": true } },
-        "region-end":   { "type": "int", "enable-if": "region-enabled", "name": "Hasta (%)", "default": 60, "min": 0, "max": 100, "control": { "slider": true, "input": true } },
-        "region-extra": { "type": "int", "enable-if": "region-enabled", "name": "Ticks extra", "default": 6, "min": 0, "max": 240, "control": { "slider": true, "input": true } },
-
+        "region-start": {
+            "type": "int",
+            "enable-if": "region-enabled",
+            "name": "Desde (%)",
+            "default": 40,
+            "min": 0,
+            "max": 100,
+            "control": {
+                "slider": true,
+                "input": true
+            }
+        },
+        "region-end": {
+            "type": "int",
+            "enable-if": "region-enabled",
+            "name": "Hasta (%)",
+            "default": 60,
+            "min": 0,
+            "max": 100,
+            "control": {
+                "slider": true,
+                "input": true
+            }
+        },
+        "region-extra": {
+            "type": "int",
+            "enable-if": "region-enabled",
+            "name": "Ticks extra",
+            "default": 6,
+            "min": 0,
+            "max": 240,
+            "control": {
+                "slider": true,
+                "input": true
+            }
+        },
         "title-behavior": {
             "type": "title",
             "name": "Comportamiento"
@@ -99,47 +221,143 @@
             "description": "Los intentos en los que el mod te salvo no guardan progreso ni completados (como una start position).",
             "default": true
         },
-
         "title-hud": {
             "type": "title",
             "name": "HUD"
         },
-        "show-hud":           { "type": "bool", "name": "Mostrar HUD (racha)", "default": true },
-        "show-timing-bar":    { "type": "bool", "name": "Barra de timing", "default": true },
-        "show-death-summary": { "type": "bool", "name": "Resumen al morir", "default": true },
+        "show-hud": {
+            "type": "bool",
+            "name": "Mostrar HUD (racha)",
+            "default": true
+        },
+        "show-timing-bar": {
+            "type": "bool",
+            "name": "Barra de timing",
+            "default": true
+        },
+        "show-death-summary": {
+            "type": "bool",
+            "name": "Resumen al morir",
+            "default": true
+        },
         "hud-scale": {
             "type": "float",
             "name": "Escala del HUD",
             "default": 1.0,
             "min": 0.5,
             "max": 1.5,
-            "control": { "slider": true, "slider-step": 0.05, "input": true }
+            "control": {
+                "slider": true,
+                "slider-step": 0.05,
+                "input": true
+            }
         },
-
         "title-colors": {
             "type": "title",
             "name": "Paleta (8 colores)"
         },
-        "color-streak": { "type": "rgba", "name": "Racha",             "default": [255, 200, 60, 255] },
-        "color-good":   { "type": "rgba", "name": "Justo",             "default": [90, 230, 120, 255] },
-        "color-early":  { "type": "rgba", "name": "Temprano",          "default": [255, 170, 60, 255] },
-        "color-saved":  { "type": "rgba", "name": "Salvado",           "default": [80, 200, 255, 255] },
-        "color-danger": { "type": "rgba", "name": "Sin salvacion",     "default": [255, 80, 80, 255] },
-        "color-bar-bg": { "type": "rgba", "name": "Fondo de paneles",  "default": [15, 15, 25, 170] },
-        "color-text":   { "type": "rgba", "name": "Texto",             "default": [230, 230, 240, 255] },
-        "color-accent": { "type": "rgba", "name": "Histograma",        "default": [180, 120, 255, 255] },
-
+        "color-streak": {
+            "type": "rgba",
+            "name": "Racha",
+            "default": [
+                255,
+                200,
+                60,
+                255
+            ]
+        },
+        "color-good": {
+            "type": "rgba",
+            "name": "Justo",
+            "default": [
+                90,
+                230,
+                120,
+                255
+            ]
+        },
+        "color-early": {
+            "type": "rgba",
+            "name": "Temprano",
+            "default": [
+                255,
+                170,
+                60,
+                255
+            ]
+        },
+        "color-saved": {
+            "type": "rgba",
+            "name": "Salvado",
+            "default": [
+                80,
+                200,
+                255,
+                255
+            ]
+        },
+        "color-danger": {
+            "type": "rgba",
+            "name": "Sin salvacion",
+            "default": [
+                255,
+                80,
+                80,
+                255
+            ]
+        },
+        "color-bar-bg": {
+            "type": "rgba",
+            "name": "Fondo de paneles",
+            "default": [
+                15,
+                15,
+                25,
+                170
+            ]
+        },
+        "color-text": {
+            "type": "rgba",
+            "name": "Texto",
+            "default": [
+                230,
+                230,
+                240,
+                255
+            ]
+        },
+        "color-accent": {
+            "type": "rgba",
+            "name": "Histograma",
+            "default": [
+                180,
+                120,
+                255,
+                255
+            ]
+        },
         "title-advanced": {
             "type": "title",
             "name": "Avanzado"
         },
-        "sim-budget": {
-            "type": "int",
-            "name": "Presupuesto de simulacion",
-            "description": "Pasos de fantasma maximos por tick. Bajalo si notas lag en celulares viejos.",
-            "default": 600,
-            "min": 100,
-            "max": 5000
+        "sim-budget-ms": {
+            "type": "float",
+            "name": "Presupuesto de simulacion (ms)",
+            "description": "Tiempo maximo por frame para simular el fantasma. Bajalo si un nivel pesado se traba (por ejemplo Slaughterhouse); subilo si en un nivel liviano no te salva.",
+            "default": 2.0,
+            "min": 0.5,
+            "max": 10.0,
+            "control": {
+                "slider": true,
+                "slider-step": 0.5,
+                "input": true
+            }
+        },
+        "direct-inject": {
+            "type": "bool",
+            "name": "Reinyeccion directa",
+            "description": "Aplica el click retrasado directo al jugador, igual que en la simulacion (recomendado). Desactivalo si los clicks salvados no se registran.",
+            "default": true
         },
         "debug-log": {
             "type": "bool",

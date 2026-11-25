@@ -123,8 +123,8 @@ antes que nosotros, nunca veríamos morir al fantasma y cualquier click "salvar�
 
 ## 6. El fantasma
 
-**Creación** (perezosa, la primera vez que se necesita):
-`PlayerObject::create(1, 1, layer, layer->m_objectLayer, false)`, invisible, sin efectos,
+**Creación** (al terminar de cargar el nivel, nunca en medio de un paso de física):
+`PlayerObject::create(1, 1, layer, layer->m_objectLayer, true)`, invisible, sin efectos,
 sin estelas ni partículas, registrado en `SimGuard`. Hay dos: uno por jugador.
 
 **Sincronización** antes de cada simulación: `copyAttributes(real)` (lo que usa GD para
@@ -138,11 +138,24 @@ clonar jugadores en el portal dual) + una lista explícita de campos críticos (
 | Modo | Ventana | Fin anticipado | Hold por defecto |
 |---|---|---|---|
 | Cubo, Robot | 120t | al aterrizar + 6t | 8t / 12t |
-| Bola | 90t | al aterrizar + 6t | 4t |
-| Araña | 60t | al aterrizar + 6t | 4t |
-| UFO | 60t | — | 6t |
-| Nave, Swing | 48t | — | 14t / 6t |
-| Wave | 36t | — | 10t |
+| Bola | 60t | al aterrizar + 6t | 4t |
+| Araña | 40t | al aterrizar + 4t | 4t |
+| UFO, Swing | 20t | — | 6t |
+| Nave | hold + 6t (máx. 40t) | — | 14t |
+| Wave | hold + 4t (máx. 30t) | — | 10t |
+
+En nave y wave la ventana termina poco después del soltar: lo que pase después depende
+de tu próximo click. Mirar más lejos hacía que el fantasma "muriera" por inputs futuros y
+el mod retuviera clicks correctos.
+
+**Presupuesto:** cada paso del fantasma es un `checkCollisions` completo, caro en niveles
+con muchos objetos. Hay un límite de **tiempo de CPU por frame** (*CPU por frame*, 2 ms por
+defecto). Si se agota, la simulación devuelve `Skipped` y no se retiene nada nuevo. El
+chequeo del click recién apretado tiene su propio presupuesto.
+
+**Reinyección:** por defecto el click retrasado se aplica con `PlayerObject::pushButton`
+sobre los jugadores reales, lo mismo que hizo el fantasma, en el mismo paso. En modo
+2 jugadores (o con *Reinyección directa* apagada) se usa el `handleButton` original.
 
 En modos de salto el click se da por bueno cuando el fantasma vuelve a apoyarse vivo: el
 obstáculo siguiente depende del próximo click, no de este.
