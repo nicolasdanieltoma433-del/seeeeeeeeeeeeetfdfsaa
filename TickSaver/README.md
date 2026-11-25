@@ -16,6 +16,7 @@ con un "fantasma" invisible y retrasa el click hasta el primer tick en el que so
 - Resumen al morir y estadísticas por nivel con histograma 0–100 %
 - Presets Suave, Normal, Fuerte, Máximo, Wave y Entrenar; ticks extra en un tramo del nivel
 - Paleta de 8 colores; exportar/importar config con un código `TS2-...`
+- Menú in-game (botón **TS** en pausa y en el menú principal) para configurar todo
 
 ## Estructura
 

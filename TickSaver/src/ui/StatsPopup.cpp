@@ -1,16 +1,12 @@
 #include "StatsPopup.hpp"
 
-#include "../core/ConfigCode.hpp"
-#include "../game/Settings.hpp"
 #include "Palette.hpp"
 
 #include <Geode/Geode.hpp>
 #include <Geode/binding/ButtonSprite.hpp>
 #include <Geode/ui/Button.hpp>
-#include <Geode/ui/Notification.hpp>
 
 #include <algorithm>
-#include <variant>
 
 using namespace geode::prelude;
 
@@ -126,38 +122,9 @@ void StatsPopup::buildHistogram() {
 }
 
 void StatsPopup::buildButtons() {
-    auto makeButton = [&](char const* text, float x, auto callback) {
-        auto spr = ButtonSprite::create(text, "goldFont.fnt", "GJ_button_01.png", .6f);
-        auto btn = Button::createWithNode(spr, [this, callback](Button*) { (this->*callback)(); });
-        m_mainLayer->addChildAtPosition(btn, Anchor::Bottom, {x, 24.f});
-    };
-    makeButton("Exportar", -115.f, &StatsPopup::onExport);
-    makeButton("Importar", 0.f, &StatsPopup::onImport);
-    makeButton("Borrar stats", 115.f, &StatsPopup::onResetStats);
-}
-
-void StatsPopup::onExport() {
-    auto code = encodeConfig(settings::get());
-    if (clipboard::write(code)) {
-        Notification::create(fmt::format("Codigo copiado: {}", code), NotificationIcon::Success, 2.5f)->show();
-    }
-    else {
-        Notification::create("No se pudo copiar al portapapeles", NotificationIcon::Error)->show();
-    }
-}
-
-void StatsPopup::onImport() {
-    auto text = clipboard::read();
-    auto result = decodeConfig(text, settings::get());
-    if (auto* err = std::get_if<CodeError>(&result)) {
-        Notification::create(fmt::format("Importar: {}", err->message), NotificationIcon::Error, 2.5f)->show();
-        return;
-    }
-    auto const& cfg = std::get<Config>(result);
-    settings::write(cfg);
-    m_cfg = cfg;
-    Notification::create(fmt::format("Config importada (preset {})", presetName(cfg.preset)), NotificationIcon::Success)
-        ->show();
+    auto spr = ButtonSprite::create("Borrar stats", "goldFont.fnt", "GJ_button_06.png", .6f);
+    auto btn = Button::createWithNode(spr, [this](Button*) { onResetStats(); });
+    m_mainLayer->addChildAtPosition(btn, Anchor::Bottom, {0.f, 24.f});
 }
 
 void StatsPopup::onResetStats() {

@@ -23,6 +23,10 @@ void install();
 // Escribe una Config completa en los settings (importar código TS2).
 void write(Config const& cfg);
 
+// Modifica la Config actual y la guarda (lo usa el menú in-game):
+//   settings::update([](Config& c) { c.modeMaxTicks[idx(Mode::Wave)] = 12; });
+void update(std::function<void(Config&)> const& mutator);
+
 // Callback opcional que se dispara tras cada recarga (lo usa el motor para
 // refrescar colores/HUD en vivo).
 void setOnChanged(std::function<void()> callback);

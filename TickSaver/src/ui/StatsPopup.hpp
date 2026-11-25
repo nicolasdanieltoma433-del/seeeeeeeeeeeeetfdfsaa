@@ -5,8 +5,8 @@
 //    * resumen: salvados, mejor racha, muertes, intentos, promedio de ticks
 //    * histograma 0%..100% en 20 barras de 5%: dónde te salva más el mod
 //      (barras) y dónde morís (puntos); el tramo con ticks extra se resalta
-//    * botones: exportar config (TS2 al portapapeles), importar config
-//      (desde el portapapeles) y borrar las stats del nivel
+//    * boton para borrar las stats del nivel (exportar/importar la config
+//      esta en el menu del mod, ui/ModMenuPopup)
 // ============================================================================
 
 #include "../core/Config.hpp"
@@ -30,8 +30,6 @@ private:
     void buildHistogram();
     void buildButtons();
 
-    void onExport();
-    void onImport();
     void onResetStats();
 
     LevelStats m_stats;

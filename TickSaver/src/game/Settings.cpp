@@ -157,10 +157,22 @@ void write(Config const& c) {
         auto const& p = c.palette[i];
         mod->setSettingValue<ccColor4B>(kPaletteKeys[i], ccColor4B{p.r, p.g, p.b, p.a});
     }
+    mod->setSettingValue<std::int64_t>("sim-budget", c.simBudgetPerTick);
+    mod->setSettingValue<bool>("debug-log", c.debugLog);
+    mod->setSettingValue<bool>("validate-sim", c.validateSim);
     g_writing = false;
 
     g_cache = readAll();
     if (g_onChanged) g_onChanged();
+}
+
+void update(std::function<void(Config&)> const& mutator) {
+    Config c = g_cache;
+    mutator(c);
+    // El preset siempre refleja los valores reales: si el menú tocó un tick
+    // a mano queda "Personalizado"; si eligió un preset, coincide con él.
+    c.preset = detectPreset(c);
+    write(c);
 }
 
 } // namespace ts::settings

@@ -88,13 +88,14 @@ TickSaver/
 │   ├── ui/
 │   │   ├── HudNode.*            racha, barra de timing, "esperando", "SALVADO +Nt"
 │   │   ├── DeathSummaryNode.*   resumen al morir
-│   │   ├── StatsPopup.*         stats + histograma + exportar/importar/borrar
+│   │   ├── ModMenuPopup.*       menu in-game: pestanas General/Modos/Tramo/Opciones/HUD
+│   │   ├── StatsPopup.*         stats + histograma + borrar
 │   │   └── Palette.hpp          RGBA -> cocos
 │   └── hooks/
 │       ├── InputHooks.cpp       handleButton, processCommands, PlayerObject::update
 │       ├── PlayLayerHooks.cpp   init, resetLevel, destroyPlayer, levelComplete, onQuit
 │       ├── GhostGuardHooks.cpp  aislamiento del fantasma (ver §6)
-│       └── PauseLayerHooks.cpp  botón "TS" en pausa
+│       └── PauseLayerHooks.cpp  botón "TS" en pausa y en el menú principal
 └── tests/                   tests de core/ (CMake independiente, sin Geode)
 ```
 
@@ -113,7 +114,7 @@ sin abrir el juego: `tests/core_tests.cpp` (75 checks).
 | `PlayLayer::resetLevel()` | nuevo intento: racha, scheduler, modo seguro | PlayLayerHooks |
 | `PlayLayer::destroyPlayer(PlayerObject*, GameObject*)` | muerte del fantasma (flag) o real (stats) | PlayLayerHooks |
 | `PlayLayer::levelComplete()` / `onQuit()` | guardar stats | PlayLayerHooks |
-| `PauseLayer::customSetup()` | botón "TS" | PauseLayerHooks |
+| `PauseLayer::customSetup()` / `MenuLayer::init()` | botón "TS" que abre el menú del mod | PauseLayerHooks |
 | 20 hooks de aislamiento | ver §6 | GhostGuardHooks |
 
 `destroyPlayer` se registra con `Priority::First`: si un noclip de otro mod corta la cadena
@@ -216,13 +217,29 @@ agrupado de a 5 caracteres. Ejemplo sin paleta (38 caracteres):
 `TS2-08ZG8-1G01G-00060-00062-GF0C0-WYCP`. Al importar se aceptan minúsculas, sin guiones,
 y `I/L→1`, `O→0`. Detalle byte a byte en `src/core/ConfigCode.hpp`.
 
-## 12. Modo seguro
+## 12. Menú in-game
+
+`ui/ModMenuPopup` (botón **TS** en pausa y en el menú principal) edita todo sin salir del
+juego, escribiendo en los mismos settings de Geode con `settings::update`:
+
+| Pestaña | Qué tiene |
+|---|---|
+| General | mod activado, preset (< >), ticks máximos, modo seguro |
+| Modos | un botón por personaje (Cubo, Nave, Bola, UFO, Wave, Robot, Araña, Swing) y slider de ticks propios; 0 = usa el general |
+| Tramo | activar, desde %, hasta %, ticks extra |
+| Opciones | adaptativo, 2 jugadores, conservar hold, log, validar fantasma, presupuesto |
+| HUD | mostrar HUD/barra/resumen, escala y los 8 colores (selector de color de Geode) |
+
+Abajo: Estadísticas, Exportar, Importar y Restablecer, y el aviso fijo de responsabilidad.
+Desactivar el modo seguro pide confirmación con una advertencia de baneo.
+
+## 13. Modo seguro
 
 Cuando un intento recibe ayuda (un *Saved* o *Unsalvageable*), el motor pone
 `m_isTestMode = true` (lo mismo que hace una start position): GD no guarda progreso,
 récords ni completados de ese intento. Se restaura antes del `resetLevel` original.
 
-## 13. Puntos a calibrar en el juego
+## 14. Puntos a calibrar en el juego
 
 Esto no se puede verificar sin correr GD. Activar **Log de depuración** y **Validar fantasma**:
 
@@ -239,7 +256,7 @@ Esto no se puede verificar sin correr GD. Activar **Log de depuración** y **Val
 6. **Ventanas por modo** (`GameMode.cpp`): ajustar si hay falsos "muere" (ventana larga) o
    saves que no salvan (ventana corta).
 
-## 14. Compilar
+## 15. Compilar
 
 * **Nube (sin instalar nada):** el workflow `.github/workflows/ticksaver.yml` del repo
   compila Windows, Android32 y Android64 con `geode-sdk/build-geode-mod` y sube el `.geode`
