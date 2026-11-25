@@ -53,6 +53,9 @@ public:
 
     SimOutcome simulatePress(Slot slot, int holdTicks) override;
     SimOutcome simulateIdle(Slot slot, int ticks) override;
+    SimOutcome simulateNoPress(Slot slot, int holdTicks) override;
+    bool pressHasEffect(Slot slot, int holdTicks) override;
+    SimOutcome simulateRelease(Slot slot) override;
 
     // Jugadores REALES que mueve un click de este slot (para reinyectar).
     // Devuelve cuántos escribió en `out`.
@@ -76,12 +79,21 @@ private:
         PlayerObject* ghost = nullptr;
     };
 
+    enum class Kind { Press, Idle, NoPress, Release };
+
+    // Posición/velocidad final del primer fantasma (para pressHasEffect).
+    struct Trace {
+        float x = 0.f, y = 0.f;
+        double yVelocity = 0.0;
+    };
+
     int collectTargets(Slot slot, std::array<Target, 2>& out);
     PlayerObject* ghostAt(std::size_t index);
     void refreshFrame();
     void sync(PlayerObject* ghost, PlayerObject* real);
     void step(PlayerObject* ghost);
-    SimOutcome run(Slot slot, bool press, int holdTicks, int idleTicks);
+    // windowOverride > 0: correr exactamente esa cantidad de pasos (sin fin anticipado).
+    SimOutcome run(Slot slot, Kind kind, int holdTicks, int windowOverride, Trace* trace = nullptr);
 
     PlayLayer* m_layer;
     std::array<geode::Ref<PlayerObject>, 2> m_ghosts{};

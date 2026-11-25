@@ -35,6 +35,8 @@ char const* kindName(ClickKind k) {
         case ClickKind::Saved: return "salvado";
         case ClickKind::Unsalvageable: return "sin salvacion";
         case ClickKind::Unchecked: return "sin evaluar";
+        case ClickKind::Unnecessary: return "sin efecto";
+        case ClickKind::Ignored: return "ignorado";
     }
     return "?";
 }
@@ -86,6 +88,8 @@ SlotParams Engine::paramsFor(Slot slot) const {
     auto const& prof = profileFor(p.mode);
     auto const& model = store::adaptive();
     p.expectedHold = cfg.adaptive ? model.expectedHold(p.mode, prof.defaultHold) : prof.defaultHold;
+    p.dropUnneeded = cfg.dropUnneeded && prof.noPressWindow > 0;   // modos de toque
+    p.saveReleases = cfg.saveReleases && prof.releaseWindow > 0;   // nave/wave
 
     if (!cfg.enabled || (slot == Slot::P2 && !cfg.correctBoth)) {
         p.maxDelay = 0;  // pasa directo (y si había algo retenido se suelta)
@@ -165,7 +169,14 @@ bool Engine::onButton(bool down, int button, bool isPlayer1) {
     // apagado, así ya hay datos cuando lo prendas).
     auto held = static_cast<int>(applyTick - m_physDownTick[idx(slot)]);
     if (held > 0) store::adaptive().recordHold(m_physDownMode[idx(slot)], held);
-    return m_scheduler.onPhysicalRelease(slot, applyTick);
+
+    // En nave/wave el soltar también se evalúa (soltar temprano mata igual
+    // que apretar temprano).
+    auto params = paramsFor(slot);
+    m_sim.setPriority(true);
+    bool forward = m_scheduler.onPhysicalRelease(slot, applyTick, params, m_sim);
+    m_sim.setPriority(false);
+    return forward;
 }
 
 void Engine::noteRealUpdate(PlayerObject* player, float dt) {
@@ -228,13 +239,16 @@ void Engine::processEvents() {
         m_stats.recordClick(ev, pct);
         m_stats.recordStreak(m_session.streak());
 
-        if (ev.kind == ClickKind::Saved) store::adaptive().recordSave(ev.mode, ev.earlyTicks);
-        if (ev.kind == ClickKind::Saved || ev.kind == ClickKind::Unsalvageable) markAssisted();
+        if (ev.kind == ClickKind::Saved && !ev.release) store::adaptive().recordSave(ev.mode, ev.earlyTicks);
+        if (ev.kind == ClickKind::Saved || ev.kind == ClickKind::Unsalvageable || ev.kind == ClickKind::Ignored) {
+            markAssisted();
+        }
 
         if (m_hud) m_hud->onClick(ev, m_session.streak(), increased);
         if (cfg.debugLog) {
-            log::info("[TickSaver] click P{} {} {} +{}t ({:.1f}%)", static_cast<int>(ev.slot) + 1,
-                      kModeNames[idx(ev.mode)], kindName(ev.kind), ev.earlyTicks, static_cast<double>(pct));
+            log::info("[TickSaver] {} P{} {} {} +{}t ({:.1f}%)", ev.release ? "soltar" : "click",
+                      static_cast<int>(ev.slot) + 1, kModeNames[idx(ev.mode)], kindName(ev.kind), ev.earlyTicks,
+                      static_cast<double>(pct));
         }
         m_dirty = true;
     }

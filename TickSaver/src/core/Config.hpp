@@ -43,7 +43,7 @@ struct Region {
     bool enabled = false;
     std::uint8_t startPct = 40;   // 0..100
     std::uint8_t endPct = 60;     // 0..100, > startPct
-    std::uint8_t extraTicks = 6;  // se SUMAN al máximo del modo (tope 240)
+    std::uint16_t extraTicks = 6;  // se SUMAN al máximo del modo (tope 1500)
 
     constexpr bool operator==(Region const&) const = default;
     bool contains(float percent) const;
@@ -55,11 +55,11 @@ struct Config {
     Preset preset = Preset::Normal;
 
     // --- Ticks ---------------------------------------------------------------
-    // Máximo de ticks que un click puede retrasarse (0..240).
-    std::uint8_t globalMaxTicks = 6;
+    // Máximo de ticks que un click puede retrasarse (0..1500).
+    std::uint16_t globalMaxTicks = 6;
     // Override por modo: 0 = usar globalMaxTicks. Así "swing aparte con sus
     // propios ticks" es simplemente modeMaxTicks[Swing] != 0.
-    std::array<std::uint8_t, kModeCount> modeMaxTicks{};
+    std::array<std::uint16_t, kModeCount> modeMaxTicks{};
     Region region{};
 
     // --- Comportamiento ------------------------------------------------------
@@ -67,6 +67,12 @@ struct Config {
     bool adaptive = false;      // modo adaptativo "aprende de vos"
     bool preserveHold = true;   // al retrasar, conservar cuánto mantuviste el click
     bool safeMode = true;       // intentos asistidos no guardan progreso
+    // Modos de toque (cubo, bola, UFO, robot, araña, swing): un click que
+    // mata y que NO hacía falta (no apretar también sobrevive) se descarta en
+    // vez de dispararse tarde.
+    bool dropUnneeded = true;
+    // Nave y wave: también se corrige el SOLTAR temprano.
+    bool saveReleases = true;
 
     // --- HUD -----------------------------------------------------------------
     bool showHud = true;

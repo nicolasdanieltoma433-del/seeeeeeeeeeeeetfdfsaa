@@ -8,11 +8,14 @@ namespace ts {
 std::string describeClick(LastClick const& c) {
     if (!c.valid) return "Sin clicks todavia";
     auto t = std::to_string(c.earlyTicks) + "t";
+    std::string early = c.release ? "soltaste temprano por " : "temprano por ";
     switch (c.kind) {
         case ClickKind::Clean: return "justo";
-        case ClickKind::Saved: return "temprano por " + t + ": salvado";
-        case ClickKind::Unsalvageable: return "temprano por " + t + ": sin salvacion";
+        case ClickKind::Saved: return early + t + ": salvado";
+        case ClickKind::Unsalvageable: return early + t + ": sin salvacion";
         case ClickKind::Unchecked: return "sin evaluar";
+        case ClickKind::Unnecessary: return "click sin efecto: no cuenta";
+        case ClickKind::Ignored: return "click innecesario: ignorado";
     }
     return {};
 }
@@ -33,6 +36,8 @@ bool Session::onClick(ClickEvent const& ev) {
     //   Saved          ->  0   (fue temprano: el mod tuvo que salvarte)
     //   Unsalvageable  ->  0
     //   Unchecked      -> sin cambio (no sabemos si fue bueno)
+    //   Unnecessary    -> sin cambio (el click no hizo nada: no cuenta)
+    //   Ignored        ->  0   (el click mataba y no hacía falta)
     bool increased = false;
     switch (ev.kind) {
         case ClickKind::Clean:
@@ -40,6 +45,7 @@ bool Session::onClick(ClickEvent const& ev) {
             increased = true;
             break;
         case ClickKind::Saved:
+        case ClickKind::Ignored:
             ++m_saves;
             m_streak = 0;
             break;
@@ -48,11 +54,12 @@ bool Session::onClick(ClickEvent const& ev) {
             m_streak = 0;
             break;
         case ClickKind::Unchecked:
+        case ClickKind::Unnecessary:
             break;
     }
     m_bestStreak = std::max(m_bestStreak, m_streak);
-    if (ev.kind != ClickKind::Unchecked) {
-        m_last = LastClick{true, ev.kind, ev.earlyTicks, ev.mode};
+    if (ev.kind != ClickKind::Unchecked && ev.kind != ClickKind::Unnecessary) {
+        m_last = LastClick{true, ev.kind, ev.earlyTicks, ev.mode, ev.release};
     }
     return increased;
 }
@@ -66,8 +73,15 @@ std::size_t LevelStats::cellFor(float percent) {
 }
 
 void LevelStats::recordClick(ClickEvent const& ev, float percent) {
-    ++clicks;
-    if (ev.kind == ClickKind::Saved) {
+    if (ev.kind == ClickKind::Unnecessary) return;  // clicks sin efecto no cuentan
+    if (!ev.release) ++clicks;                       // los "soltar" no son clicks
+    if (ev.kind == ClickKind::Ignored) {
+        ++saves;
+        ++ignored;
+        ++savesByPct[cellFor(percent)];
+        ++savesByMode[idx(ev.mode)];
+    }
+    else if (ev.kind == ClickKind::Saved) {
         ++saves;
         savedTicksSum += static_cast<std::uint64_t>(std::max(0, ev.earlyTicks));
         maxSavedTicks = std::max<std::uint32_t>(maxSavedTicks, static_cast<std::uint32_t>(std::max(0, ev.earlyTicks)));
@@ -93,7 +107,8 @@ void LevelStats::recordProgress(float percent) {
 }
 
 double LevelStats::averageSavedTicks() const {
-    return saves == 0 ? 0.0 : static_cast<double>(savedTicksSum) / static_cast<double>(saves);
+    auto timed = saves - std::min(saves, ignored);  // los descartados no tienen "ticks salvados"
+    return timed == 0 ? 0.0 : static_cast<double>(savedTicksSum) / static_cast<double>(timed);
 }
 
 std::vector<std::uint32_t> LevelStats::bucketed(Histogram const& h, int buckets) {

@@ -17,6 +17,7 @@ std::function<void()> g_onChanged;
 std::string modeKey(std::size_t i) { return fmt::format("ticks-{}", kModeKeys[i]); }
 
 std::uint8_t toU8(std::int64_t v, int max) { return static_cast<std::uint8_t>(std::clamp<std::int64_t>(v, 0, max)); }
+std::uint16_t toU16(std::int64_t v, int max) { return static_cast<std::uint16_t>(std::clamp<std::int64_t>(v, 0, max)); }
 
 template <class T>
 T value(std::string_view key) {
@@ -28,20 +29,22 @@ Config readAll() {
     c.enabled = value<bool>("enabled");
     c.preset = presetFromName(value<std::string>("preset")).value_or(Preset::Custom);
 
-    c.globalMaxTicks = toU8(value<std::int64_t>("max-ticks"), kMaxSaveTicks);
+    c.globalMaxTicks = toU16(value<std::int64_t>("max-ticks"), kMaxSaveTicks);
     for (std::size_t i = 0; i < kModeCount; ++i) {
-        c.modeMaxTicks[i] = toU8(value<std::int64_t>(modeKey(i)), kMaxSaveTicks);
+        c.modeMaxTicks[i] = toU16(value<std::int64_t>(modeKey(i)), kMaxSaveTicks);
     }
 
     c.region.enabled = value<bool>("region-enabled");
     c.region.startPct = toU8(value<std::int64_t>("region-start"), 100);
     c.region.endPct = toU8(value<std::int64_t>("region-end"), 100);
-    c.region.extraTicks = toU8(value<std::int64_t>("region-extra"), kMaxSaveTicks);
+    c.region.extraTicks = toU16(value<std::int64_t>("region-extra"), kMaxSaveTicks);
 
     c.correctBoth = value<bool>("correct-both");
     c.adaptive = value<bool>("adaptive");
     c.preserveHold = value<bool>("preserve-hold");
     c.safeMode = value<bool>("safe-mode");
+    c.dropUnneeded = value<bool>("drop-unneeded");
+    c.saveReleases = value<bool>("save-releases");
 
     c.showHud = value<bool>("show-hud");
     c.showTimingBar = value<bool>("show-timing-bar");
@@ -126,6 +129,7 @@ void install() {
     reload();
 
     for (auto key : {"enabled", "region-enabled", "correct-both", "adaptive", "preserve-hold", "safe-mode",
+                     "drop-unneeded", "save-releases",
                      "show-hud", "show-timing-bar", "show-death-summary", "debug-log", "validate-sim", "direct-inject", "full-sync"}) {
         listen<bool>(key);
     }
@@ -152,6 +156,8 @@ void write(Config const& c) {
     mod->setSettingValue<bool>("correct-both", c.correctBoth);
     mod->setSettingValue<bool>("preserve-hold", c.preserveHold);
     mod->setSettingValue<bool>("safe-mode", c.safeMode);
+    mod->setSettingValue<bool>("drop-unneeded", c.dropUnneeded);
+    mod->setSettingValue<bool>("save-releases", c.saveReleases);
     mod->setSettingValue<bool>("show-hud", c.showHud);
     mod->setSettingValue<bool>("show-timing-bar", c.showTimingBar);
     mod->setSettingValue<bool>("show-death-summary", c.showDeathSummary);

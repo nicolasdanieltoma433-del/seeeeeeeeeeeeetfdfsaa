@@ -32,6 +32,12 @@ struct ModeProfile {
     // próximo click, no de este.
     bool holdBased;
     int afterRelease;
+    // Ventana para "¿y si NO apreto?" (decidir si un click hace falta). Más
+    // larga que la del press para no descartar un salto que se necesita un
+    // poco más adelante. 0 = el modo no descarta clicks (nave/wave).
+    int noPressWindow;
+    // Ventana para "¿y si suelto ahora?" (nave/wave). 0 = no se corrige el soltar.
+    int releaseWindow;
 };
 
 ModeProfile const& profileFor(Mode mode);

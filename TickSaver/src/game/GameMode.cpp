@@ -21,16 +21,16 @@ Mode detectMode(PlayerObject* p) {
 }
 
 ModeProfile const& profileFor(Mode mode) {
-    //                         window landing margin hold  holdBased afterRelease
+    //              window landing margin hold holdBased afterRel noPress release
     static constexpr ModeProfile kProfiles[kModeCount] = {
-        /* Cube   */ {120, true, 6, 8, false, 0},
-        /* Ship   */ {40, false, 0, 14, true, 6},
-        /* Ball   */ {60, true, 6, 4, false, 0},
-        /* Ufo    */ {20, false, 0, 6, false, 0},
-        /* Wave   */ {30, false, 0, 10, true, 4},
-        /* Robot  */ {120, true, 6, 12, false, 0},
-        /* Spider */ {40, true, 4, 4, false, 0},
-        /* Swing  */ {20, false, 0, 6, false, 0},
+        /* Cube   */ {120, true, 6, 8, false, 0, 180, 0},
+        /* Ship   */ {48, false, 0, 14, true, 10, 0, 20},
+        /* Ball   */ {60, true, 6, 4, false, 0, 120, 0},
+        /* Ufo    */ {24, false, 0, 6, false, 0, 60, 0},
+        /* Wave   */ {40, false, 0, 10, true, 10, 0, 16},
+        /* Robot  */ {120, true, 6, 12, false, 0, 180, 0},
+        /* Spider */ {40, true, 4, 4, false, 0, 90, 0},
+        /* Swing  */ {24, false, 0, 6, false, 0, 60, 0},
     };
     return kProfiles[idx(mode)];
 }

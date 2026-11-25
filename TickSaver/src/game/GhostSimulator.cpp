@@ -235,7 +235,19 @@ void GhostSimulator::step(PlayerObject* ghost) {
     ++m_stepsUsed;
 }
 
-SimOutcome GhostSimulator::run(Slot slot, bool press, int holdTicks, int idleTicks) {
+namespace {
+char const* kindName(int kind) {
+    switch (kind) {
+        case 0: return "press";
+        case 1: return "idle";
+        case 2: return "sin-apretar";
+        case 3: return "soltar";
+    }
+    return "?";
+}
+} // namespace
+
+SimOutcome GhostSimulator::run(Slot slot, Kind kind, int holdTicks, int windowOverride, Trace* trace) {
     using Clock = std::chrono::steady_clock;
 
     refreshFrame();
@@ -253,9 +265,21 @@ SimOutcome GhostSimulator::run(Slot slot, bool press, int holdTicks, int idleTic
     for (int i = 0; i < n; ++i) {
         auto ui = static_cast<std::size_t>(i);
         prof[ui] = profileFor(detectMode(targets[ui].real));
-        window[ui] = press ? windowFor(prof[ui], holdTicks) : idleTicks;
-        maxWindow = std::max(maxWindow, window[ui]);
+        int w = 0;
+        switch (kind) {
+            case Kind::Press: w = windowFor(prof[ui], holdTicks); break;
+            case Kind::Idle: w = windowOverride; break;
+            case Kind::NoPress: w = prof[ui].noPressWindow > 0 ? prof[ui].noPressWindow : windowFor(prof[ui], holdTicks); break;
+            case Kind::Release: w = prof[ui].releaseWindow; break;
+        }
+        if (windowOverride > 0) w = windowOverride;
+        window[ui] = w;
+        maxWindow = std::max(maxWindow, w);
     }
+    // Modo sin corrección de soltar (o ventana vacía): soltar no se juzga.
+    if (maxWindow <= 0) return SimOutcome::Survives;
+
+    bool landingExit = (kind == Kind::Press || kind == Kind::NoPress) && trace == nullptr;
 
     auto start = Clock::now();
     {
@@ -271,8 +295,13 @@ SimOutcome GhostSimulator::run(Slot slot, bool press, int holdTicks, int idleTic
     int steps = 0;
     {
         sim::Scope scope;  // al salir de este bloque se restauran orbes/pads
-        if (press) {
-            for (int i = 0; i < n; ++i) targets[static_cast<std::size_t>(i)].ghost->pushButton(PlayerButton::Jump);
+        for (int i = 0; i < n; ++i) {
+            auto* g = targets[static_cast<std::size_t>(i)].ghost;
+            if (kind == Kind::Press) g->pushButton(PlayerButton::Jump);
+            else if (kind == Kind::Release) g->releaseButton(PlayerButton::Jump);
+            else if (kind == Kind::NoPress && g->m_holdingButtons[static_cast<int>(PlayerButton::Jump)]) {
+                g->releaseButton(PlayerButton::Jump);  // "no apretar" = botón suelto
+            }
         }
 
         std::array<bool, 2> airborne{}, done{};
@@ -285,7 +314,7 @@ SimOutcome GhostSimulator::run(Slot slot, bool press, int holdTicks, int idleTic
                 if (done[ui]) continue;
                 auto* g = targets[ui].ghost;
 
-                if (press && k == holdTicks) g->releaseButton(PlayerButton::Jump);
+                if (kind == Kind::Press && k == holdTicks) g->releaseButton(PlayerButton::Jump);
                 step(g);
                 ++steps;
 
@@ -301,7 +330,7 @@ SimOutcome GhostSimulator::run(Slot slot, bool press, int holdTicks, int idleTic
                 }
 
                 // Modos de salto: el click es bueno si aterriza vivo.
-                if (press && prof[ui].endOnLanding) {
+                if (landingExit && prof[ui].endOnLanding) {
                     if (!g->m_isOnGround) airborne[ui] = true;
                     else if (airborne[ui] && landedAt[ui] < 0) landedAt[ui] = k;
                     if (landedAt[ui] >= 0 && k - landedAt[ui] >= prof[ui].landingMargin) done[ui] = true;
@@ -321,21 +350,49 @@ SimOutcome GhostSimulator::run(Slot slot, bool press, int holdTicks, int idleTic
                 break;
             }
         }
+
+        if (trace) {
+            auto* g = targets[0].ghost;
+            trace->x = g->getPositionX();
+            trace->y = g->getPositionY();
+            trace->yVelocity = g->m_yVelocity;
+        }
     }
     m_usedUs += elapsedUs();
 
     if (m_debug) {
-        log::debug("[TickSaver] sim {} slot={} hold={} -> {} (paso {}/{}, {:.2f} ms){}{}", press ? "press" : "idle",
-                   static_cast<int>(slot) + 1, holdTicks, outcomeName(result), endedAt, maxWindow, elapsedUs() / 1000.0,
-                   result == SimOutcome::Inconclusive ? ", motivo: " : "",
+        log::debug("[TickSaver] sim {} slot={} hold={} -> {} (paso {}/{}, {:.2f} ms){}{}",
+                   kindName(static_cast<int>(kind)), static_cast<int>(slot) + 1, holdTicks, outcomeName(result),
+                   endedAt, maxWindow, elapsedUs() / 1000.0, result == SimOutcome::Inconclusive ? ", motivo: " : "",
                    result == SimOutcome::Inconclusive ? sim::inconclusiveReason() : "");
     }
     return result;
 }
 
-SimOutcome GhostSimulator::simulatePress(Slot slot, int holdTicks) { return run(slot, true, holdTicks, 0); }
+SimOutcome GhostSimulator::simulatePress(Slot slot, int holdTicks) { return run(slot, Kind::Press, holdTicks, 0); }
 
-SimOutcome GhostSimulator::simulateIdle(Slot slot, int ticks) { return run(slot, false, 0, ticks); }
+SimOutcome GhostSimulator::simulateIdle(Slot slot, int ticks) { return run(slot, Kind::Idle, 0, ticks); }
+
+SimOutcome GhostSimulator::simulateNoPress(Slot slot, int holdTicks) { return run(slot, Kind::NoPress, holdTicks, 0); }
+
+SimOutcome GhostSimulator::simulateRelease(Slot slot) { return run(slot, Kind::Release, 0, 0); }
+
+bool GhostSimulator::pressHasEffect(Slot slot, int holdTicks) {
+    // Nave/wave: apretar siempre cambia la trayectoria.
+    std::array<PlayerObject*, 2> reals{};
+    if (realTargets(slot, false, reals) == 0) return true;
+    if (profileFor(detectMode(reals[0])).holdBased) return true;
+
+    // Comparamos 8 pasos apretando contra 8 pasos sin apretar. Si el fantasma
+    // termina exactamente igual, el click no hizo nada (cubo en el aire, bola
+    // sin suelo...). Ante cualquier duda, "tiene efecto".
+    constexpr int kSteps = 8;
+    Trace withPress, without;
+    if (run(slot, Kind::Press, holdTicks, kSteps, &withPress) != SimOutcome::Survives) return true;
+    if (run(slot, Kind::NoPress, holdTicks, kSteps, &without) != SimOutcome::Survives) return true;
+    return std::abs(withPress.x - without.x) > 0.01f || std::abs(withPress.y - without.y) > 0.01f ||
+           std::abs(withPress.yVelocity - without.yVelocity) > 0.0001;
+}
 
 void GhostSimulator::validationBefore() {
     m_validating = false;

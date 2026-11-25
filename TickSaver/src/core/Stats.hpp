@@ -24,6 +24,7 @@ struct LastClick {
     ClickKind kind = ClickKind::Unchecked;
     int earlyTicks = 0;
     Mode mode = Mode::Cube;
+    bool release = false;  // fue un SOLTAR (nave/wave)
 };
 
 // "temprano por 3t: salvado", "justo", ... (sin tildes: fuentes de GD).
@@ -64,6 +65,7 @@ struct LevelStats {
     std::uint32_t clicks = 0;
     std::uint32_t saves = 0;
     std::uint32_t unsalvageable = 0;
+    std::uint32_t ignored = 0;  // clicks que mataban y no hacían falta (descartados)
     std::uint32_t bestStreak = 0;
     std::uint64_t savedTicksSum = 0;  // para el promedio de ticks salvados
     std::uint32_t maxSavedTicks = 0;

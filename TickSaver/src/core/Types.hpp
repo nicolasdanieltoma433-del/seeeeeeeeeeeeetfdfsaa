@@ -22,8 +22,8 @@ namespace ts {
 using Tick = std::int64_t;
 
 inline constexpr int kTicksPerSecond = 240;
-// Límite duro del slider de ticks (240t = 1 segundo de retraso máximo).
-inline constexpr int kMaxSaveTicks = 240;
+// Límite duro del slider de ticks (1500t = 6,25 segundos de retraso máximo).
+inline constexpr int kMaxSaveTicks = 1500;
 
 // ----------------------------------------------------------------------------
 // Modos de juego. El orden importa: se usa como índice en arrays y en el
@@ -83,6 +83,8 @@ enum class ClickKind : std::uint8_t {
     Saved,          // el click mataba; se retrasó N ticks y sobrevive
     Unsalvageable,  // se retuvo hasta el máximo y ningún tick servía
     Unchecked,      // no se evaluó (modo con 0 ticks, sin presupuesto, etc.)
+    Unnecessary,    // el click no cambia nada (ej. cubo en el aire): no cuenta
+    Ignored,        // el click mataba y NO hacía falta: se descartó
 };
 
 // ----------------------------------------------------------------------------

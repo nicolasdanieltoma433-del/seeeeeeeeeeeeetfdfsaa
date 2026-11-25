@@ -41,6 +41,10 @@ struct MockPredictor final : IPredictor {
     Tick* clock = nullptr;
     std::function<SimOutcome(Slot, Tick, int)> press = [](Slot, Tick, int) { return SimOutcome::Survives; };
     std::function<SimOutcome(Slot, Tick)> idle = [](Slot, Tick) { return SimOutcome::Survives; };
+    // Por defecto no apretar "muere" (= el click hace falta) y apretar tiene efecto.
+    std::function<SimOutcome(Slot, Tick)> noPress = [](Slot, Tick) { return SimOutcome::Dies; };
+    std::function<bool(Slot, Tick)> effect = [](Slot, Tick) { return true; };
+    std::function<SimOutcome(Slot, Tick)> release = [](Slot, Tick) { return SimOutcome::Survives; };
     int lastHold = -1;
 
     SimOutcome simulatePress(Slot s, int hold) override {
@@ -48,6 +52,9 @@ struct MockPredictor final : IPredictor {
         return press(s, *clock, hold);
     }
     SimOutcome simulateIdle(Slot s, int) override { return idle(s, *clock); }
+    SimOutcome simulateNoPress(Slot s, int) override { return noPress(s, *clock); }
+    bool pressHasEffect(Slot s, int) override { return effect(s, *clock); }
+    SimOutcome simulateRelease(Slot s) override { return release(s, *clock); }
 };
 
 static SimOutcome viableFrom(Tick now, Tick first) { return now >= first ? SimOutcome::Survives : SimOutcome::Dies; }
@@ -116,7 +123,7 @@ static void testPreserveHold() {
     std::vector<InjectCmd> out;
     now = 101; s.onTick(now, params(10), pred, out);
     now = 102; s.onTick(now, params(10), pred, out);
-    CHECK(!s.onPhysicalRelease(Slot::P1, now));  // soltó a los 2 ticks: queda retenido
+    CHECK(!s.onPhysicalRelease(Slot::P1, now, params(10)[0], pred));  // soltó a los 2 ticks: queda retenido
     now = 103; s.onTick(now, params(10), pred, out);
     CHECK(pred.lastHold == 2);  // el fantasma ya simula el hold real de 2 ticks
     CHECK(out.empty());
@@ -203,7 +210,7 @@ static void testRetapDropsOldTap() {
     pred.press = [](Slot, Tick, int) { return SimOutcome::Dies; };
     InputScheduler s;
     s.onPhysicalPress(Slot::P1, now, params(30)[0], pred);
-    s.onPhysicalRelease(Slot::P1, 1);
+    s.onPhysicalRelease(Slot::P1, 1, params(30)[0], pred);
     CHECK(s.isHolding(Slot::P1));
     now = 3;
     pred.press = [](Slot, Tick, int) { return SimOutcome::Survives; };
@@ -246,7 +253,7 @@ static void testRepressFlushesRelease() {
     s.onPhysicalPress(Slot::P1, now, params(10)[0], pred);
     std::vector<InjectCmd> out;
     now = 1;
-    s.onPhysicalRelease(Slot::P1, now);  // hold de 1 tick
+    s.onPhysicalRelease(Slot::P1, now, params(10)[0], pred);  // hold de 1 tick
     s.onTick(now, params(10), pred, out);
     now = 2; s.onTick(now, params(10), pred, out);  // press inyectado, release programado en 3
     CHECK(out.size() == 1 && out[0].push);
@@ -324,7 +331,10 @@ static void testPresetsAndRegion() {
     CHECK(cfg.maxTicksFor(Mode::Cube, 50.f) == 16);
     CHECK(cfg.maxTicksFor(Mode::Cube, 61.f) == 6);
     applyPreset(cfg, Preset::Max);
-    CHECK(cfg.maxTicksFor(Mode::Cube, 50.f) == 240);  // tope duro
+    CHECK(cfg.maxTicksFor(Mode::Cube, 50.f) == 1500);  // tope duro
+    cfg.globalMaxTicks = 1500;
+    cfg.region.extraTicks = 1500;
+    CHECK(cfg.maxTicksFor(Mode::Cube, 50.f) == 1500);  // base + tramo no pasa de 1500
     cfg.globalMaxTicks = 7;
     CHECK(detectPreset(cfg) == Preset::Custom);
     CHECK(presetFromName("Entrenar") == Preset::Train);
@@ -374,6 +384,160 @@ static void testStats() {
     CHECK(ls.averageSavedTicks() == 3.0);
 }
 
+static SlotParams tapParams(int maxDelay) {
+    SlotParams p;
+    p.maxDelay = maxDelay;
+    p.dropUnneeded = true;
+    return p;
+}
+
+static void testUnnecessaryClickNotCounted() {
+    std::puts("[scheduler] click sin efecto (cubo en el aire) pasa pero no cuenta");
+    Tick now = 0;
+    MockPredictor pred;
+    pred.clock = &now;
+    pred.effect = [](Slot, Tick) { return false; };
+    InputScheduler s;
+    CHECK(s.onPhysicalPress(Slot::P1, now, tapParams(10), pred).forwardNow);
+    auto ev = s.drainEvents();
+    CHECK(ev.size() == 1 && ev[0].kind == ClickKind::Unnecessary);
+    Session session;
+    session.startAttempt();
+    session.onClick(ev[0]);
+    CHECK(session.streak() == 0 && !session.lastClick().valid);
+    LevelStats ls;
+    ls.recordClick(ev[0], 10.f);
+    CHECK(ls.clicks == 0);
+}
+
+static void testDeadlyUnneededClickDropped() {
+    std::puts("[scheduler] click que mata y no hace falta: se descarta, no se dispara tarde");
+    Tick now = 0;
+    MockPredictor pred;
+    pred.clock = &now;
+    pred.press = [](Slot, Tick t, int) { return viableFrom(t, 5); };  // pinchos en el techo hasta t=5
+    pred.noPress = [](Slot, Tick) { return SimOutcome::Survives; };    // en el piso no pasa nada
+    InputScheduler s;
+    CHECK(!s.onPhysicalPress(Slot::P1, now, tapParams(100), pred).forwardNow);
+    std::vector<InjectCmd> out;
+    for (now = 1; now <= 20; ++now) s.onTick(now, {tapParams(100), tapParams(100)}, pred, out);
+    CHECK(out.empty());  // nunca se inyecta
+    auto ev = s.drainEvents();
+    CHECK(ev.size() == 1 && ev[0].kind == ClickKind::Ignored && ev[0].earlyTicks == 5);
+    CHECK(!s.isHolding(Slot::P1));
+}
+
+static void testNeededEarlyClickStillApplied() {
+    std::puts("[scheduler] click temprano que SI hace falta: se aplica (no se descarta)");
+    Tick now = 0;
+    MockPredictor pred;
+    pred.clock = &now;
+    pred.press = [](Slot, Tick t, int) { return viableFrom(t, 3); };
+    pred.noPress = [](Slot, Tick) { return SimOutcome::Dies; };  // sin saltar te comés el pincho
+    InputScheduler s;
+    s.onPhysicalPress(Slot::P1, now, tapParams(100), pred);
+    std::vector<InjectCmd> out;
+    for (now = 1; now <= 3; ++now) s.onTick(now, {tapParams(100), tapParams(100)}, pred, out);
+    CHECK(out.size() == 1 && out[0].push);
+    auto ev = s.drainEvents();
+    CHECK(ev.size() == 1 && ev[0].kind == ClickKind::Saved && ev[0].earlyTicks == 3);
+}
+
+static void testDropAtMaxDelay() {
+    std::puts("[scheduler] al llegar al maximo, un click innecesario se descarta en vez de matarte");
+    Tick now = 0;
+    MockPredictor pred;
+    pred.clock = &now;
+    pred.press = [](Slot, Tick, int) { return SimOutcome::Dies; };
+    pred.noPress = [](Slot, Tick) { return SimOutcome::Survives; };
+    InputScheduler s;
+    s.onPhysicalPress(Slot::P1, now, tapParams(4), pred);
+    std::vector<InjectCmd> out;
+    for (now = 1; now <= 4; ++now) s.onTick(now, {tapParams(4), tapParams(4)}, pred, out);
+    CHECK(out.empty());
+    auto ev = s.drainEvents();
+    CHECK(ev.size() == 1 && ev[0].kind == ClickKind::Ignored);
+}
+
+static SlotParams holdParams(int maxDelay) {
+    SlotParams p;
+    p.maxDelay = maxDelay;
+    p.saveReleases = true;
+    p.mode = Mode::Wave;
+    return p;
+}
+
+static void testEarlyReleaseSaved() {
+    std::puts("[scheduler] wave: soltar temprano se retiene hasta que soltar sea seguro");
+    Tick now = 10;
+    MockPredictor pred;
+    pred.clock = &now;
+    pred.release = [](Slot, Tick t) { return viableFrom(t, 14); };
+    InputScheduler s;
+    CHECK(!s.onPhysicalRelease(Slot::P1, now, holdParams(20), pred));  // soltar en 10 mataba
+    CHECK(s.isHolding(Slot::P1));
+    std::vector<InjectCmd> out;
+    for (now = 11; now <= 13; ++now) s.onTick(now, {holdParams(20), holdParams(20)}, pred, out);
+    CHECK(out.empty());
+    now = 14;
+    s.onTick(now, {holdParams(20), holdParams(20)}, pred, out);
+    CHECK(out.size() == 1 && !out[0].push);
+    auto ev = s.drainEvents();
+    CHECK(ev.size() == 1 && ev[0].kind == ClickKind::Saved && ev[0].release && ev[0].earlyTicks == 4);
+    Session session;
+    session.startAttempt();
+    session.onClick(ev[0]);
+    CHECK(describeClick(session.lastClick()) == "soltaste temprano por 4t: salvado");
+}
+
+static void testRepressCancelsHeldRelease() {
+    std::puts("[scheduler] wave: volver a apretar con un soltar retenido lo cancela");
+    Tick now = 0;
+    MockPredictor pred;
+    pred.clock = &now;
+    pred.release = [](Slot, Tick) { return SimOutcome::Dies; };
+    InputScheduler s;
+    s.onPhysicalRelease(Slot::P1, now, holdParams(20), pred);
+    now = 2;
+    auto r = s.onPhysicalPress(Slot::P1, now, holdParams(20), pred);
+    CHECK(!r.forwardNow);  // el juego ya lo tiene apretado
+    CHECK(!s.isHolding(Slot::P1));
+    std::vector<InjectCmd> out;
+    for (now = 3; now < 30; ++now) s.onTick(now, {holdParams(20), holdParams(20)}, pred, out);
+    CHECK(out.empty());
+}
+
+static void testConfigCodeV2StillImports() {
+    std::puts("[config] codigos TS2 viejos (v2, ticks de 1 byte) se siguen importando");
+    auto res = decodeConfig("TS2-08ZG8-1G01G-00060-00062-GF0C0-WYCP", Config{});
+    CHECK(std::holds_alternative<Config>(res));
+    if (auto* c = std::get_if<Config>(&res)) {
+        CHECK(c->globalMaxTicks == 6);
+        CHECK(c->modeMaxTicks[idx(Mode::Wave)] == 24 && c->modeMaxTicks[idx(Mode::Ship)] == 12);
+        CHECK(c->region.enabled && c->region.startPct == 40 && c->region.endPct == 60 && c->region.extraTicks == 12);
+        CHECK(c->adaptive);
+    }
+}
+
+static void testConfigCodeV3BigTicks() {
+    std::puts("[config] TS2 v3 guarda ticks hasta 1500 y las opciones nuevas");
+    Config cfg;
+    cfg.globalMaxTicks = 1500;
+    cfg.modeMaxTicks[idx(Mode::Swing)] = 777;
+    cfg.region = Region{true, 10, 90, 1234};
+    cfg.dropUnneeded = false;
+    cfg.saveReleases = false;
+    auto code = encodeConfig(cfg);
+    std::printf("  codigo v3 (%zu chars): %s\n", code.size(), code.c_str());
+    auto res = decodeConfig(code, Config{});
+    CHECK(std::holds_alternative<Config>(res));
+    if (auto* c = std::get_if<Config>(&res)) {
+        CHECK(c->globalMaxTicks == 1500 && c->modeMaxTicks[idx(Mode::Swing)] == 777);
+        CHECK(c->region.extraTicks == 1234);
+        CHECK(!c->dropUnneeded && !c->saveReleases);
+    }
+}
+
 int main() {
     testCleanClick();
     testEarlyClickSaved();
@@ -390,6 +554,14 @@ int main() {
     testPresetsAndRegion();
     testAdaptive();
     testStats();
+    testUnnecessaryClickNotCounted();
+    testDeadlyUnneededClickDropped();
+    testNeededEarlyClickStillApplied();
+    testDropAtMaxDelay();
+    testEarlyReleaseSaved();
+    testRepressCancelsHeldRelease();
+    testConfigCodeV2StillImports();
+    testConfigCodeV3BigTicks();
     std::printf("\n%d/%d checks OK\n", g_checks - g_failures, g_checks);
     return g_failures == 0 ? 0 : 1;
 }

@@ -142,10 +142,22 @@ void ModMenuPopup::addToggleRow(char const* label, float y, bool value, std::fun
 
 void ModMenuPopup::addSliderRow(char const* label, float y, float min, float max, float step, float value,
                                 std::function<std::string(int)> format, std::function<void(int)> onChange,
-                                bool rebuildOnRelease) {
+                                bool rebuildOnRelease, bool quadratic) {
     addLabel(m_content, label, {kRowLabelX, y}, .38f, {0.f, .5f}, textColor());
     auto valueLabel = addLabel(m_content, format(static_cast<int>(std::lround(value))), {kRowControlX + 6.f, y}, .4f,
                                {1.f, .5f}, role(cfg().palette, PaletteRole::Streak));
+
+    // Conversión valor <-> posición del slider (lineal o cuadrática).
+    constexpr float kQuadRange = 1000.f;
+    auto toValue = [min, max, quadratic](float s) -> int {
+        if (!quadratic) return static_cast<int>(std::lround(s));
+        float t = std::clamp(s / kQuadRange, 0.f, 1.f);
+        return static_cast<int>(std::lround(min + (max - min) * t * t));
+    };
+    auto toSlider = [min, max, quadratic](float v) -> float {
+        if (!quadratic || max <= min) return v;
+        return std::sqrt(std::clamp((v - min) / (max - min), 0.f, 1.f)) * kQuadRange;
+    };
 
     // Callback compartido por el slider y los botones -/+.
     auto apply = [this, valueLabel, format, onChange](int v) {
@@ -154,14 +166,14 @@ void ModMenuPopup::addSliderRow(char const* label, float y, float min, float max
         onChange(v);
     };
 
-    auto slider = SliderNode::create([apply](SliderNode*, float v) { apply(static_cast<int>(std::lround(v))); });
+    auto slider = SliderNode::create([apply, toValue](SliderNode*, float s) { apply(toValue(s)); });
     slider->setContentSize({220.f, 10.f});
     slider->setScale(.7f);
     slider->setAnchorPoint({.5f, .5f});
-    slider->setMin(min);
-    slider->setMax(max);
-    slider->setSnapStep(step);
-    slider->setValue(value);
+    slider->setMin(quadratic ? 0.f : min);
+    slider->setMax(quadratic ? kQuadRange : max);
+    slider->setSnapStep(quadratic ? 1.f : step);
+    slider->setValue(toSlider(value));
     slider->setPosition({252.f, y});
     if (rebuildOnRelease) {
         slider->setReleaseCallback([this](SliderNode*, float) { requestRebuild(); });
@@ -171,15 +183,28 @@ void ModMenuPopup::addSliderRow(char const* label, float y, float min, float max
     // -/+ para ajustes finos (en celular arrastrar el slider de a 1 es incómodo).
     // Puntero crudo seguro: el slider y estos botones son hermanos en
     // m_content y se destruyen juntos en cada rebuild.
-    auto nudge = [this, slider, apply, min, max, step](int dir) {
-        auto* s = slider;
-        float v = std::clamp(s->getValue() + static_cast<float>(dir) * step, min, max);
-        s->setValue(v);
-        apply(static_cast<int>(std::lround(v)));
+    auto current = std::make_shared<int>(static_cast<int>(std::lround(value)));
+    auto nudge = [this, slider, apply, toSlider, current, min, max, step](int dir) {
+        int v = static_cast<int>(std::clamp(static_cast<float>(*current) + static_cast<float>(dir) * step, min, max));
+        *current = v;
+        slider->setValue(toSlider(static_cast<float>(v)));
+        apply(v);
         requestRebuild();
     };
     addButton(m_content, "-", {162.f, y}, .55f, false, [nudge] { nudge(-1); });
     addButton(m_content, "+", {342.f, y}, .55f, false, [nudge] { nudge(+1); });
+}
+
+void ModMenuPopup::addToggleAt(char const* label, float x, float y, float toggleX, bool value,
+                               std::function<void(bool)> onChange) {
+    auto text = addLabel(m_content, label, {x, y}, .34f, {0.f, .5f}, textColor());
+    text->limitLabelWidth(toggleX - x - 14.f, .34f, .15f);
+    auto toggler = Toggler::createWithStandardSprites(.55f, [this, onChange = std::move(onChange)](Toggler*, bool on) {
+        if (!m_building) onChange(on);
+    });
+    toggler->setToggled(value);
+    toggler->setPosition({toggleX, y});
+    m_content->addChild(toggler);
 }
 
 // ------------------------------------------------------------------- tabs
@@ -217,8 +242,8 @@ void ModMenuPopup::buildGeneral() {
     addButton(m_content, ">", {386.f, 116.f}, .55f, false, [cycle] { cycle(+1); });
 
     addSliderRow("Ticks maximos", 84.f, 0.f, static_cast<float>(kMaxSaveTicks), 1.f, c.globalMaxTicks, ticksText,
-                 [](int v) { settings::update([v](Config& x) { x.globalMaxTicks = static_cast<std::uint8_t>(v); }); },
-                 true);
+                 [](int v) { settings::update([v](Config& x) { x.globalMaxTicks = static_cast<std::uint16_t>(v); }); },
+                 true, true);
 
     addToggleRow("Modo seguro", 50.f, c.safeMode, [this](bool on) { onSafeModeToggled(on); });
     addLabel(m_content,
@@ -259,9 +284,9 @@ void ModMenuPopup::buildModes() {
     addSliderRow("Ticks", 54.f, 0.f, static_cast<float>(kMaxSaveTicks), 1.f, own,
                  [](int v) { return v == 0 ? std::string("global") : fmt::format("{}t", v); },
                  [selected](int v) {
-                     settings::update([selected, v](Config& x) { x.modeMaxTicks[idx(selected)] = static_cast<std::uint8_t>(v); });
+                     settings::update([selected, v](Config& x) { x.modeMaxTicks[idx(selected)] = static_cast<std::uint16_t>(v); });
                  },
-                 true);
+                 true, true);
 
     addButton(m_content, "Usar el general", {kContentW / 2.f, 22.f}, .5f, false, [this, selected] {
         settings::update([selected](Config& x) { x.modeMaxTicks[idx(selected)] = 0; });
@@ -285,7 +310,8 @@ void ModMenuPopup::buildRegion() {
                  true);
     addSliderRow("Ticks extra", 50.f, 0.f, static_cast<float>(kMaxSaveTicks), 1.f, c.region.extraTicks,
                  [](int v) { return fmt::format("+{}t", v); },
-                 [](int v) { settings::update([v](Config& x) { x.region.extraTicks = static_cast<std::uint8_t>(v); }); });
+                 [](int v) { settings::update([v](Config& x) { x.region.extraTicks = static_cast<std::uint16_t>(v); }); },
+                 false, true);
 
     bool invalid = c.region.enabled && c.region.endPct <= c.region.startPct;
     addLabel(m_content,
@@ -302,25 +328,35 @@ void ModMenuPopup::buildOptions() {
         bool value;
         bool Config::*field;
     };
-    Row const rows[] = {
-        {"Modo adaptativo (aprende de vos)", c.adaptive, &Config::adaptive},
-        {"Corregir a los dos jugadores", c.correctBoth, &Config::correctBoth},
+    // Dos columnas: comportamiento a la izquierda, técnico a la derecha.
+    Row const left[] = {
+        {"Descartar clicks innecesarios", c.dropUnneeded, &Config::dropUnneeded},
+        {"Corregir el soltar (nave/wave)", c.saveReleases, &Config::saveReleases},
+        {"Modo adaptativo", c.adaptive, &Config::adaptive},
+        {"Corregir a los 2 jugadores", c.correctBoth, &Config::correctBoth},
         {"Conservar duracion del hold", c.preserveHold, &Config::preserveHold},
-        {"Copia completa del jugador (recomendado)", c.fullSync, &Config::fullSync},
-        {"Reinyeccion directa (recomendado)", c.directInject, &Config::directInject},
+    };
+    Row const right[] = {
+        {"Copia completa del jugador", c.fullSync, &Config::fullSync},
+        {"Reinyeccion directa", c.directInject, &Config::directInject},
         {"Log de depuracion", c.debugLog, &Config::debugLog},
         {"Validar fantasma", c.validateSim, &Config::validateSim},
     };
-    float y = 158.f;
-    for (auto const& row : rows) {
-        auto field = row.field;
-        addToggleRow(row.label, y, row.value, [field](bool on) {
-            settings::update([field, on](Config& x) { x.*field = on; });
-        });
-        y -= 20.f;
-    }
+    auto addColumn = [this](auto const& rows, float x, float toggleX) {
+        float y = 154.f;
+        for (auto const& row : rows) {
+            auto field = row.field;
+            addToggleAt(row.label, x, y, toggleX, row.value, [field](bool on) {
+                settings::update([field, on](Config& cfgRef) { cfgRef.*field = on; });
+            });
+            y -= 26.f;
+        }
+    };
+    addColumn(left, kRowLabelX, 192.f);
+    addColumn(right, 214.f, kRowControlX);
+
     // En décimas de ms para que el slider sea entero: 5..100 = 0.5..10 ms.
-    addSliderRow("CPU por frame", 12.f, 5.f, 100.f, 5.f, std::round(c.simBudgetMs * 10.f),
+    addSliderRow("CPU por frame", 14.f, 5.f, 100.f, 5.f, std::round(c.simBudgetMs * 10.f),
                  [](int v) { return fmt::format("{:.1f} ms", static_cast<double>(v) / 10.0); },
                  [](int v) { settings::update([v](Config& x) { x.simBudgetMs = static_cast<float>(v) / 10.f; }); });
 }

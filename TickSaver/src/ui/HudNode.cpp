@@ -129,7 +129,8 @@ void HudNode::redrawBar() {
 }
 
 void HudNode::onClick(ClickEvent const& ev, int streak, bool streakIncreased) {
-    if (ev.kind == ClickKind::Unchecked) return;
+    // Sin evaluar o sin efecto (cubo en el aire): no tocan la racha ni la barra.
+    if (ev.kind == ClickKind::Unchecked || ev.kind == ClickKind::Unnecessary) return;
     auto const& p = m_cfg.palette;
 
     // Racha
@@ -142,14 +143,21 @@ void HudNode::onClick(ClickEvent const& ev, int streak, bool streakIncreased) {
     }
 
     // Barra
-    m_hasMarker = true;
+    m_hasMarker = ev.kind != ClickKind::Ignored;  // un click descartado no tiene "timing"
     m_markerPos = markerX(ev.earlyTicks);
     m_markerColor = colorForKind(p, ev.kind);
-    m_caption->setString(describeClick(LastClick{true, ev.kind, ev.earlyTicks, ev.mode}).c_str());
+    m_caption->setString(describeClick(LastClick{true, ev.kind, ev.earlyTicks, ev.mode, ev.release}).c_str());
     m_caption->setColor(c3(ev.kind == ClickKind::Clean ? role(p, PaletteRole::Good) : m_markerColor));
     redrawBar();
 
-    if (ev.kind == ClickKind::Saved) spawnToast(fmt::format("SALVADO +{}t", ev.earlyTicks), role(p, PaletteRole::Saved));
+    if (ev.kind == ClickKind::Saved) {
+        auto text = ev.release ? fmt::format("SALVADO +{}t (soltar)", ev.earlyTicks)
+                               : fmt::format("SALVADO +{}t", ev.earlyTicks);
+        spawnToast(text, role(p, PaletteRole::Saved));
+    }
+    else if (ev.kind == ClickKind::Ignored) {
+        spawnToast("CLICK IGNORADO", role(p, PaletteRole::Saved));
+    }
 }
 
 void HudNode::setHolding(int ticksHeld) {

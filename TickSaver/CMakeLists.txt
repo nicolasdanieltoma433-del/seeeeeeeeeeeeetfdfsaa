@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
-project(TickSaver VERSION 0.2.2)
+project(TickSaver VERSION 0.3.0)
 
 # core/ (lógica pura), game/, ui/ y hooks/ entran todos al .geode.
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)

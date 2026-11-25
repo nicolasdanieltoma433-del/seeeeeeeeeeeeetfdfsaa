@@ -56,9 +56,12 @@ private:
                    std::function<void()> callback);
     void addToggleRow(char const* label, float y, bool value, std::function<void(bool)> onChange);
     // Fila con etiqueta + slider + valor. `format` arma el texto del valor.
+    // `quadratic`: escala cuadrática (mucha precisión en valores chicos y aun
+    // así llega a 1500). Los -/+ siempre van de a `step`.
     void addSliderRow(char const* label, float y, float min, float max, float step, float value,
                       std::function<std::string(int)> format, std::function<void(int)> onChange,
-                      bool rebuildOnRelease = false);
+                      bool rebuildOnRelease = false, bool quadratic = false);
+    void addToggleAt(char const* label, float x, float y, float toggleX, bool value, std::function<void(bool)> onChange);
 
     // --- acciones -----------------------------------------------------------
     void onSafeModeToggled(bool enabled);

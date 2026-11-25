@@ -26,7 +26,9 @@ inline RGBA colorForKind(Palette const& p, ClickKind kind) {
         case ClickKind::Clean: return role(p, PaletteRole::Good);
         case ClickKind::Saved: return role(p, PaletteRole::Saved);
         case ClickKind::Unsalvageable: return role(p, PaletteRole::Danger);
-        case ClickKind::Unchecked: return role(p, PaletteRole::Text);
+        case ClickKind::Unchecked:
+        case ClickKind::Unnecessary: return role(p, PaletteRole::Text);
+        case ClickKind::Ignored: return role(p, PaletteRole::Saved);
     }
     return role(p, PaletteRole::Text);
 }

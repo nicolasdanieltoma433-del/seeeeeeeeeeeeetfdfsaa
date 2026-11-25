@@ -6,7 +6,7 @@
     },
     "id": "tuusuario.ticksaver",
     "name": "TickSaver",
-    "version": "v0.2.2",
+    "version": "v0.3.0",
     "developer": "TuUsuario",
     "description": "Asistente de practica: retrasa los clicks tempranos para salvar el intento",
     "tags": [
@@ -43,10 +43,10 @@
         "max-ticks": {
             "type": "int",
             "name": "Ticks maximos",
-            "description": "Cuantos ticks (1/240 s) puede retrasarse un click temprano como maximo. 240 = 1 segundo.",
+            "description": "Cuantos ticks (1/240 s) puede retrasarse un click temprano como maximo. 1500 = 6,25 segundos.",
             "default": 6,
             "min": 0,
-            "max": 240,
+            "max": 1500,
             "control": {
                 "slider": true,
                 "arrows": true,
@@ -63,7 +63,7 @@
             "name": "Cubo",
             "default": 0,
             "min": 0,
-            "max": 240,
+            "max": 1500,
             "control": {
                 "slider": true,
                 "input": true
@@ -74,7 +74,7 @@
             "name": "Nave",
             "default": 0,
             "min": 0,
-            "max": 240,
+            "max": 1500,
             "control": {
                 "slider": true,
                 "input": true
@@ -85,7 +85,7 @@
             "name": "Bola",
             "default": 0,
             "min": 0,
-            "max": 240,
+            "max": 1500,
             "control": {
                 "slider": true,
                 "input": true
@@ -96,7 +96,7 @@
             "name": "UFO",
             "default": 0,
             "min": 0,
-            "max": 240,
+            "max": 1500,
             "control": {
                 "slider": true,
                 "input": true
@@ -107,7 +107,7 @@
             "name": "Wave",
             "default": 5,
             "min": 0,
-            "max": 240,
+            "max": 1500,
             "control": {
                 "slider": true,
                 "input": true
@@ -118,7 +118,7 @@
             "name": "Robot",
             "default": 0,
             "min": 0,
-            "max": 240,
+            "max": 1500,
             "control": {
                 "slider": true,
                 "input": true
@@ -129,7 +129,7 @@
             "name": "Arana",
             "default": 0,
             "min": 0,
-            "max": 240,
+            "max": 1500,
             "control": {
                 "slider": true,
                 "input": true
@@ -141,7 +141,7 @@
             "description": "El swing tiene sus propios ticks porque su fisica es mucho mas sensible.",
             "default": 4,
             "min": 0,
-            "max": 240,
+            "max": 1500,
             "control": {
                 "slider": true,
                 "input": true
@@ -187,7 +187,7 @@
             "name": "Ticks extra",
             "default": 6,
             "min": 0,
-            "max": 240,
+            "max": 1500,
             "control": {
                 "slider": true,
                 "input": true
@@ -213,6 +213,18 @@
             "type": "bool",
             "name": "Conservar duracion del hold",
             "description": "Si soltas antes de que el click retrasado se aplique, el soltar tambien se retrasa para que dure lo mismo.",
+            "default": true
+        },
+        "drop-unneeded": {
+            "type": "bool",
+            "name": "Descartar clicks innecesarios",
+            "description": "Cubo, bola, UFO, robot, arana y swing: si un click te iba a matar y no hacerlo tambien sobrevive, se descarta en vez de dispararse tarde. Los clicks que no hacen nada (por ejemplo en el aire) no cuentan para la racha.",
+            "default": true
+        },
+        "save-releases": {
+            "type": "bool",
+            "name": "Corregir el soltar (nave y wave)",
+            "description": "En nave y wave tambien corrige el SOLTAR temprano: si soltar te mata, sigue manteniendo hasta que soltar sea seguro.",
             "default": true
         },
         "safe-mode": {
