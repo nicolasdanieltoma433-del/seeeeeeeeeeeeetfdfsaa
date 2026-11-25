@@ -11,7 +11,7 @@ GD simula la física a **240 ticks por segundo**. Un click que llega 1–3 ticks
 necesario suele matar: el cubo salta antes del borde, la wave sube un píxel antes de tiempo.
 TickSaver mira hacia adelante: **si el click en su tick original mata, lo retiene** y lo
 reinyecta en el primer tick posterior en el que sí sobrevive, siempre dentro de un máximo
-configurable (hasta 1500t = 6,25 s).
+configurable (hasta 255t ≈ 1,06 s).
 
 ## 2. Cómo GD procesa un click (2.2091)
 
@@ -221,14 +221,14 @@ y es global: tu forma de jugar no cambia de nivel a nivel.
 | Suave | 3t | Swing 2t | no |
 | Normal | 6t | Wave 5t, Swing 4t | no |
 | Fuerte | 12t | Wave 10t, Swing 8t | no |
-| Maximo | 1500t | — | no |
+| Maximo | 255t | — | no |
 | Wave | 6t | Nave 12t, Wave 24t, Swing 12t | no |
 | Entrenar | 4t | Wave 3t, Swing 3t | sí |
 
 Elegir un preset escribe esos valores en los settings; tocar uno a mano pasa el preset a
 *Personalizado* (`game/Settings.cpp` evita el bucle de eventos con un flag de escritura).
 
-Ticks efectivos = `min(1500, base_del_modo [ajustado por adaptativo] + extra_del_tramo)`,
+Ticks efectivos = `min(255, base_del_modo [ajustado por adaptativo] + extra_del_tramo)`,
 con el tramo activo sólo entre *Desde %* y *Hasta %*.
 
 ## 10. Persistencia
@@ -242,7 +242,7 @@ con el tramo activo sólo entre *Desde %* y *Hasta %*.
 
 ## 11. Código de configuración `TS2-...`
 
-Formato v3: 28 bytes de datos (ticks de 16 bits, hasta 1500) + 32 si la paleta no es la de
+Formato v3: 28 bytes de datos (ticks de 16 bits; hoy el tope es 255) + 32 si la paleta no es la de
 fábrica + CRC-8, en Base32 Crockford agrupado de a 5 caracteres (60 caracteres sin paleta).
 Los códigos v2 (ticks de 1 byte), como `TS2-08ZG8-1G01G-00060-00062-GF0C0-WYCP`, se
 siguen importando. Al importar se aceptan minúsculas, sin guiones,

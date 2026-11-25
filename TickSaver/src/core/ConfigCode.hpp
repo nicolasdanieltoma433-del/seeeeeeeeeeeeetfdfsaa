@@ -9,7 +9,7 @@
 //                    b4 safeMode b5 region.on   b6 paleta propia  b7 reservado
 //    [2]      flags2 b0 descartar innecesarios  b1 corregir soltar
 //    [3]      preset
-//    [4..5]   globalMaxTicks (u16, 0..1500)
+//    [4..5]   globalMaxTicks (u16, hoy 0..255; 16 bits por si el tope vuelve a subir)
 //    [6..21]  modeMaxTicks[8] (u16)
 //    [22..23] tramo desde%, hasta%
 //    [24..25] tramo ticks extra (u16)

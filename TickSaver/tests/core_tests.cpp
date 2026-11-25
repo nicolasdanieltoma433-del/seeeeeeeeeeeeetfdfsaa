@@ -331,10 +331,10 @@ static void testPresetsAndRegion() {
     CHECK(cfg.maxTicksFor(Mode::Cube, 50.f) == 16);
     CHECK(cfg.maxTicksFor(Mode::Cube, 61.f) == 6);
     applyPreset(cfg, Preset::Max);
-    CHECK(cfg.maxTicksFor(Mode::Cube, 50.f) == 1500);  // tope duro
-    cfg.globalMaxTicks = 1500;
-    cfg.region.extraTicks = 1500;
-    CHECK(cfg.maxTicksFor(Mode::Cube, 50.f) == 1500);  // base + tramo no pasa de 1500
+    CHECK(cfg.maxTicksFor(Mode::Cube, 50.f) == 255);  // tope duro
+    cfg.globalMaxTicks = 255;
+    cfg.region.extraTicks = 255;
+    CHECK(cfg.maxTicksFor(Mode::Cube, 50.f) == 255);  // base + tramo no pasa de 255
     cfg.globalMaxTicks = 7;
     CHECK(detectPreset(cfg) == Preset::Custom);
     CHECK(presetFromName("Entrenar") == Preset::Train);
@@ -520,11 +520,11 @@ static void testConfigCodeV2StillImports() {
 }
 
 static void testConfigCodeV3BigTicks() {
-    std::puts("[config] TS2 v3 guarda ticks hasta 1500 y las opciones nuevas");
+    std::puts("[config] TS2 v3 guarda ticks hasta 255 y las opciones nuevas");
     Config cfg;
-    cfg.globalMaxTicks = 1500;
-    cfg.modeMaxTicks[idx(Mode::Swing)] = 777;
-    cfg.region = Region{true, 10, 90, 1234};
+    cfg.globalMaxTicks = 255;
+    cfg.modeMaxTicks[idx(Mode::Swing)] = 200;
+    cfg.region = Region{true, 10, 90, 250};
     cfg.dropUnneeded = false;
     cfg.saveReleases = false;
     auto code = encodeConfig(cfg);
@@ -532,8 +532,8 @@ static void testConfigCodeV3BigTicks() {
     auto res = decodeConfig(code, Config{});
     CHECK(std::holds_alternative<Config>(res));
     if (auto* c = std::get_if<Config>(&res)) {
-        CHECK(c->globalMaxTicks == 1500 && c->modeMaxTicks[idx(Mode::Swing)] == 777);
-        CHECK(c->region.extraTicks == 1234);
+        CHECK(c->globalMaxTicks == 255 && c->modeMaxTicks[idx(Mode::Swing)] == 200);
+        CHECK(c->region.extraTicks == 250);
         CHECK(!c->dropUnneeded && !c->saveReleases);
     }
 }

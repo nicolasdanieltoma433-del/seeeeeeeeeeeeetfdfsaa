@@ -22,8 +22,8 @@ namespace ts {
 using Tick = std::int64_t;
 
 inline constexpr int kTicksPerSecond = 240;
-// Límite duro del slider de ticks (1500t = 6,25 segundos de retraso máximo).
-inline constexpr int kMaxSaveTicks = 1500;
+// Límite duro del slider de ticks (255t ≈ 1,06 segundos de retraso máximo).
+inline constexpr int kMaxSaveTicks = 255;
 
 // ----------------------------------------------------------------------------
 // Modos de juego. El orden importa: se usa como índice en arrays y en el

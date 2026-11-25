@@ -43,7 +43,7 @@ struct Region {
     bool enabled = false;
     std::uint8_t startPct = 40;   // 0..100
     std::uint8_t endPct = 60;     // 0..100, > startPct
-    std::uint16_t extraTicks = 6;  // se SUMAN al máximo del modo (tope 1500)
+    std::uint16_t extraTicks = 6;  // se SUMAN al máximo del modo (tope 255)
 
     constexpr bool operator==(Region const&) const = default;
     bool contains(float percent) const;
@@ -55,7 +55,7 @@ struct Config {
     Preset preset = Preset::Normal;
 
     // --- Ticks ---------------------------------------------------------------
-    // Máximo de ticks que un click puede retrasarse (0..1500).
+    // Máximo de ticks que un click puede retrasarse (0..255).
     std::uint16_t globalMaxTicks = 6;
     // Override por modo: 0 = usar globalMaxTicks. Así "swing aparte con sus
     // propios ticks" es simplemente modeMaxTicks[Swing] != 0.

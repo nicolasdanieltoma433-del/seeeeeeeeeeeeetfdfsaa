@@ -1,10 +1,10 @@
 # v0.3.0
-- Maximo de ticks: de 240 a 1500 (6,25 s). Sliders con escala cuadratica para seguir siendo precisos en valores chicos
+- Maximo de ticks: de 240 a 255. Sliders con escala cuadratica para ser precisos en valores chicos
 - Clicks innecesarios: si un click te iba a matar y no hacerlo tambien sobrevive, se descarta ("CLICK IGNORADO") en vez de dispararse tarde
 - Los clicks que no hacen nada (por ejemplo cubo en el aire) ya no cuentan para la racha ni las estadisticas
 - Nave y wave: ahora tambien se corrige el SOLTAR temprano ("SALVADO +Nt (soltar)")
 - Ventanas de nave/wave ajustadas
-- Codigo TS2 en formato v3 (ticks de hasta 1500 y opciones nuevas); los codigos viejos se siguen importando
+- Codigo TS2 en formato v3 (ticks de 16 bits y opciones nuevas); los codigos viejos se siguen importando
 - Opciones en dos columnas con "Descartar clicks innecesarios" y "Corregir el soltar"
 
 # v0.2.2

@@ -63,7 +63,7 @@ constexpr PresetValues kPresets[] = {
     /* Suave    */ {3,   {0, 0, 0, 0, 0,  0, 0, 2},   false},
     /* Normal   */ {6,   {0, 0, 0, 0, 5,  0, 0, 4},   false},
     /* Fuerte   */ {12,  {0, 0, 0, 0, 10, 0, 0, 8},   false},
-    /* Maximo   */ {1500, {0, 0, 0, 0, 0, 0, 0, 0},   false},
+    /* Maximo   */ {255, {0, 0, 0, 0, 0,  0, 0, 0},   false},
     /* Wave     */ {6,   {0, 12, 0, 0, 24, 0, 0, 12}, false},
     /* Entrenar */ {4,   {0, 0, 0, 0, 3,  0, 0, 3},   true},
 };

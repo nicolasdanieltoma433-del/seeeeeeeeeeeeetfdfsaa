@@ -43,10 +43,10 @@
         "max-ticks": {
             "type": "int",
             "name": "Ticks maximos",
-            "description": "Cuantos ticks (1/240 s) puede retrasarse un click temprano como maximo. 1500 = 6,25 segundos.",
+            "description": "Cuantos ticks (1/240 s) puede retrasarse un click temprano como maximo. 255 = 1,06 segundos.",
             "default": 6,
             "min": 0,
-            "max": 1500,
+            "max": 255,
             "control": {
                 "slider": true,
                 "arrows": true,
@@ -63,7 +63,7 @@
             "name": "Cubo",
             "default": 0,
             "min": 0,
-            "max": 1500,
+            "max": 255,
             "control": {
                 "slider": true,
                 "input": true
@@ -74,7 +74,7 @@
             "name": "Nave",
             "default": 0,
             "min": 0,
-            "max": 1500,
+            "max": 255,
             "control": {
                 "slider": true,
                 "input": true
@@ -85,7 +85,7 @@
             "name": "Bola",
             "default": 0,
             "min": 0,
-            "max": 1500,
+            "max": 255,
             "control": {
                 "slider": true,
                 "input": true
@@ -96,7 +96,7 @@
             "name": "UFO",
             "default": 0,
             "min": 0,
-            "max": 1500,
+            "max": 255,
             "control": {
                 "slider": true,
                 "input": true
@@ -107,7 +107,7 @@
             "name": "Wave",
             "default": 5,
             "min": 0,
-            "max": 1500,
+            "max": 255,
             "control": {
                 "slider": true,
                 "input": true
@@ -118,7 +118,7 @@
             "name": "Robot",
             "default": 0,
             "min": 0,
-            "max": 1500,
+            "max": 255,
             "control": {
                 "slider": true,
                 "input": true
@@ -129,7 +129,7 @@
             "name": "Arana",
             "default": 0,
             "min": 0,
-            "max": 1500,
+            "max": 255,
             "control": {
                 "slider": true,
                 "input": true
@@ -141,7 +141,7 @@
             "description": "El swing tiene sus propios ticks porque su fisica es mucho mas sensible.",
             "default": 4,
             "min": 0,
-            "max": 1500,
+            "max": 255,
             "control": {
                 "slider": true,
                 "input": true
@@ -187,7 +187,7 @@
             "name": "Ticks extra",
             "default": 6,
             "min": 0,
-            "max": 1500,
+            "max": 255,
             "control": {
                 "slider": true,
                 "input": true
