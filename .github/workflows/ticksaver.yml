@@ -55,6 +55,8 @@ jobs:
     name: Empaquetar .geode
     runs-on: ubuntu-latest
     needs: ["build"]
+    permissions:
+      contents: write
 
     steps:
       - uses: geode-sdk/build-geode-mod/combine@main
@@ -64,3 +66,21 @@ jobs:
         with:
           name: Build Output
           path: ${{ steps.build.outputs.build-output }}
+
+      # Guarda el .geode compilado en la rama (TickSaver/dist/) para poder
+      # descargarlo sin entrar a Actions. Los push con GITHUB_TOKEN no
+      # vuelven a disparar el workflow.
+      - uses: actions/checkout@v7
+        with:
+          path: repo
+
+      - name: Guardar .geode en la rama
+        run: |
+          mkdir -p repo/TickSaver/dist
+          cp "${{ steps.build.outputs.build-output }}"/*.geode repo/TickSaver/dist/
+          cd repo
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add TickSaver/dist
+          git diff --cached --quiet || git commit -m "Build de TickSaver (${GITHUB_SHA::7})"
+          git push
