@@ -1,0 +1,157 @@
+{
+    "geode": "6.0.0",
+    "gd": {
+        "win": "2.2091",
+        "android": "2.2091"
+    },
+    "id": "tuusuario.ticksaver",
+    "name": "TickSaver",
+    "version": "v0.1.0",
+    "developer": "TuUsuario",
+    "description": "Asistente de practica: retrasa los clicks tempranos para salvar el intento",
+    "tags": ["cheat", "gameplay", "utility"],
+    "settings": {
+        "title-general": {
+            "type": "title",
+            "name": "General"
+        },
+        "enabled": {
+            "type": "bool",
+            "name": "Activado",
+            "description": "Activa la correccion de clicks. Con el modo seguro, los intentos asistidos no guardan progreso.",
+            "default": true
+        },
+        "preset": {
+            "type": "string",
+            "name": "Preset",
+            "description": "Suave/Normal/Fuerte/Maximo cambian cuantos ticks se puede retrasar un click. Wave da mas margen a wave, nave y swing. Entrenar da poca ayuda y activa el modo adaptativo. Si cambias un valor a mano pasa a Personalizado.",
+            "default": "Normal",
+            "one-of": ["Suave", "Normal", "Fuerte", "Maximo", "Wave", "Entrenar", "Personalizado"]
+        },
+        "max-ticks": {
+            "type": "int",
+            "name": "Ticks maximos",
+            "description": "Cuantos ticks (1/240 s) puede retrasarse un click temprano como maximo. 240 = 1 segundo.",
+            "default": 6,
+            "min": 0,
+            "max": 240,
+            "control": { "slider": true, "arrows": true, "arrow-step": 1, "input": true }
+        },
+
+        "title-modes": {
+            "type": "title",
+            "name": "Ticks por modo (0 = usar el maximo general)"
+        },
+        "ticks-cube":   { "type": "int", "name": "Cubo",  "default": 0, "min": 0, "max": 240, "control": { "slider": true, "input": true } },
+        "ticks-ship":   { "type": "int", "name": "Nave",  "default": 0, "min": 0, "max": 240, "control": { "slider": true, "input": true } },
+        "ticks-ball":   { "type": "int", "name": "Bola",  "default": 0, "min": 0, "max": 240, "control": { "slider": true, "input": true } },
+        "ticks-ufo":    { "type": "int", "name": "UFO",   "default": 0, "min": 0, "max": 240, "control": { "slider": true, "input": true } },
+        "ticks-wave":   { "type": "int", "name": "Wave",  "default": 5, "min": 0, "max": 240, "control": { "slider": true, "input": true } },
+        "ticks-robot":  { "type": "int", "name": "Robot", "default": 0, "min": 0, "max": 240, "control": { "slider": true, "input": true } },
+        "ticks-spider": { "type": "int", "name": "Arana", "default": 0, "min": 0, "max": 240, "control": { "slider": true, "input": true } },
+        "ticks-swing":  {
+            "type": "int",
+            "name": "Swing",
+            "description": "El swing tiene sus propios ticks porque su fisica es mucho mas sensible.",
+            "default": 4, "min": 0, "max": 240,
+            "control": { "slider": true, "input": true }
+        },
+
+        "title-region": {
+            "type": "title",
+            "name": "Tramo dificil"
+        },
+        "region-enabled": {
+            "type": "bool",
+            "name": "Ticks extra en un tramo",
+            "description": "Suma ticks extra solo entre dos porcentajes del nivel (por ejemplo 40% a 60%).",
+            "default": false
+        },
+        "region-start": { "type": "int", "enable-if": "region-enabled", "name": "Desde (%)", "default": 40, "min": 0, "max": 100, "control": { "slider": true, "input": true } },
+        "region-end":   { "type": "int", "enable-if": "region-enabled", "name": "Hasta (%)", "default": 60, "min": 0, "max": 100, "control": { "slider": true, "input": true } },
+        "region-extra": { "type": "int", "enable-if": "region-enabled", "name": "Ticks extra", "default": 6, "min": 0, "max": 240, "control": { "slider": true, "input": true } },
+
+        "title-behavior": {
+            "type": "title",
+            "name": "Comportamiento"
+        },
+        "correct-both": {
+            "type": "bool",
+            "name": "Corregir a los dos jugadores",
+            "description": "En modo 2 jugadores corrige tambien al P2, y en dual exige que sobrevivan ambos.",
+            "default": true
+        },
+        "adaptive": {
+            "type": "bool",
+            "name": "Modo adaptativo",
+            "description": "Aprende cuan temprano clickeas y cuanto mantenes el boton, y ajusta la ayuda a tu forma de jugar.",
+            "default": false
+        },
+        "preserve-hold": {
+            "type": "bool",
+            "name": "Conservar duracion del hold",
+            "description": "Si soltas antes de que el click retrasado se aplique, el soltar tambien se retrasa para que dure lo mismo.",
+            "default": true
+        },
+        "safe-mode": {
+            "type": "bool",
+            "name": "Modo seguro",
+            "description": "Los intentos en los que el mod te salvo no guardan progreso ni completados (como una start position).",
+            "default": true
+        },
+
+        "title-hud": {
+            "type": "title",
+            "name": "HUD"
+        },
+        "show-hud":           { "type": "bool", "name": "Mostrar HUD (racha)", "default": true },
+        "show-timing-bar":    { "type": "bool", "name": "Barra de timing", "default": true },
+        "show-death-summary": { "type": "bool", "name": "Resumen al morir", "default": true },
+        "hud-scale": {
+            "type": "float",
+            "name": "Escala del HUD",
+            "default": 1.0,
+            "min": 0.5,
+            "max": 1.5,
+            "control": { "slider": true, "slider-step": 0.05, "input": true }
+        },
+
+        "title-colors": {
+            "type": "title",
+            "name": "Paleta (8 colores)"
+        },
+        "color-streak": { "type": "rgba", "name": "Racha",             "default": [255, 200, 60, 255] },
+        "color-good":   { "type": "rgba", "name": "Justo",             "default": [90, 230, 120, 255] },
+        "color-early":  { "type": "rgba", "name": "Temprano",          "default": [255, 170, 60, 255] },
+        "color-saved":  { "type": "rgba", "name": "Salvado",           "default": [80, 200, 255, 255] },
+        "color-danger": { "type": "rgba", "name": "Sin salvacion",     "default": [255, 80, 80, 255] },
+        "color-bar-bg": { "type": "rgba", "name": "Fondo de paneles",  "default": [15, 15, 25, 170] },
+        "color-text":   { "type": "rgba", "name": "Texto",             "default": [230, 230, 240, 255] },
+        "color-accent": { "type": "rgba", "name": "Histograma",        "default": [180, 120, 255, 255] },
+
+        "title-advanced": {
+            "type": "title",
+            "name": "Avanzado"
+        },
+        "sim-budget": {
+            "type": "int",
+            "name": "Presupuesto de simulacion",
+            "description": "Pasos de fantasma maximos por tick. Bajalo si notas lag en celulares viejos.",
+            "default": 600,
+            "min": 100,
+            "max": 5000
+        },
+        "debug-log": {
+            "type": "bool",
+            "name": "Log de depuracion",
+            "description": "Registra cada click y cada simulacion en la consola de Geode.",
+            "default": false
+        },
+        "validate-sim": {
+            "type": "bool",
+            "name": "Validar fantasma",
+            "description": "Compara cada tick la prediccion del fantasma con el jugador real y avisa si se desvian.",
+            "default": false
+        }
+    }
+}
