@@ -169,6 +169,10 @@ void HudNode::setHolding(int ticksHeld) {
 
 void HudNode::setAssisted(bool assisted) { m_assistedLabel->setVisible(assisted); }
 
+void HudNode::showFailedSave() {
+    spawnToast("PREDICCION FALLIDA", role(m_cfg.palette, PaletteRole::Danger));
+}
+
 void HudNode::resetAttempt() {
     m_streakLabel->setString("x0");
     m_streakLabel->setOpacity(120);

@@ -63,6 +63,11 @@ public:
     virtual bool pressHasEffect(Slot, int /*holdTicks*/) { return true; }
     // Soltar en ESTE tick (el jugador venía manteniendo).
     virtual SimOutcome simulateRelease(Slot) { return SimOutcome::Survives; }
+    // Press que REINYECTA el mod, aplicado `extraDelay` ticks después de ahora.
+    // (Puede tener otra latencia que un click físico; el simulador la calibra.)
+    virtual SimOutcome simulateInjectedPress(Slot slot, int holdTicks, int extraDelay) {
+        return extraDelay == 0 ? simulatePress(slot, holdTicks) : SimOutcome::Dies;
+    }
 };
 
 // Parámetros vigentes para un slot en el tick actual (los calcula el motor
@@ -73,6 +78,9 @@ struct SlotParams {
     Mode mode = Mode::Cube;     // sólo para etiquetar eventos
     bool dropUnneeded = false;  // modos de toque: descartar clicks que no hacen falta
     bool saveReleases = false;  // nave/wave: corregir también el soltar
+    // Ticks de margen: si el tick siguiente también es seguro, esperar para no
+    // disparar justo en el borde de la ventana segura (frágil ante errores).
+    int safetyMargin = 0;
 };
 
 // Comando que el motor debe meter en GJBaseGameLayer::m_queuedButtons.
@@ -133,6 +141,7 @@ private:
         std::optional<Tick> scheduledRelease;  // release a inyectar en ese tick
         bool pendingRelease = false;           // un SOLTAR retenido (nave/wave)
         Tick releaseHeldTick = 0;
+        int viableTicks = 0;                   // ticks seguidos en que apretar ya sobrevivía
     };
 
     void apply(Slot slot, Tick now, ClickKind kind, int holdTicks, std::vector<InjectCmd>& out);

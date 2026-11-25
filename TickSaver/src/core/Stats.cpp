@@ -11,7 +11,7 @@ std::string describeClick(LastClick const& c) {
     std::string early = c.release ? "soltaste temprano por " : "temprano por ";
     switch (c.kind) {
         case ClickKind::Clean: return "justo";
-        case ClickKind::Saved: return early + t + ": salvado";
+        case ClickKind::Saved: return early + t + (c.failed ? ": salvado, pero fallo la prediccion" : ": salvado");
         case ClickKind::Unsalvageable: return early + t + ": sin salvacion";
         case ClickKind::Unchecked: return "sin evaluar";
         case ClickKind::Unnecessary: return "click sin efecto: no cuenta";

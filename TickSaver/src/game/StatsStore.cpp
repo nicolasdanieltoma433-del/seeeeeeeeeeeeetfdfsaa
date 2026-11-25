@@ -53,6 +53,7 @@ matjson::Value toJson(LevelStats const& s) {
         {"saves", s.saves},
         {"unsalvageable", s.unsalvageable},
         {"ignored", s.ignored},
+        {"failedSaves", s.failedSaves},
         {"bestStreak", s.bestStreak},
         {"savedTicksSum", s.savedTicksSum},
         {"maxSavedTicks", s.maxSavedTicks},
@@ -74,6 +75,7 @@ LevelStats fromJson(matjson::Value const& j) {
     s.saves = u32("saves");
     s.unsalvageable = u32("unsalvageable");
     s.ignored = u32("ignored");
+    s.failedSaves = u32("failedSaves");
     s.bestStreak = u32("bestStreak");
     s.savedTicksSum = j["savedTicksSum"].asUInt().unwrapOr(0);
     s.maxSavedTicks = u32("maxSavedTicks");

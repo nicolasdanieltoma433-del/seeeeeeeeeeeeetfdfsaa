@@ -47,6 +47,12 @@ struct MockPredictor final : IPredictor {
     std::function<SimOutcome(Slot, Tick)> release = [](Slot, Tick) { return SimOutcome::Survives; };
     int lastHold = -1;
 
+    // Press reinyectado `delay` ticks después: por defecto, igual que press(t + delay).
+    SimOutcome simulateInjectedPress(Slot s, int hold, int delay) override {
+        lastHold = hold;
+        return press(s, *clock + delay, hold);
+    }
+
     SimOutcome simulatePress(Slot s, int hold) override {
         lastHold = hold;
         return press(s, *clock, hold);
@@ -538,6 +544,59 @@ static void testConfigCodeV3BigTicks() {
     }
 }
 
+static SlotParams marginParams(int maxDelay, int margin) {
+    SlotParams p;
+    p.maxDelay = maxDelay;
+    p.safetyMargin = margin;
+    return p;
+}
+
+static void testSafetyMarginAvoidsEdge() {
+    std::puts("[scheduler] margen de seguridad: no dispara en el borde de la ventana segura");
+    Tick now = 0;
+    MockPredictor pred;
+    pred.clock = &now;
+    pred.press = [](Slot, Tick t, int) { return (t >= 3 && t <= 8) ? SimOutcome::Survives : SimOutcome::Dies; };
+    InputScheduler s;
+    s.onPhysicalPress(Slot::P1, now, marginParams(20, 1), pred);
+    std::vector<std::pair<Tick, InjectCmd>> log;
+    for (now = 1; now <= 10; ++now) {
+        std::vector<InjectCmd> out;
+        s.onTick(now, {marginParams(20, 1), marginParams(20, 1)}, pred, out);
+        for (auto c : out) log.push_back({now, c});
+    }
+    CHECK(log.size() == 1 && log[0].first == 4);  // no en 3 (borde), sino en 4
+    auto ev = s.drainEvents();
+    CHECK(ev.size() == 1 && ev[0].kind == ClickKind::Saved && ev[0].earlyTicks == 4);
+}
+
+static void testSafetyMarginNarrowWindow() {
+    std::puts("[scheduler] margen con ventana de 1 tick: dispara en el unico tick seguro");
+    Tick now = 0;
+    MockPredictor pred;
+    pred.clock = &now;
+    pred.press = [](Slot, Tick t, int) { return t == 3 ? SimOutcome::Survives : SimOutcome::Dies; };
+    InputScheduler s;
+    s.onPhysicalPress(Slot::P1, now, marginParams(20, 2), pred);
+    std::vector<std::pair<Tick, InjectCmd>> log;
+    for (now = 1; now <= 10; ++now) {
+        std::vector<InjectCmd> out;
+        s.onTick(now, {marginParams(20, 2), marginParams(20, 2)}, pred, out);
+        for (auto c : out) log.push_back({now, c});
+    }
+    CHECK(log.size() == 1 && log[0].first == 3);
+}
+
+static void testFailedSaveDescription() {
+    std::puts("[stats] salvada fallida se describe honestamente");
+    Session session;
+    session.startAttempt();
+    ClickEvent saved{Slot::P1, ClickKind::Saved, 3, Mode::Cube, 0, 3};
+    session.onClick(saved);
+    session.markLastFailed();
+    CHECK(describeClick(session.lastClick()) == "temprano por 3t: salvado, pero fallo la prediccion");
+}
+
 int main() {
     testCleanClick();
     testEarlyClickSaved();
@@ -562,6 +621,9 @@ int main() {
     testRepressCancelsHeldRelease();
     testConfigCodeV2StillImports();
     testConfigCodeV3BigTicks();
+    testSafetyMarginAvoidsEdge();
+    testSafetyMarginNarrowWindow();
+    testFailedSaveDescription();
     std::printf("\n%d/%d checks OK\n", g_checks - g_failures, g_checks);
     return g_failures == 0 ? 0 : 1;
 }

@@ -45,6 +45,7 @@ Config readAll() {
     c.safeMode = value<bool>("safe-mode");
     c.dropUnneeded = value<bool>("drop-unneeded");
     c.saveReleases = value<bool>("save-releases");
+    c.safetyMargin = static_cast<int>(value<std::int64_t>("safety-margin"));
 
     c.showHud = value<bool>("show-hud");
     c.showTimingBar = value<bool>("show-timing-bar");
@@ -133,7 +134,7 @@ void install() {
                      "show-hud", "show-timing-bar", "show-death-summary", "debug-log", "validate-sim", "direct-inject", "full-sync"}) {
         listen<bool>(key);
     }
-    for (auto key : {"max-ticks", "region-start", "region-end", "region-extra"}) {
+    for (auto key : {"max-ticks", "region-start", "region-end", "region-extra", "safety-margin"}) {
         listen<std::int64_t>(key);
     }
     for (std::size_t i = 0; i < kModeCount; ++i) listen<std::int64_t>(modeKey(i));
@@ -158,6 +159,7 @@ void write(Config const& c) {
     mod->setSettingValue<bool>("safe-mode", c.safeMode);
     mod->setSettingValue<bool>("drop-unneeded", c.dropUnneeded);
     mod->setSettingValue<bool>("save-releases", c.saveReleases);
+    mod->setSettingValue<std::int64_t>("safety-margin", c.safetyMargin);
     mod->setSettingValue<bool>("show-hud", c.showHud);
     mod->setSettingValue<bool>("show-timing-bar", c.showTimingBar);
     mod->setSettingValue<bool>("show-death-summary", c.showDeathSummary);

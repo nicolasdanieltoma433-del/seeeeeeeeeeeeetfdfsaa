@@ -73,6 +73,9 @@ struct Config {
     bool dropUnneeded = true;
     // Nave y wave: también se corrige el SOLTAR temprano.
     bool saveReleases = true;
+    // Ticks de margen dentro de la ventana segura (0 = disparar en el primer
+    // tick seguro, que es el borde y el más frágil).
+    int safetyMargin = 1;
 
     // --- HUD -----------------------------------------------------------------
     bool showHud = true;

@@ -59,6 +59,20 @@ processCommands (cada tick completo T+1, T+2, ...)
 cada evaluación usa el estado real del nivel en ese tick (objetos que se movieron, triggers
 ya disparados), el costo se reparte en el tiempo, y los clicks buenos nunca suman latencia.
 
+**Margen de seguridad:** el primer tick en que apretar sobrevive es el *borde* de la ventana
+segura (el cubo pasa el pincho por un pelo). Si el tick siguiente también es seguro, el mod
+espera hasta `safetyMargin` ticks para disparar adentro de la ventana y no en el límite.
+
+**Autocalibración de latencia:** antes de reinyectar un press del cubo, el simulador predice
+la posición K=6 ticks después con 0, 1 y 2 ticks de retraso; luego la compara con el jugador
+real y vota. Con 3 votos consistentes ajusta la latencia de todas las predicciones de
+reinyección. Si ninguna coincide, lo avisa en el log (el problema es otro: orden del paso,
+campos sin copiar u objetos móviles).
+
+**Predicción fallida:** si moriste dentro de la ventana que el fantasma daba por segura tras
+una salvada, se cuenta en `failedSaves`, se avisa en el HUD/resumen y se loguea con el tick,
+el modo, el % y la latencia calibrada.
+
 **Soltar temprano (nave/wave):** si soltar ahora te mata, el soltar se retiene y se
 reinyecta en el primer tick en que soltar es seguro (`IPredictor::simulateRelease`).
 

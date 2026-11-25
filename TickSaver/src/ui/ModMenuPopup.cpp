@@ -252,8 +252,8 @@ void ModMenuPopup::buildGeneral() {
              {kRowLabelX, 32.f}, .28f, {0.f, .5f},
              c.safeMode ? dimColor() : role(c.palette, PaletteRole::Danger));
 
-    addLabel(m_content, "Los ticks de cada personaje se ajustan en la pestana Modos", {kContentW / 2.f, 8.f}, .27f,
-             {.5f, .5f}, dimColor());
+    addSliderRow("Margen seguridad", 12.f, 0.f, 3.f, 1.f, static_cast<float>(c.safetyMargin), ticksText,
+                 [](int v) { settings::update([v](Config& x) { x.safetyMargin = v; }); });
 }
 
 void ModMenuPopup::buildModes() {

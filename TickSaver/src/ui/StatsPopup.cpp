@@ -52,8 +52,8 @@ void StatsPopup::buildSummary() {
     };
 
     auto const& s = m_stats;
-    addLine(fmt::format("Salvados: {}   Mejor racha: x{}   Muertes: {}   Intentos: {}", s.saves, s.bestStreak, s.deaths,
-                        s.attempts),
+    addLine(fmt::format("Salvados: {} (fallidos {})   Mejor racha: x{}   Muertes: {}   Intentos: {}", s.saves,
+                        s.failedSaves, s.bestStreak, s.deaths, s.attempts),
             -46.f);
     addLine(fmt::format("Promedio: {:.1f}t   Max: {}t   Ignorados: {}   Sin salvacion: {}   Mejor: {:.0f}%",
                         s.averageSavedTicks(), s.maxSavedTicks, s.ignored, s.unsalvageable,

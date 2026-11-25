@@ -100,6 +100,11 @@ private:
     std::array<Mode, kSlotCount> m_physDownMode{};
 
     bool m_inputThisTick = false;
+    // Última salvada de un press, para detectar predicciones fallidas.
+    bool m_lastSaveValid = false;
+    Tick m_lastSaveTick = 0;
+    Mode m_lastSaveMode = Mode::Cube;
+    int m_lastSaveEarly = 0;
     bool m_validatePending = false;
     bool m_deadThisAttempt = false;
 

@@ -6,7 +6,7 @@
     },
     "id": "tuusuario.ticksaver",
     "name": "TickSaver",
-    "version": "v0.3.0",
+    "version": "v0.3.1",
     "developer": "TuUsuario",
     "description": "Asistente de practica: retrasa los clicks tempranos para salvar el intento",
     "tags": [
@@ -226,6 +226,18 @@
             "name": "Corregir el soltar (nave y wave)",
             "description": "En nave y wave tambien corrige el SOLTAR temprano: si soltar te mata, sigue manteniendo hasta que soltar sea seguro.",
             "default": true
+        },
+        "safety-margin": {
+            "type": "int",
+            "name": "Margen de seguridad (ticks)",
+            "description": "Al salvar un click, no lo dispara en el primer tick seguro (el borde, el mas fragil) sino hasta este numero de ticks mas adentro de la ventana segura.",
+            "default": 1,
+            "min": 0,
+            "max": 3,
+            "control": {
+                "arrows": true,
+                "input": true
+            }
         },
         "safe-mode": {
             "type": "bool",

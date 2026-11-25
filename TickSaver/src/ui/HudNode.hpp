@@ -27,6 +27,8 @@ public:
     void setHolding(int ticksHeld);
     // Cartel "INTENTO ASISTIDO: NO GUARDA" (modo seguro activo en este intento).
     void setAssisted(bool assisted);
+    // "PREDICCION FALLIDA": dijo salvado y moriste igual enseguida.
+    void showFailedSave();
     void resetAttempt();
 
 protected:

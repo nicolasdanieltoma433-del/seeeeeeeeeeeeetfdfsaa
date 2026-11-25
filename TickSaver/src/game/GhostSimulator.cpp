@@ -247,7 +247,7 @@ char const* kindName(int kind) {
 }
 } // namespace
 
-SimOutcome GhostSimulator::run(Slot slot, Kind kind, int holdTicks, int windowOverride, Trace* trace) {
+SimOutcome GhostSimulator::run(Slot slot, Kind kind, int holdTicks, int windowOverride, Trace* trace, int pressAt) {
     using Clock = std::chrono::steady_clock;
 
     refreshFrame();
@@ -267,7 +267,7 @@ SimOutcome GhostSimulator::run(Slot slot, Kind kind, int holdTicks, int windowOv
         prof[ui] = profileFor(detectMode(targets[ui].real));
         int w = 0;
         switch (kind) {
-            case Kind::Press: w = windowFor(prof[ui], holdTicks); break;
+            case Kind::Press: w = windowFor(prof[ui], holdTicks) + pressAt; break;
             case Kind::Idle: w = windowOverride; break;
             case Kind::NoPress: w = prof[ui].noPressWindow > 0 ? prof[ui].noPressWindow : windowFor(prof[ui], holdTicks); break;
             case Kind::Release: w = prof[ui].releaseWindow; break;
@@ -297,8 +297,7 @@ SimOutcome GhostSimulator::run(Slot slot, Kind kind, int holdTicks, int windowOv
         sim::Scope scope;  // al salir de este bloque se restauran orbes/pads
         for (int i = 0; i < n; ++i) {
             auto* g = targets[static_cast<std::size_t>(i)].ghost;
-            if (kind == Kind::Press) g->pushButton(PlayerButton::Jump);
-            else if (kind == Kind::Release) g->releaseButton(PlayerButton::Jump);
+            if (kind == Kind::Release) g->releaseButton(PlayerButton::Jump);
             else if (kind == Kind::NoPress && g->m_holdingButtons[static_cast<int>(PlayerButton::Jump)]) {
                 g->releaseButton(PlayerButton::Jump);  // "no apretar" = botón suelto
             }
@@ -314,7 +313,8 @@ SimOutcome GhostSimulator::run(Slot slot, Kind kind, int holdTicks, int windowOv
                 if (done[ui]) continue;
                 auto* g = targets[ui].ghost;
 
-                if (kind == Kind::Press && k == holdTicks) g->releaseButton(PlayerButton::Jump);
+                if (kind == Kind::Press && k == pressAt) g->pushButton(PlayerButton::Jump);
+                if (kind == Kind::Press && k == pressAt + holdTicks) g->releaseButton(PlayerButton::Jump);
                 step(g);
                 ++steps;
 
@@ -330,7 +330,7 @@ SimOutcome GhostSimulator::run(Slot slot, Kind kind, int holdTicks, int windowOv
                 }
 
                 // Modos de salto: el click es bueno si aterriza vivo.
-                if (landingExit && prof[ui].endOnLanding) {
+                if (landingExit && prof[ui].endOnLanding && k >= pressAt) {
                     if (!g->m_isOnGround) airborne[ui] = true;
                     else if (airborne[ui] && landedAt[ui] < 0) landedAt[ui] = k;
                     if (landedAt[ui] >= 0 && k - landedAt[ui] >= prof[ui].landingMargin) done[ui] = true;
@@ -376,6 +376,80 @@ SimOutcome GhostSimulator::simulateIdle(Slot slot, int ticks) { return run(slot,
 SimOutcome GhostSimulator::simulateNoPress(Slot slot, int holdTicks) { return run(slot, Kind::NoPress, holdTicks, 0); }
 
 SimOutcome GhostSimulator::simulateRelease(Slot slot) { return run(slot, Kind::Release, 0, 0); }
+
+SimOutcome GhostSimulator::simulateInjectedPress(Slot slot, int holdTicks, int extraDelay) {
+    return run(slot, Kind::Press, holdTicks, 0, nullptr, m_injectLatency + extraDelay);
+}
+
+void GhostSimulator::calibrateBefore(Slot slot, Tick now, int holdTicks) {
+    if (m_cal.active || slot != Slot::P1) return;
+    std::array<PlayerObject*, 2> reals{};
+    // Sólo cubo y un solo jugador: es el caso donde los primeros ticks de un
+    // salto son deterministas y no dependen de cuándo sueltes.
+    if (realTargets(slot, false, reals) != 1 || detectMode(reals[0]) != Mode::Cube) return;
+
+    Calibration cal;
+    bool any = false;
+    for (int latency = 0; latency <= kMaxLatency; ++latency) {
+        auto ul = static_cast<std::size_t>(latency);
+        auto outcome = run(slot, Kind::Press, std::max(holdTicks, kCalSteps), kCalSteps, &cal.traces[ul], latency);
+        cal.valid[ul] = outcome == SimOutcome::Survives;
+        any = any || cal.valid[ul];
+    }
+    if (!any) return;
+    cal.active = true;
+    cal.checkTick = now + kCalSteps;
+    m_cal = cal;
+}
+
+void GhostSimulator::calibrateCheck(Tick now, bool cancel) {
+    if (!m_cal.active) return;
+    if (cancel || now > m_cal.checkTick) {
+        m_cal.active = false;  // hubo otro input en el medio: la medición no sirve
+        return;
+    }
+    if (now < m_cal.checkTick) return;
+    m_cal.active = false;
+
+    auto* real = m_layer->m_player1;
+    if (!real || real->m_isDead) return;
+    float rx = real->getPositionX(), ry = real->getPositionY();
+
+    std::array<float, kMaxLatency + 1> err{};
+    int best = -1;
+    for (int l = 0; l <= kMaxLatency; ++l) {
+        auto ul = static_cast<std::size_t>(l);
+        err[ul] = m_cal.valid[ul] ? std::hypot(rx - m_cal.traces[ul].x, ry - m_cal.traces[ul].y) : 1e9f;
+        if (best < 0 || err[ul] < err[static_cast<std::size_t>(best)]) best = l;
+    }
+    float second = 1e9f;
+    for (int l = 0; l <= kMaxLatency; ++l) {
+        if (l != best) second = std::min(second, err[static_cast<std::size_t>(l)]);
+    }
+    float bestErr = err[static_cast<std::size_t>(best)];
+
+    if (m_debug) {
+        log::debug("[TickSaver] calibracion: error latencia0={:.3f} 1={:.3f} 2={:.3f}", err[0], err[1], err[2]);
+    }
+    if (bestErr > 0.5f) {
+        // Ninguna latencia explica lo que pasó: el fantasma difiere por otra
+        // razón (orden del paso, campos sin copiar, objetos móviles).
+        log::warn("[TickSaver] calibracion: el jugador real no coincide con ninguna prediccion (error {:.2f})", bestErr);
+        return;
+    }
+    if (second < std::max(1.5f, bestErr * 3.f)) return;  // no es concluyente
+
+    ++m_votes[static_cast<std::size_t>(best)];
+    int others = 0;
+    for (int l = 0; l <= kMaxLatency; ++l) {
+        if (l != best) others += m_votes[static_cast<std::size_t>(l)];
+    }
+    if (best != m_injectLatency && m_votes[static_cast<std::size_t>(best)] >= 3 &&
+        m_votes[static_cast<std::size_t>(best)] >= 2 * others) {
+        log::info("[TickSaver] calibracion: el click reinyectado entra {} tick(s) tarde; ajustando predicciones", best);
+        m_injectLatency = best;
+    }
+}
 
 bool GhostSimulator::pressHasEffect(Slot slot, int holdTicks) {
     // Nave/wave: apretar siempre cambia la trayectoria.

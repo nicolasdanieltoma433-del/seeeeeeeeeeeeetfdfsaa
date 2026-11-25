@@ -140,19 +140,33 @@ void InputScheduler::onTick(Tick now, std::array<SlotParams, kSlotCount> const& 
         }
 
         // 5) ¿Apretar en ESTE tick sobrevive?
-        auto outcome = predictor.simulatePress(slot, hold);
+        auto outcome = predictor.simulateInjectedPress(slot, hold, 0);
         if (outcome == SimOutcome::Survives || outcome == SimOutcome::Inconclusive) {
             // Si tampoco apretar mata, el click no hace falta: dispararlo tarde
             // sería un salto "fantasma" en cualquier momento. Se descarta.
             if (p.dropUnneeded && predictor.simulateNoPress(slot, hold) == SimOutcome::Survives) {
                 drop(slot, now);
+                continue;
             }
-            else {
-                apply(slot, now, ClickKind::Saved, hold, out);
+            // Margen: el primer tick seguro es el BORDE de la ventana (el cubo
+            // pasa el pincho por un pelo). Si el siguiente también es seguro,
+            // esperamos para disparar adentro de la ventana y no en el límite.
+            if (s.viableTicks < p.safetyMargin && elapsed + 1 < p.maxDelay &&
+                predictor.simulateInjectedPress(slot, hold, 1) == SimOutcome::Survives) {
+                ++s.viableTicks;
+                continue;
             }
+            apply(slot, now, ClickKind::Saved, hold, out);
             continue;
         }
         if (outcome == SimOutcome::Skipped) continue;  // sin CPU este tick: seguimos esperando
+
+        // Esperábamos margen y la ventana se cerró antes de lo previsto: el
+        // tick anterior era seguro, este es lo más cerca que queda. Disparar.
+        if (s.viableTicks > 0) {
+            apply(slot, now, ClickKind::Saved, hold, out);
+            continue;
+        }
 
         // 6) Sigue matando. Si además esperar un tick más ya mata (por ejemplo
         //    un pincho justo delante del cubo), retener sólo empeora: aplicar.
@@ -209,6 +223,7 @@ void InputScheduler::apply(Slot slot, Tick now, ClickKind kind, int holdTicks, s
 
     s.pending = false;
     s.released = false;
+    s.viableTicks = 0;
 }
 
 void InputScheduler::drop(Slot slot, Tick now) {
@@ -225,6 +240,7 @@ void InputScheduler::drop(Slot slot, Tick now) {
 
     s.pending = false;
     s.released = false;
+    s.viableTicks = 0;
 }
 
 void InputScheduler::applyRelease(Slot slot, Tick now, ClickKind kind, std::vector<InjectCmd>& out) {

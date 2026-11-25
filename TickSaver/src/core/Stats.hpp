@@ -25,6 +25,7 @@ struct LastClick {
     int earlyTicks = 0;
     Mode mode = Mode::Cube;
     bool release = false;  // fue un SOLTAR (nave/wave)
+    bool failed = false;   // dijo "salvado" y moriste igual enseguida
 };
 
 // "temprano por 3t: salvado", "justo", ... (sin tildes: fuentes de GD).
@@ -42,6 +43,9 @@ public:
     int savesThisAttempt() const { return m_saves; }
     bool assisted() const { return m_saves > 0 || m_unsalvageable > 0; }
     LastClick const& lastClick() const { return m_last; }
+    // La última salvada no alcanzó (moriste dentro de lo que el fantasma
+    // daba por seguro).
+    void markLastFailed() { m_last.failed = true; }
 
 private:
     int m_streak = 0;
@@ -66,6 +70,7 @@ struct LevelStats {
     std::uint32_t saves = 0;
     std::uint32_t unsalvageable = 0;
     std::uint32_t ignored = 0;  // clicks que mataban y no hacían falta (descartados)
+    std::uint32_t failedSaves = 0;  // dijo "salvado" y moriste igual
     std::uint32_t bestStreak = 0;
     std::uint64_t savedTicksSum = 0;  // para el promedio de ticks salvados
     std::uint32_t maxSavedTicks = 0;

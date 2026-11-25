@@ -56,6 +56,16 @@ public:
     SimOutcome simulateNoPress(Slot slot, int holdTicks) override;
     bool pressHasEffect(Slot slot, int holdTicks) override;
     SimOutcome simulateRelease(Slot slot) override;
+    SimOutcome simulateInjectedPress(Slot slot, int holdTicks, int extraDelay) override;
+
+    // --- Autocalibración de la latencia de reinyección ----------------------
+    // Justo antes de reinyectar un press del cubo, predice dónde estará el
+    // jugador K ticks después si el press entra con 0, 1 o 2 ticks de retraso.
+    // K ticks más tarde compara con el jugador real y vota. Con votos
+    // consistentes ajusta la latencia que usan todas las predicciones.
+    void calibrateBefore(Slot slot, Tick now, int holdTicks);
+    void calibrateCheck(Tick now, bool cancel);
+    int injectLatency() const { return m_injectLatency; }
 
     // Jugadores REALES que mueve un click de este slot (para reinyectar).
     // Devuelve cuántos escribió en `out`.
@@ -93,7 +103,8 @@ private:
     void sync(PlayerObject* ghost, PlayerObject* real);
     void step(PlayerObject* ghost);
     // windowOverride > 0: correr exactamente esa cantidad de pasos (sin fin anticipado).
-    SimOutcome run(Slot slot, Kind kind, int holdTicks, int windowOverride, Trace* trace = nullptr);
+    // pressAt: en qué paso se aprieta (Kind::Press); antes el fantasma no toca nada.
+    SimOutcome run(Slot slot, Kind kind, int holdTicks, int windowOverride, Trace* trace = nullptr, int pressAt = 0);
 
     PlayLayer* m_layer;
     std::array<geode::Ref<PlayerObject>, 2> m_ghosts{};
@@ -110,6 +121,19 @@ private:
     bool m_debug = false;
     bool m_correctBoth = true;
     bool m_fullSync = true;
+
+    // calibración
+    static constexpr int kCalSteps = 6;
+    static constexpr int kMaxLatency = 2;
+    struct Calibration {
+        bool active = false;
+        Tick checkTick = 0;
+        std::array<Trace, kMaxLatency + 1> traces{};
+        std::array<bool, kMaxLatency + 1> valid{};
+    };
+    Calibration m_cal;
+    std::array<int, kMaxLatency + 1> m_votes{};
+    int m_injectLatency = 0;
 
     // validación
     bool m_validating = false;

@@ -1,3 +1,8 @@
+# v0.3.1
+- "Dice salvado y me mata igual": el click salvado ya no se dispara en el borde de la ventana segura; espera un tick de margen si el siguiente tambien es seguro (opcion "Margen de seguridad", 0 a 3)
+- Autocalibracion: despues de cada salvada del cubo compara tu trayectoria real con la prediccion (0, 1 o 2 ticks de retraso) y ajusta sola la latencia
+- Si dice salvado y moris igual enseguida, ahora lo avisa: "PREDICCION FALLIDA" en el HUD, en el resumen, en las estadisticas y en el log
+
 # v0.3.0
 - Maximo de ticks: de 240 a 255. Sliders con escala cuadratica para ser precisos en valores chicos
 - Clicks innecesarios: si un click te iba a matar y no hacerlo tambien sobrevive, se descarta ("CLICK IGNORADO") en vez de dispararse tarde

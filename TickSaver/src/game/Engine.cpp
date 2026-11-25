@@ -90,6 +90,7 @@ SlotParams Engine::paramsFor(Slot slot) const {
     p.expectedHold = cfg.adaptive ? model.expectedHold(p.mode, prof.defaultHold) : prof.defaultHold;
     p.dropUnneeded = cfg.dropUnneeded && prof.noPressWindow > 0;   // modos de toque
     p.saveReleases = cfg.saveReleases && prof.releaseWindow > 0;   // nave/wave
+    p.safetyMargin = std::clamp(cfg.safetyMargin, 0, 3);
 
     if (!cfg.enabled || (slot == Slot::P2 && !cfg.correctBoth)) {
         p.maxDelay = 0;  // pasa directo (y si había algo retenido se suelta)
@@ -202,6 +203,9 @@ void Engine::beforeStep(bool isHalfTick) {
     }
 
     m_sim.beginTick(m_lastDt, cfg.simBudgetMs);
+    // Autocalibración: ¿dónde quedó el jugador K ticks después de la última
+    // reinyección? (Se anula si hubo otro input en el medio.)
+    m_sim.calibrateCheck(m_tick, m_inputThisTick);
     m_sim.setDebugLog(cfg.debugLog);
     m_sim.setCorrectBoth(cfg.correctBoth);
     m_sim.setFullSync(cfg.fullSync);
@@ -211,7 +215,10 @@ void Engine::beforeStep(bool isHalfTick) {
         std::array<SlotParams, kSlotCount> params{paramsFor(Slot::P1), paramsFor(Slot::P2)};
         std::vector<InjectCmd> cmds;
         m_scheduler.onTick(m_tick, params, m_sim, cmds);
-        for (auto const& cmd : cmds) inject(cmd.slot, cmd.push);
+        for (auto const& cmd : cmds) {
+            if (cmd.push) m_sim.calibrateBefore(cmd.slot, m_tick, params[idx(cmd.slot)].expectedHold);
+            inject(cmd.slot, cmd.push);
+        }
         processEvents();
 
         if (m_hud) {
@@ -239,7 +246,13 @@ void Engine::processEvents() {
         m_stats.recordClick(ev, pct);
         m_stats.recordStreak(m_session.streak());
 
-        if (ev.kind == ClickKind::Saved && !ev.release) store::adaptive().recordSave(ev.mode, ev.earlyTicks);
+        if (ev.kind == ClickKind::Saved && !ev.release) {
+            store::adaptive().recordSave(ev.mode, ev.earlyTicks);
+            m_lastSaveValid = true;
+            m_lastSaveTick = ev.applyTick;
+            m_lastSaveMode = ev.mode;
+            m_lastSaveEarly = ev.earlyTicks;
+        }
         if (ev.kind == ClickKind::Saved || ev.kind == ClickKind::Unsalvageable || ev.kind == ClickKind::Ignored) {
             markAssisted();
         }
@@ -293,6 +306,7 @@ void Engine::onReset() {
     m_session.startAttempt();
     m_deadThisAttempt = false;
     m_validatePending = false;
+    m_lastSaveValid = false;
     ++m_stats.attempts;
     if (m_hud) m_hud->resetAttempt();
     m_dirty = true;
@@ -303,6 +317,24 @@ void Engine::onRealDeath(PlayerObject*) {
     m_deadThisAttempt = true;
 
     float pct = percent();
+
+    // ¿Dijo "salvado" y moriste dentro de lo que el fantasma daba por seguro?
+    // Entonces la predicción falló: lo decimos en vez de esconderlo.
+    bool failedSave = false;
+    if (m_lastSaveValid) {
+        auto since = m_tick - m_lastSaveTick;
+        if (since >= 0 && since <= profileFor(m_lastSaveMode).window) {
+            failedSave = true;
+            ++m_stats.failedSaves;
+            m_session.markLastFailed();
+            log::warn("[TickSaver] prediccion fallida: salvado +{}t en tick {} ({}), muerte {} ticks despues al {:.1f}%; "
+                      "latencia calibrada={}",
+                      m_lastSaveEarly, m_lastSaveTick, kModeNames[idx(m_lastSaveMode)], since,
+                      static_cast<double>(pct), m_sim.injectLatency());
+        }
+        m_lastSaveValid = false;
+    }
+
     m_scheduler.reset();
     m_stats.recordDeath(pct);
     m_stats.recordProgress(pct);
@@ -313,9 +345,10 @@ void Engine::onRealDeath(PlayerObject*) {
     // disco ahí es arriesgado. Lo hacemos en el próximo frame.
     // Capturamos un id y no punteros: si saliste del nivel antes del próximo
     // frame, el Engine ya no existe y el callback no hace nada.
-    geode::queueInMainThread([id = m_id, pct] {
+    geode::queueInMainThread([id = m_id, pct, failedSave] {
         auto* engine = Engine::current();
         if (!engine || engine->m_id != id) return;
+        if (failedSave && engine->m_hud) engine->m_hud->showFailedSave();
         if (settings::get().showDeathSummary) engine->showDeathSummary(pct);
         engine->saveStats(false);
     });
