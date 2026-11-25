@@ -38,12 +38,16 @@ jobs:
     runs-on: ${{ matrix.config.os }}
 
     steps:
+      # Checkout en una subcarpeta: el repo tiene su propia carpeta "output/"
+      # que choca con la que crea build-geode-mod en la raíz del workspace.
       - uses: actions/checkout@v7
+        with:
+          path: repo
 
       - name: Compilar el mod
         uses: geode-sdk/build-geode-mod@main
         with:
-          path: TickSaver
+          path: repo/TickSaver
           combine: true
           target: ${{ matrix.config.target }}
 
