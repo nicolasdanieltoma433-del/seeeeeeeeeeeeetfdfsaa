@@ -19,7 +19,7 @@
 
 #include "../core/InputScheduler.hpp"
 #include "../core/Stats.hpp"
-#include "../ui/DeathSummaryNode.hpp"  // Ref/WeakRef necesitan el tipo completo
+#include "../ui/DeathSummaryNode.hpp"  // Ref necesita el tipo completo
 #include "../ui/HudNode.hpp"
 #include "GhostSimulator.hpp"
 
@@ -84,8 +84,13 @@ private:
     Session m_session;
     LevelStats m_stats;
 
+    // Refs fuertes a propósito: NO usar geode::WeakRef acá. Reasignar un
+    // WeakRef (operator= -> swap) deja el objeto nuevo sin retener, y al
+    // borrarse solo el resumen quedaba un puntero colgado (crash al morir
+    // por tercera vez, visto en v0.2.0).
     geode::Ref<ui::HudNode> m_hud;
-    geode::WeakRef<ui::DeathSummaryNode> m_summary;
+    geode::Ref<ui::DeathSummaryNode> m_summary;
+    std::uint64_t m_id = 0;  // identifica a este Engine en callbacks diferidos
 
     Tick m_tick = 0;
     float m_tickDt = 0.f;    // mayor dt visto en el tick (paso completo)

@@ -83,12 +83,12 @@ bool ModMenuPopup::init() {
 void ModMenuPopup::requestRebuild() {
     if (m_rebuildPending) return;
     m_rebuildPending = true;
-    WeakRef<ModMenuPopup> self(this);
+    // Ref fuerte (no WeakRef): mantiene vivo el popup hasta el próximo
+    // frame. Si para entonces ya se cerró, no reconstruimos nada.
+    Ref<ModMenuPopup> self(this);
     geode::queueInMainThread([self] {
-        if (auto popup = self.lock()) {
-            popup->m_rebuildPending = false;
-            popup->rebuild();
-        }
+        self->m_rebuildPending = false;
+        if (self->getParent()) self->rebuild();
     });
 }
 
@@ -169,10 +169,10 @@ void ModMenuPopup::addSliderRow(char const* label, float y, float min, float max
     m_content->addChild(slider);
 
     // -/+ para ajustes finos (en celular arrastrar el slider de a 1 es incómodo).
-    WeakRef<SliderNode> weakSlider(slider);
-    auto nudge = [this, weakSlider, apply, min, max, step](int dir) {
-        auto s = weakSlider.lock();
-        if (!s) return;
+    // Puntero crudo seguro: el slider y estos botones son hermanos en
+    // m_content y se destruyen juntos en cada rebuild.
+    auto nudge = [this, slider, apply, min, max, step](int dir) {
+        auto* s = slider;
         float v = std::clamp(s->getValue() + static_cast<float>(dir) * step, min, max);
         s->setValue(v);
         apply(static_cast<int>(std::lround(v)));
@@ -344,10 +344,10 @@ void ModMenuPopup::buildHud() {
         auto button = Button::createWithNode(swatch, [this, i](Button*) {
             auto const& col = cfg().palette[i];
             auto picker = ColorPickPopup::create(ccColor4B{col.r, col.g, col.b, col.a});
-            WeakRef<ModMenuPopup> self(this);
+            Ref<ModMenuPopup> self(this);
             picker->setCallback([self, i](ccColor4B const& picked) {
                 settings::update([&](Config& x) { x.palette[i] = RGBA{picked.r, picked.g, picked.b, picked.a}; });
-                if (auto popup = self.lock()) popup->requestRebuild();
+                self->requestRebuild();
             });
             picker->show();
         });
@@ -386,7 +386,7 @@ void ModMenuPopup::onSafeModeToggled(bool enabled) {
         requestRebuild();
         return;
     }
-    WeakRef<ModMenuPopup> self(this);
+    Ref<ModMenuPopup> self(this);
     createQuickPopup(
         "Desactivar modo seguro",
         "Sin modo seguro, los intentos en los que <cr>TickSaver</c> te ayudo <cy>guardan progreso y completados</c>.\n"
@@ -396,7 +396,7 @@ void ModMenuPopup::onSafeModeToggled(bool enabled) {
         [self](FLAlertLayer*, bool confirmed) {
             if (confirmed) settings::update([](Config& x) { x.safeMode = false; });
             // Si canceló, el toggle volvió a quedar marcado: redibujamos igual.
-            if (auto popup = self.lock()) popup->requestRebuild();
+            self->requestRebuild();
         });
 }
 
@@ -437,14 +437,14 @@ void ModMenuPopup::onImport() {
 }
 
 void ModMenuPopup::onRestoreDefaults() {
-    WeakRef<ModMenuPopup> self(this);
+    Ref<ModMenuPopup> self(this);
     createQuickPopup("Restablecer", "Volver toda la configuracion de <cy>TickSaver</c> a los valores de fabrica?",
                      "Cancelar", "Restablecer", [self](FLAlertLayer*, bool confirmed) {
                          if (!confirmed) return;
                          Config defaults;
                          applyPreset(defaults, Preset::Normal);
                          settings::write(defaults);
-                         if (auto popup = self.lock()) popup->requestRebuild();
+                         self->requestRebuild();
                      });
 }
 

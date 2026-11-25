@@ -1,4 +1,5 @@
 # v0.2.1
+- Crash al morir (a partir del tercer intento): el resumen al morir usaba un puntero colgado. Corregido
 - Rendimiento: el fantasma tiene un limite de CPU por frame (ms), para que niveles pesados como Slaughterhouse no se traben
 - Clicks: el click retrasado se aplica directo al jugador (igual que en la simulacion); opcion para volver al metodo anterior
 - Nave y wave: la simulacion ya no mira mas alla de tu hold (antes retenia clicks que estaban bien)

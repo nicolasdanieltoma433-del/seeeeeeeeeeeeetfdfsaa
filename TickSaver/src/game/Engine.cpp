@@ -21,6 +21,7 @@ namespace ts {
 namespace {
 Engine* g_current = nullptr;
 bool g_injecting = false;
+std::uint64_t g_nextEngineId = 1;
 
 // RAII para marcar "este handleButton lo mandamos nosotros".
 struct InjectGuard {
@@ -44,6 +45,7 @@ bool Engine::isInjecting() { return g_injecting; }
 
 Engine::Engine(PlayLayer* layer) : m_layer(layer), m_sim(layer) {
     g_current = this;
+    m_id = g_nextEngineId++;
     m_stats = store::loadLevel(layer->m_level);
     m_scheduler.setPreserveHold(settings::get().preserveHold);
     m_session.startAttempt();
@@ -293,11 +295,11 @@ void Engine::onRealDeath(PlayerObject*) {
 
     // destroyPlayer corre en medio del paso de física: crear UI o escribir a
     // disco ahí es arriesgado. Lo hacemos en el próximo frame.
-    WeakRef<PlayLayer> layer(m_layer);
-    geode::queueInMainThread([layer, pct] {
-        auto alive = layer.lock();
+    // Capturamos un id y no punteros: si saliste del nivel antes del próximo
+    // frame, el Engine ya no existe y el callback no hace nada.
+    geode::queueInMainThread([id = m_id, pct] {
         auto* engine = Engine::current();
-        if (!alive || !engine || !engine->owns(alive.data())) return;
+        if (!engine || engine->m_id != id) return;
         if (settings::get().showDeathSummary) engine->showDeathSummary(pct);
         engine->saveStats(false);
     });
@@ -335,7 +337,7 @@ void Engine::resetStats() {
 }
 
 void Engine::showDeathSummary(float pct) {
-    if (auto old = m_summary.lock()) old->removeFromParent();
+    if (m_summary && m_summary->getParent()) m_summary->removeFromParent();
 
     ui::DeathSummary s;
     s.percent = pct;
