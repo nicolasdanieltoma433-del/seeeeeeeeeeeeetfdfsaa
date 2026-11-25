@@ -1,3 +1,9 @@
+# v0.2.2
+- Velocidad, gravedad y orbes: el fantasma copia el estado completo del jugador con el sistema de checkpoints del modo practica (velocidad, gravedad, mini, dash, pendientes, suelo)
+- Orbes: el fantasma ahora sabe que orbes estas tocando y cuales ya usaste en este click, asi un click en un orbe ya no se retiene por error
+- Tiempos internos copiados (margen tras portales, ultimo salto, flip de gravedad y de arana)
+- Opcion "Copia completa del jugador" en el menu (activada por defecto)
+
 # v0.2.1
 - Crash al morir (a partir del tercer intento): el resumen al morir usaba un puntero colgado. Corregido
 - Rendimiento: el fantasma tiene un limite de CPU por frame (ms), para que niveles pesados como Slaughterhouse no se traben

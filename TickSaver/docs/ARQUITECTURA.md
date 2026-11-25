@@ -127,9 +127,18 @@ antes que nosotros, nunca veríamos morir al fantasma y cualquier click "salvar�
 `PlayerObject::create(1, 1, layer, layer->m_objectLayer, true)`, invisible, sin efectos,
 sin estelas ni partículas, registrado en `SimGuard`. Hay dos: uno por jugador.
 
-**Sincronización** antes de cada simulación: `copyAttributes(real)` (lo que usa GD para
-clonar jugadores en el portal dual) + una lista explícita de campos críticos (posición,
-`m_yVelocity`, flags de modo, gravedad, tamaño, velocidad, `m_holdingButtons`...).
+**Sincronización** antes de cada simulación (aislada con `sim::SyncScope`):
+1. `copyAttributes(real)`, lo que usa GD para clonar jugadores en el portal dual;
+2. `real->saveToCheckpoint(cp)` + `ghost->loadFromCheckpoint(cp)`, la **copia del modo
+   práctica**: velocidad, gravedad, mini, dash de orbes, pendientes, suelo y colisiones;
+3. estado de **orbes** que el checkpoint no guarda: `m_touchingRings` (orbes que estás
+   tocando ahora), `m_usedRings`, `m_jumpBuffered`, `m_statePreJump`...;
+4. **tiempos** internos: margen tras un portal, último salto, flips de gravedad/araña;
+5. flags de física por versión del nivel (`m_enable22Changes`, `m_enableImpulseFix`...).
+
+Sin el punto 3 el fantasma no podía activar el orbe que estabas tocando al clickear,
+"moría", y el mod retenía un click correcto. La copia completa se puede apagar en
+*Opciones → Copia completa del jugador*.
 
 **Un paso:** `checkCollisions(ghost, dt, false)` → `ghost->update(dt)` → `updateRotation(dt)`.
 

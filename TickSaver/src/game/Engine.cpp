@@ -150,6 +150,7 @@ bool Engine::onButton(bool down, int button, bool isPlayer1) {
         m_scheduler.setPreserveHold(cfg.preserveHold);
         m_sim.setDebugLog(cfg.debugLog);
         m_sim.setCorrectBoth(cfg.correctBoth);
+        m_sim.setFullSync(cfg.fullSync);
 
         // El chequeo del click recién apretado usa su propio presupuesto.
         m_sim.setPriority(true);
@@ -192,6 +193,7 @@ void Engine::beforeStep(bool isHalfTick) {
     m_sim.beginTick(m_lastDt, cfg.simBudgetMs);
     m_sim.setDebugLog(cfg.debugLog);
     m_sim.setCorrectBoth(cfg.correctBoth);
+    m_sim.setFullSync(cfg.fullSync);
     m_scheduler.setPreserveHold(cfg.preserveHold);
 
     if (playing()) {

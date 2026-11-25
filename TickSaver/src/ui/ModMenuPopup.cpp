@@ -297,26 +297,30 @@ void ModMenuPopup::buildRegion() {
 
 void ModMenuPopup::buildOptions() {
     auto const& c = cfg();
-    addToggleRow("Modo adaptativo (aprende de vos)", 154.f, c.adaptive, [](bool on) {
-        settings::update([on](Config& x) { x.adaptive = on; });
-    });
-    addToggleRow("Corregir a los dos jugadores", 132.f, c.correctBoth, [](bool on) {
-        settings::update([on](Config& x) { x.correctBoth = on; });
-    });
-    addToggleRow("Conservar duracion del hold", 110.f, c.preserveHold, [](bool on) {
-        settings::update([on](Config& x) { x.preserveHold = on; });
-    });
-    addToggleRow("Reinyeccion directa (recomendado)", 88.f, c.directInject, [](bool on) {
-        settings::update([on](Config& x) { x.directInject = on; });
-    });
-    addToggleRow("Log de depuracion", 66.f, c.debugLog, [](bool on) {
-        settings::update([on](Config& x) { x.debugLog = on; });
-    });
-    addToggleRow("Validar fantasma", 44.f, c.validateSim, [](bool on) {
-        settings::update([on](Config& x) { x.validateSim = on; });
-    });
+    struct Row {
+        char const* label;
+        bool value;
+        bool Config::*field;
+    };
+    Row const rows[] = {
+        {"Modo adaptativo (aprende de vos)", c.adaptive, &Config::adaptive},
+        {"Corregir a los dos jugadores", c.correctBoth, &Config::correctBoth},
+        {"Conservar duracion del hold", c.preserveHold, &Config::preserveHold},
+        {"Copia completa del jugador (recomendado)", c.fullSync, &Config::fullSync},
+        {"Reinyeccion directa (recomendado)", c.directInject, &Config::directInject},
+        {"Log de depuracion", c.debugLog, &Config::debugLog},
+        {"Validar fantasma", c.validateSim, &Config::validateSim},
+    };
+    float y = 158.f;
+    for (auto const& row : rows) {
+        auto field = row.field;
+        addToggleRow(row.label, y, row.value, [field](bool on) {
+            settings::update([field, on](Config& x) { x.*field = on; });
+        });
+        y -= 20.f;
+    }
     // En décimas de ms para que el slider sea entero: 5..100 = 0.5..10 ms.
-    addSliderRow("CPU por frame", 16.f, 5.f, 100.f, 5.f, std::round(c.simBudgetMs * 10.f),
+    addSliderRow("CPU por frame", 12.f, 5.f, 100.f, 5.f, std::round(c.simBudgetMs * 10.f),
                  [](int v) { return fmt::format("{:.1f} ms", static_cast<double>(v) / 10.0); },
                  [](int v) { settings::update([v](Config& x) { x.simBudgetMs = static_cast<float>(v) / 10.f; }); });
 }

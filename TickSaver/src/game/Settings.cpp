@@ -55,6 +55,7 @@ Config readAll() {
 
     c.simBudgetMs = static_cast<float>(value<double>("sim-budget-ms"));
     c.directInject = value<bool>("direct-inject");
+    c.fullSync = value<bool>("full-sync");
     c.debugLog = value<bool>("debug-log");
     c.validateSim = value<bool>("validate-sim");
     return c;
@@ -125,7 +126,7 @@ void install() {
     reload();
 
     for (auto key : {"enabled", "region-enabled", "correct-both", "adaptive", "preserve-hold", "safe-mode",
-                     "show-hud", "show-timing-bar", "show-death-summary", "debug-log", "validate-sim", "direct-inject"}) {
+                     "show-hud", "show-timing-bar", "show-death-summary", "debug-log", "validate-sim", "direct-inject", "full-sync"}) {
         listen<bool>(key);
     }
     for (auto key : {"max-ticks", "region-start", "region-end", "region-extra"}) {
@@ -161,6 +162,7 @@ void write(Config const& c) {
     }
     mod->setSettingValue<double>("sim-budget-ms", static_cast<double>(c.simBudgetMs));
     mod->setSettingValue<bool>("direct-inject", c.directInject);
+    mod->setSettingValue<bool>("full-sync", c.fullSync);
     mod->setSettingValue<bool>("debug-log", c.debugLog);
     mod->setSettingValue<bool>("validate-sim", c.validateSim);
     g_writing = false;

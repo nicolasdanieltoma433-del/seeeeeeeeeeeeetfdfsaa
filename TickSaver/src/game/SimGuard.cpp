@@ -18,6 +18,7 @@ struct ActivationRecord {
 
 struct State {
     bool active = false;
+    bool syncing = false;
     std::array<PlayerObject*, 4> ghosts{};  // P1, P2 (+ margen)
     std::array<PlayerObject*, 4> dead{};
     bool inconclusive = false;
@@ -77,7 +78,26 @@ Scope::~Scope() {
     s.active = false;
 }
 
+SyncScope::SyncScope() {
+    auto& s = state();
+    s.active = true;
+    s.syncing = true;
+    s.ledger.clear();
+}
+
+SyncScope::~SyncScope() {
+    auto& s = state();
+    for (auto it = s.ledger.rbegin(); it != s.ledger.rend(); ++it) {
+        it->object->m_activatedByPlayer1 = it->byP1;
+        it->object->m_activatedByPlayer2 = it->byP2;
+    }
+    s.ledger.clear();
+    s.syncing = false;
+    s.active = false;
+}
+
 void markDeath(PlayerObject* ghost) {
+    if (state().syncing) return;
     for (auto& slot : state().dead) {
         if (slot == ghost) return;
         if (!slot) {
@@ -94,6 +114,7 @@ bool died(PlayerObject const* ghost) {
 
 void markInconclusive(char const* reason) {
     auto& s = state();
+    if (s.syncing) return;
     if (!s.inconclusive) {
         s.inconclusive = true;
         s.reason = reason;

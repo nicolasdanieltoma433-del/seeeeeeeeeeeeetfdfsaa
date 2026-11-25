@@ -84,6 +84,9 @@ struct Config {
     // Reinyectar el click retrasado con PlayerObject::pushButton (igual que
     // hace el fantasma) en vez de pasar por handleButton.
     bool directInject = true;
+    // Sincronizar el fantasma con saveToCheckpoint/loadFromCheckpoint (la
+    // copia del modo práctica): respeta velocidad, gravedad, orbes y dash.
+    bool fullSync = true;
     bool debugLog = false;
     bool validateSim = false;
 

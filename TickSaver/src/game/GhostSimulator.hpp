@@ -23,6 +23,7 @@
 
 #include "../core/InputScheduler.hpp"
 
+#include <Geode/binding/PlayerCheckpoint.hpp>
 #include <Geode/binding/PlayerObject.hpp>  // Ref<PlayerObject> necesita el tipo completo
 #include <Geode/utils/cocos.hpp>
 
@@ -64,6 +65,8 @@ public:
     void setDebugLog(bool v) { m_debug = v; }
     // Dual de un jugador: si es false sólo se exige que sobreviva el P1.
     void setCorrectBoth(bool v) { m_correctBoth = v; }
+    // Copia completa con el sistema de checkpoints del modo práctica.
+    void setFullSync(bool v) { m_fullSync = v; }
     int stepsUsedThisTick() const { return m_stepsUsed; }
     double usedMsThisFrame() const { return m_usedUs / 1000.0; }
 
@@ -82,6 +85,7 @@ private:
 
     PlayLayer* m_layer;
     std::array<geode::Ref<PlayerObject>, 2> m_ghosts{};
+    geode::Ref<PlayerCheckpoint> m_checkpoint;  // buffer reutilizado para sync
     float m_dt = 0.25f;  // se reemplaza por el dt real en el primer tick
 
     // presupuesto
@@ -93,6 +97,7 @@ private:
 
     bool m_debug = false;
     bool m_correctBoth = true;
+    bool m_fullSync = true;
 
     // validación
     bool m_validating = false;

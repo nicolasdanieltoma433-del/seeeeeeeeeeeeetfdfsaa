@@ -39,6 +39,17 @@ public:
     Scope& operator=(Scope const&) = delete;
 };
 
+// RAII: copiando el estado del jugador al fantasma (loadFromCheckpoint
+// cambia de modo, toca orbes...). Los hooks bloquean efectos sobre el nivel
+// igual que en una simulación, pero no se anotan muertes ni "inconclusos".
+class SyncScope {
+public:
+    SyncScope();
+    ~SyncScope();
+    SyncScope(SyncScope const&) = delete;
+    SyncScope& operator=(SyncScope const&) = delete;
+};
+
 // --- resultados que escriben los hooks durante la simulación ---------------
 void markDeath(PlayerObject* ghost);
 bool died(PlayerObject const* ghost);

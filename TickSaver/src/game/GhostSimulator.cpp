@@ -63,6 +63,7 @@ GhostSimulator::~GhostSimulator() {
 void GhostSimulator::prepare() {
     ghostAt(0);
     ghostAt(1);
+    if (!m_checkpoint) m_checkpoint = PlayerCheckpoint::create();
 }
 
 void GhostSimulator::refreshFrame() {
@@ -138,6 +139,15 @@ void GhostSimulator::sync(PlayerObject* ghost, PlayerObject* real) {
     // copyAttributes es lo que usa GD para clonar jugadores (dual portal).
     ghost->copyAttributes(real);
 
+    // Copia completa: la misma que usa el MODO PRÁCTICA para guardar y
+    // restaurar al jugador en un checkpoint. Incluye velocidad, gravedad,
+    // mini, dash de orbes, pendientes, suelo y estado de colisiones: si un
+    // respawn de práctica es idéntico, el fantasma también.
+    if (m_fullSync && m_checkpoint) {
+        real->saveToCheckpoint(m_checkpoint);
+        ghost->loadFromCheckpoint(m_checkpoint);
+    }
+
     // "Cinturón y tirantes": campos que, si copyAttributes no copiara en
     // alguna versión, romperían la predicción. Si el fantasma deriva en un
     // modo (ver "validate-sim"), el campo que falta casi seguro va acá.
@@ -174,6 +184,40 @@ void GhostSimulator::sync(PlayerObject* ghost, PlayerObject* real) {
     ghost->m_reverseSync = real->m_reverseSync;
     ghost->m_disablePlayerSqueeze = real->m_disablePlayerSqueeze;
     ghost->m_ignoreDamage = false;
+
+    // ORBES. El checkpoint no guarda qué orbes estás tocando ahora: sin esto
+    // el fantasma no puede activar el orbe que estás tocando al clickear,
+    // "muere", y el mod retiene un click que estaba perfecto.
+    if (ghost->m_touchingRings) {
+        ghost->m_touchingRings->removeAllObjects();
+        if (real->m_touchingRings) ghost->m_touchingRings->addObjectsFromArray(real->m_touchingRings);
+    }
+    ghost->m_touchedRings = real->m_touchedRings;
+    ghost->m_usedRings = real->m_usedRings;
+    ghost->m_ringJumpedSincePress = real->m_ringJumpedSincePress;
+    ghost->m_usedRingThisStep = real->m_usedRingThisStep;
+    ghost->m_touchedRing = real->m_touchedRing;
+    ghost->m_touchedCustomRing = real->m_touchedCustomRing;
+    ghost->m_touchedGravityPortal = real->m_touchedGravityPortal;
+    ghost->m_jumpBuffered = real->m_jumpBuffered;
+    ghost->m_wasJumpBuffered = real->m_wasJumpBuffered;
+    ghost->m_stateJumpBuffered = real->m_stateJumpBuffered;
+    ghost->m_stateRingJump = real->m_stateRingJump;
+    ghost->m_statePreJump = real->m_statePreJump;
+    ghost->m_wasRobotJump = real->m_wasRobotJump;
+    ghost->m_hasStartedFalling = real->m_hasStartedFalling;
+    ghost->m_lastActivatedPortal = real->m_lastActivatedPortal;
+    ghost->m_lastGroundedPos = real->m_lastGroundedPos;
+
+    // TIEMPOS internos: margen de gracia tras un portal, último salto/flip de
+    // gravedad, flip de araña... Varias reglas de GD dependen de ellos.
+    ghost->m_totalTime = real->m_totalTime;
+    ghost->m_gameModeChangedTime = real->m_gameModeChangedTime;
+    ghost->m_lastJumpTime = real->m_lastJumpTime;
+    ghost->m_lastFlipTime = real->m_lastFlipTime;
+    ghost->m_lastSpiderFlipTime = real->m_lastSpiderFlipTime;
+    ghost->m_lastLandTime = real->m_lastLandTime;
+
     ghost->m_isDead = false;
 
     silence(ghost);  // copyAttributes puede haber copiado visibilidad/efectos
@@ -213,9 +257,13 @@ SimOutcome GhostSimulator::run(Slot slot, bool press, int holdTicks, int idleTic
         maxWindow = std::max(maxWindow, window[ui]);
     }
 
-    for (int i = 0; i < n; ++i) sync(targets[static_cast<std::size_t>(i)].ghost, targets[static_cast<std::size_t>(i)].real);
-
     auto start = Clock::now();
+    {
+        // La copia de estado también va aislada (loadFromCheckpoint cambia de
+        // modo y eso tocaría cámara/suelo del nivel real).
+        sim::SyncScope syncing;
+        for (int i = 0; i < n; ++i) sync(targets[static_cast<std::size_t>(i)].ghost, targets[static_cast<std::size_t>(i)].real);
+    }
     auto elapsedUs = [&] { return std::chrono::duration<double, std::micro>(Clock::now() - start).count(); };
 
     SimOutcome result = SimOutcome::Survives;
@@ -295,7 +343,10 @@ void GhostSimulator::validationBefore() {
     if (!real || real->m_isDead) return;
     auto* g = ghostAt(0);
     if (!g) return;
-    sync(g, real);
+    {
+        sim::SyncScope syncing;
+        sync(g, real);
+    }
     {
         sim::Scope scope;
         step(g);

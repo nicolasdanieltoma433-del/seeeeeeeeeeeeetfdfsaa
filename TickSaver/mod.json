@@ -6,7 +6,7 @@
     },
     "id": "tuusuario.ticksaver",
     "name": "TickSaver",
-    "version": "v0.2.1",
+    "version": "v0.2.2",
     "developer": "TuUsuario",
     "description": "Asistente de practica: retrasa los clicks tempranos para salvar el intento",
     "tags": [
@@ -357,6 +357,12 @@
             "type": "bool",
             "name": "Reinyeccion directa",
             "description": "Aplica el click retrasado directo al jugador, igual que en la simulacion (recomendado). Desactivalo si los clicks salvados no se registran.",
+            "default": true
+        },
+        "full-sync": {
+            "type": "bool",
+            "name": "Copia completa del jugador",
+            "description": "Copia al fantasma el estado completo del jugador con el sistema de checkpoints del modo practica: velocidad, gravedad, orbes y dash. Recomendado.",
             "default": true
         },
         "debug-log": {
