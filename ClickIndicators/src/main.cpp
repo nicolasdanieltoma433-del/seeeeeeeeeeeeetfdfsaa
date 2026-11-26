@@ -2672,7 +2672,9 @@ public:
         // on both of its overloads and on a six line file that does nothing
         // else. Nothing to route around in this mod, and openFolder already
         // works here, so Windows keeps it.
-        const bool opened = geode::utils::file::openFolder(macroDir());
+        (void)macroDir();  // crea la carpeta si falta
+        // Geode 6 recibe asp::fs::Path (en Windows std::filesystem::path no se convierte solo).
+        const bool opened = geode::utils::file::openFolder(Mod::get()->getConfigDir() / "macros");
         if (opened) {
             FLAlertLayer::create(
                 "Import Macro",
