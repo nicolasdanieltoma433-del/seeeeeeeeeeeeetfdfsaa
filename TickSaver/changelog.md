@@ -1,3 +1,6 @@
+# v0.4.1
+- "Ignorar clicks innecesarios" (pestana Ayudas): activado, los clicks que no hacian falta se descartan y los que no hacen nada no cuentan; desactivado, todos los clicks pasan y cuentan como normales
+
 # v0.4.0
 - Fantasma rehecho con las tecnicas de Afterflow (MIT, prsevend): ahora sigue el orden real del paso (moverse y despues chocar), vive en una capa aparte y copia unos 110 datos del jugador. Arregla "dice salvado y me mata igual"
 - Portales de velocidad y de tamano: el fantasma los respeta. Los portales de modo, dual y teleport cortan la prediccion sin tocar el nivel

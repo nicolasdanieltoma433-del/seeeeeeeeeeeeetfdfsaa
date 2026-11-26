@@ -61,8 +61,9 @@ PressResult InputScheduler::onPhysicalPress(Slot slot, Tick now, SlotParams cons
                 result.forwardNow = false;
                 return result;
             }
-            // Pasa siempre (no cuesta nada), pero si no cambia nada no cuenta.
-            ev.kind = effect ? ClickKind::Clean : ClickKind::Unnecessary;
+            // Pasa siempre (no cuesta nada). Si no cambia nada y se ignoran
+            // los clicks innecesarios, no cuenta; si no, cuenta como uno normal.
+            ev.kind = (effect || !params.dropUnneeded) ? ClickKind::Clean : ClickKind::Unnecessary;
             m_events.push_back(ev);
             return result;
         }

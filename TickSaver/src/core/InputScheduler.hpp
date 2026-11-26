@@ -84,7 +84,9 @@ struct SlotParams {
     int maxDelay = 0;           // 0 = no evaluar este slot (pasa directo)
     int expectedHold = 8;       // hold supuesto si el jugador aún no soltó
     Mode mode = Mode::Cube;     // sólo para etiquetar eventos
-    bool dropUnneeded = false;  // modos de toque: descartar clicks que no hacen falta
+    // Modos de toque: ignorar clicks innecesarios (descartar los que no hacen
+    // falta y no contar los que no hacen nada). Apagado: todos pasan y cuentan.
+    bool dropUnneeded = false;
     bool saveReleases = false;  // nave/wave: corregir también el soltar
     // Ticks de margen: si el tick siguiente también es seguro, esperar para no
     // disparar justo en el borde de la ventana segura (frágil ante errores).

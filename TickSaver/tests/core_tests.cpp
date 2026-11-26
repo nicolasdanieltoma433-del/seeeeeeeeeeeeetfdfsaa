@@ -717,6 +717,20 @@ static void testOrbBufferHeldTimeoutDelivers() {
     CHECK(s.onPhysicalRelease(Slot::P1, 12, orbParams(5), pred));
 }
 
+static void testUnneededCountsWhenNotIgnored() {
+    std::puts("[scheduler] sin ignorar innecesarios: el click sin efecto cuenta y el que no hacia falta se dispara");
+    Tick now = 0;
+    MockPredictor pred;
+    pred.clock = &now;
+    pred.effect = [](Slot, Tick) { return false; };
+    InputScheduler s;
+    auto p = tapParams(10);
+    p.dropUnneeded = false;
+    CHECK(s.onPhysicalPress(Slot::P1, now, p, pred).forwardNow);
+    auto ev = s.drainEvents();
+    CHECK(ev.size() == 1 && ev[0].kind == ClickKind::Clean);
+}
+
 int main() {
     testCleanClick();
     testEarlyClickSaved();
@@ -734,6 +748,7 @@ int main() {
     testAdaptive();
     testStats();
     testUnnecessaryClickNotCounted();
+    testUnneededCountsWhenNotIgnored();
     testDeadlyUnneededClickDropped();
     testNeededEarlyClickStillApplied();
     testDropAtMaxDelay();

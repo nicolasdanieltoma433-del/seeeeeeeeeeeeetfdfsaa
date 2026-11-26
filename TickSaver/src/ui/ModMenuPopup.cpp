@@ -342,7 +342,7 @@ void ModMenuPopup::buildRegion() {
 void ModMenuPopup::buildAssists() {
     auto const& c = cfg();
     ToggleRow const left[] = {
-        {"Descartar clicks innecesarios", &Config::dropUnneeded},
+        {"Ignorar clicks innecesarios", &Config::dropUnneeded},
         {"Corregir el soltar (nave/wave)", &Config::saveReleases},
         {"Buffer de orbes", &Config::orbBuffer},
         {"Dejar pasar el spam", &Config::ignoreSpam},
@@ -360,7 +360,7 @@ void ModMenuPopup::buildAssists() {
             auto field = row.field;
             addToggleAt(row.label, x, y, toggleX, c.*field, [this, field](bool on) {
                 settings::update([field, on](Config& cfgRef) { cfgRef.*field = on; });
-                if (field == &Config::orbBuffer) requestRebuild();
+                if (field == &Config::orbBuffer || field == &Config::dropUnneeded) requestRebuild();
             });
             y -= 24.f;
         }
@@ -368,7 +368,11 @@ void ModMenuPopup::buildAssists() {
     addColumn(left, kRowLabelX, 192.f);
     addColumn(right, 214.f, kRowControlX);
 
-    if (c.orbBuffer) {
+    if (!c.dropUnneeded) {
+        addLabel(m_content, "Clicks innecesarios: todos pasan y cuentan (sin buffer de orbes)",
+                 {kContentW / 2.f, 14.f}, .3f, {.5f, .5f}, dimColor());
+    }
+    else if (c.orbBuffer) {
         addSliderRow("Ventana orbes", 14.f, 4.f, 60.f, 1.f, static_cast<float>(c.orbBufferTicks), ticksText,
                      [](int v) { settings::update([v](Config& x) { x.orbBufferTicks = v; }); });
     }

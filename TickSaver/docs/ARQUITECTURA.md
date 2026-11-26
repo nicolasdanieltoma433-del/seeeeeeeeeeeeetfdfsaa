@@ -296,7 +296,7 @@ juego, escribiendo en los mismos settings de Geode con `settings::update`:
 | General | mod activado, preset (< >), ticks máximos, modo seguro, margen de seguridad |
 | Modos | un botón por personaje (Cubo, Nave, Bola, UFO, Wave, Robot, Araña, Swing) y slider de ticks propios; 0 = usa el general |
 | Tramo | activar, desde %, hasta %, ticks extra |
-| Ayudas | descartar innecesarios, corregir el soltar, buffer de orbes (+ ventana), dejar pasar el spam, adaptativo, 2 jugadores, conservar hold, sólo práctica, plataformero |
+| Ayudas | ignorar clicks innecesarios, corregir el soltar, buffer de orbes (+ ventana), dejar pasar el spam, adaptativo, 2 jugadores, conservar hold, sólo práctica, plataformero |
 | Tecnico | copia extendida, reinyección directa, log de depuración, validar fantasma, CPU por frame, latencia calibrada |
 | HUD | HUD/barra/resumen, sonido al salvar, trayectoria, botón flotante, escala y los 8 colores |
 | Log | los últimos eventos del mod, con "Copiar log" y "Limpiar" |

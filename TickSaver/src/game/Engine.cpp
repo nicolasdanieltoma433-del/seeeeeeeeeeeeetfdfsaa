@@ -113,7 +113,8 @@ SlotParams Engine::paramsFor(Slot slot) const {
     p.safetyMargin = std::clamp(cfg.safetyMargin, 0, 3);
     // El buffer de orbes sólo tiene sentido donde un click puede "no hacer
     // nada" (cubo/robot/bola/araña en el aire). En nave/wave siempre hace algo.
-    p.orbBufferTicks = (cfg.orbBuffer && !prof.holdBased) ? std::clamp(cfg.orbBufferTicks, 4, 60) : 0;
+    // Necesita "Ignorar clicks innecesarios": si no, un tap sin orbe no se puede descartar.
+    p.orbBufferTicks = (cfg.orbBuffer && cfg.dropUnneeded && !prof.holdBased) ? std::clamp(cfg.orbBufferTicks, 4, 60) : 0;
 
     // Reglas de paso directo. maxDelay = 0 hace que el click pase tal cual (y
     // si había algo retenido se suelta sin juzgar), así el scheduler nunca

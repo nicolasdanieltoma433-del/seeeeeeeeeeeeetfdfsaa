@@ -6,7 +6,7 @@
     },
     "id": "tuusuario.ticksaver",
     "name": "TickSaver",
-    "version": "v0.4.0",
+    "version": "v0.4.1",
     "developer": "TuUsuario",
     "description": "Asistente de practica: retrasa los clicks tempranos para salvar el intento",
     "tags": [
@@ -217,8 +217,8 @@
         },
         "drop-unneeded": {
             "type": "bool",
-            "name": "Descartar clicks innecesarios",
-            "description": "Cubo, bola, UFO, robot, arana y swing: si un click te iba a matar y no hacerlo tambien sobrevive, se descarta en vez de dispararse tarde. Los clicks que no hacen nada (por ejemplo en el aire) no cuentan para la racha.",
+            "name": "Ignorar clicks innecesarios",
+            "description": "Activado: un click que te iba a matar y que no hacia falta se descarta en vez de dispararse tarde, y los clicks que no hacen nada (por ejemplo el cubo en el aire) no cuentan para la racha ni las estadisticas. Desactivado: ningun click se descarta, todos pasan y cuentan como clicks normales (el buffer de orbes queda apagado).",
             "default": true
         },
         "save-releases": {
@@ -252,7 +252,7 @@
         "orb-buffer": {
             "type": "bool",
             "name": "Buffer de orbes",
-            "description": "Si clickeas en el aire un poco antes de llegar a un orbe, el click espera y se aplica justo al tocarlo. Si no aparece ningun orbe, el click se descarta sin contar (no hacia nada).",
+            "description": "Si clickeas en el aire un poco antes de llegar a un orbe, el click espera y se aplica justo al tocarlo. Si no aparece ningun orbe, el click se descarta sin contar (no hacia nada). Necesita \"Ignorar clicks innecesarios\".",
             "default": true
         },
         "orb-buffer-ticks": {
