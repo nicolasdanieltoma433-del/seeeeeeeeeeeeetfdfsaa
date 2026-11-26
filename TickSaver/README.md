@@ -1,0 +1,65 @@
+# TickSaver
+
+Mod de **Geode** para **Geometry Dash 2.2091** (Windows y Android), pensado para practicar.
+Si clickeás unos ticks antes de tiempo y ese click te iba a matar, TickSaver simula el futuro
+con un "fantasma" invisible y retrasa el click hasta el primer tick en el que sobrevivís.
+
+> Es un cheat. Con el **modo seguro** (activado por defecto) los intentos asistidos no
+> guardan progreso. No es para récords ni listas.
+
+## Funciones
+
+- Predicción y corrección de clicks tempranos, hasta 255 ticks, para cubo, nave, bola, UFO,
+  wave, robot, araña y swing (con sus propios ticks); dual y modo 2 jugadores
+- Fantasma fiel a la física del juego: velocidad, gravedad, tamaño, orbes, pads y dash
+- Buffer de orbes, clicks sobre orbes que nunca se retrasan y regla de spam para wave/nave
+- Modo adaptativo: aprende cuán temprano clickeás y cuánto mantenés el botón
+- HUD: racha `x12`, barra de timing (temprano ↔ justo), aviso `SALVADO +3t` / `ORBE +5t`,
+  sonido opcional y trayectoria salvada
+- Resumen al morir, estadísticas por nivel con histograma 0–100 % y log en vivo
+- Presets Suave, Normal, Fuerte, Máximo, Wave y Entrenar; ticks extra en un tramo del nivel
+- Paleta de 8 colores; exportar/importar config con un código `TS2-...`
+- Menú in-game (botón **TS** en pausa, en el menú principal, botón flotante en el nivel y
+  teclas rápidas F7/F8 en PC)
+
+## Créditos
+
+La predicción del fantasma (orden del paso, copia de campos, filtro de colisiones, fotos de
+objetos), el buffer de orbes, la regla de spam, el botón flotante y el log en vivo están
+adaptados de [Afterflow](https://github.com/afterflow-gd/afterflow) (MIT, (c) 2026 prsevend).
+
+## Estructura
+
+```
+src/core    lógica pura (sin Geode), con tests en tests/
+src/game    motor, simulador fantasma, settings, guardado
+src/ui      HUD, resumen al morir, menú, estadísticas, botón flotante
+src/hooks   $modify sobre GJBaseGameLayer, PlayLayer, PlayerObject, PauseLayer
+```
+
+La arquitectura completa (flujo de un click, hooks, aislamiento del fantasma, formato TS2,
+puntos a calibrar) está en [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md).
+
+## Compilar
+
+**En la nube:** cada push que toca `TickSaver/` dispara el workflow
+`.github/workflows/ticksaver.yml`; el `.geode` queda en *Actions → Build Output*.
+
+**Local:**
+
+```sh
+geode sdk install
+geode sdk install-binaries
+cd TickSaver
+geode build
+```
+
+**Tests de la lógica** (no necesitan Geode):
+
+```sh
+cmake -S tests -B build-tests
+cmake --build build-tests
+./build-tests/core_tests
+```
+
+Antes de publicar cambiá `id` y `developer` en `mod.json`.

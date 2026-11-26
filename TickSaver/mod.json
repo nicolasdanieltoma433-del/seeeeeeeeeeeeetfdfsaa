@@ -1,0 +1,506 @@
+{
+    "geode": "6.0.0",
+    "gd": {
+        "win": "2.2091",
+        "android": "2.2091"
+    },
+    "id": "tuusuario.ticksaver",
+    "name": "TickSaver",
+    "version": "v0.4.1",
+    "developer": "TuUsuario",
+    "description": "Asistente de practica: retrasa los clicks tempranos para salvar el intento",
+    "tags": [
+        "cheat",
+        "gameplay",
+        "utility"
+    ],
+    "settings": {
+        "title-general": {
+            "type": "title",
+            "name": "General"
+        },
+        "enabled": {
+            "type": "bool",
+            "name": "Activado",
+            "description": "Activa la correccion de clicks. Con el modo seguro, los intentos asistidos no guardan progreso.",
+            "default": true
+        },
+        "preset": {
+            "type": "string",
+            "name": "Preset",
+            "description": "Suave/Normal/Fuerte/Maximo cambian cuantos ticks se puede retrasar un click. Wave da mas margen a wave, nave y swing. Entrenar da poca ayuda y activa el modo adaptativo. Si cambias un valor a mano pasa a Personalizado.",
+            "default": "Normal",
+            "one-of": [
+                "Suave",
+                "Normal",
+                "Fuerte",
+                "Maximo",
+                "Wave",
+                "Entrenar",
+                "Personalizado"
+            ]
+        },
+        "max-ticks": {
+            "type": "int",
+            "name": "Ticks maximos",
+            "description": "Cuantos ticks (1/240 s) puede retrasarse un click temprano como maximo. 255 = 1,06 segundos.",
+            "default": 6,
+            "min": 0,
+            "max": 255,
+            "control": {
+                "slider": true,
+                "arrows": true,
+                "arrow-step": 1,
+                "input": true
+            }
+        },
+        "title-modes": {
+            "type": "title",
+            "name": "Ticks por modo (0 = usar el maximo general)"
+        },
+        "ticks-cube": {
+            "type": "int",
+            "name": "Cubo",
+            "default": 0,
+            "min": 0,
+            "max": 255,
+            "control": {
+                "slider": true,
+                "input": true
+            }
+        },
+        "ticks-ship": {
+            "type": "int",
+            "name": "Nave",
+            "default": 0,
+            "min": 0,
+            "max": 255,
+            "control": {
+                "slider": true,
+                "input": true
+            }
+        },
+        "ticks-ball": {
+            "type": "int",
+            "name": "Bola",
+            "default": 0,
+            "min": 0,
+            "max": 255,
+            "control": {
+                "slider": true,
+                "input": true
+            }
+        },
+        "ticks-ufo": {
+            "type": "int",
+            "name": "UFO",
+            "default": 0,
+            "min": 0,
+            "max": 255,
+            "control": {
+                "slider": true,
+                "input": true
+            }
+        },
+        "ticks-wave": {
+            "type": "int",
+            "name": "Wave",
+            "default": 5,
+            "min": 0,
+            "max": 255,
+            "control": {
+                "slider": true,
+                "input": true
+            }
+        },
+        "ticks-robot": {
+            "type": "int",
+            "name": "Robot",
+            "default": 0,
+            "min": 0,
+            "max": 255,
+            "control": {
+                "slider": true,
+                "input": true
+            }
+        },
+        "ticks-spider": {
+            "type": "int",
+            "name": "Arana",
+            "default": 0,
+            "min": 0,
+            "max": 255,
+            "control": {
+                "slider": true,
+                "input": true
+            }
+        },
+        "ticks-swing": {
+            "type": "int",
+            "name": "Swing",
+            "description": "El swing tiene sus propios ticks porque su fisica es mucho mas sensible.",
+            "default": 4,
+            "min": 0,
+            "max": 255,
+            "control": {
+                "slider": true,
+                "input": true
+            }
+        },
+        "title-region": {
+            "type": "title",
+            "name": "Tramo dificil"
+        },
+        "region-enabled": {
+            "type": "bool",
+            "name": "Ticks extra en un tramo",
+            "description": "Suma ticks extra solo entre dos porcentajes del nivel (por ejemplo 40% a 60%).",
+            "default": false
+        },
+        "region-start": {
+            "type": "int",
+            "enable-if": "region-enabled",
+            "name": "Desde (%)",
+            "default": 40,
+            "min": 0,
+            "max": 100,
+            "control": {
+                "slider": true,
+                "input": true
+            }
+        },
+        "region-end": {
+            "type": "int",
+            "enable-if": "region-enabled",
+            "name": "Hasta (%)",
+            "default": 60,
+            "min": 0,
+            "max": 100,
+            "control": {
+                "slider": true,
+                "input": true
+            }
+        },
+        "region-extra": {
+            "type": "int",
+            "enable-if": "region-enabled",
+            "name": "Ticks extra",
+            "default": 6,
+            "min": 0,
+            "max": 255,
+            "control": {
+                "slider": true,
+                "input": true
+            }
+        },
+        "title-behavior": {
+            "type": "title",
+            "name": "Comportamiento"
+        },
+        "correct-both": {
+            "type": "bool",
+            "name": "Corregir a los dos jugadores",
+            "description": "En modo 2 jugadores corrige tambien al P2, y en dual exige que sobrevivan ambos.",
+            "default": true
+        },
+        "adaptive": {
+            "type": "bool",
+            "name": "Modo adaptativo",
+            "description": "Aprende cuan temprano clickeas y cuanto mantenes el boton, y ajusta la ayuda a tu forma de jugar.",
+            "default": false
+        },
+        "preserve-hold": {
+            "type": "bool",
+            "name": "Conservar duracion del hold",
+            "description": "Si soltas antes de que el click retrasado se aplique, el soltar tambien se retrasa para que dure lo mismo.",
+            "default": true
+        },
+        "drop-unneeded": {
+            "type": "bool",
+            "name": "Ignorar clicks innecesarios",
+            "description": "Activado: un click que te iba a matar y que no hacia falta se descarta en vez de dispararse tarde, y los clicks que no hacen nada (por ejemplo el cubo en el aire) no cuentan para la racha ni las estadisticas. Desactivado: ningun click se descarta, todos pasan y cuentan como clicks normales (el buffer de orbes queda apagado).",
+            "default": true
+        },
+        "save-releases": {
+            "type": "bool",
+            "name": "Corregir el soltar (nave y wave)",
+            "description": "En nave y wave tambien corrige el SOLTAR temprano: si soltar te mata, sigue manteniendo hasta que soltar sea seguro.",
+            "default": true
+        },
+        "safety-margin": {
+            "type": "int",
+            "name": "Margen de seguridad (ticks)",
+            "description": "Al salvar un click, no lo dispara en el primer tick seguro (el borde, el mas fragil) sino hasta este numero de ticks mas adentro de la ventana segura.",
+            "default": 1,
+            "min": 0,
+            "max": 3,
+            "control": {
+                "arrows": true,
+                "input": true
+            }
+        },
+        "safe-mode": {
+            "type": "bool",
+            "name": "Modo seguro",
+            "description": "Los intentos en los que el mod te salvo no guardan progreso ni completados (como una start position).",
+            "default": true
+        },
+        "title-assists": {
+            "type": "title",
+            "name": "Ayudas"
+        },
+        "orb-buffer": {
+            "type": "bool",
+            "name": "Buffer de orbes",
+            "description": "Si clickeas en el aire un poco antes de llegar a un orbe, el click espera y se aplica justo al tocarlo. Si no aparece ningun orbe, el click se descarta sin contar (no hacia nada). Necesita \"Ignorar clicks innecesarios\".",
+            "default": true
+        },
+        "orb-buffer-ticks": {
+            "type": "int",
+            "name": "Ventana del buffer de orbes (ticks)",
+            "description": "Cuanto puede esperar un click a que llegues al orbe. 24 ticks = 0,1 s.",
+            "default": 24,
+            "min": 4,
+            "max": 60,
+            "enable-if": "orb-buffer",
+            "control": {
+                "slider": true,
+                "arrows": true,
+                "input": true
+            }
+        },
+        "ignore-spam": {
+            "type": "bool",
+            "name": "Dejar pasar el spam",
+            "description": "Wave, nave, UFO, bola y swing: si haces 3 inputs muy seguidos, pasan directo sin evaluarse (retenerlos se sentiria como lag).",
+            "default": true
+        },
+        "practice-only": {
+            "type": "bool",
+            "name": "Solo en modo practica",
+            "description": "El mod solo ayuda en modo practica; en modo normal los clicks pasan tal cual.",
+            "default": false
+        },
+        "platformer": {
+            "type": "bool",
+            "name": "Ayudar en plataformero",
+            "description": "Experimental: tambien corrige el salto en niveles plataformero.",
+            "default": false
+        },
+        "title-hud": {
+            "type": "title",
+            "name": "HUD"
+        },
+        "show-hud": {
+            "type": "bool",
+            "name": "Mostrar HUD (racha)",
+            "default": true
+        },
+        "show-timing-bar": {
+            "type": "bool",
+            "name": "Barra de timing",
+            "default": true
+        },
+        "show-death-summary": {
+            "type": "bool",
+            "name": "Resumen al morir",
+            "default": true
+        },
+        "hud-scale": {
+            "type": "float",
+            "name": "Escala del HUD",
+            "default": 1.0,
+            "min": 0.5,
+            "max": 1.5,
+            "control": {
+                "slider": true,
+                "slider-step": 0.05,
+                "input": true
+            }
+        },
+        "save-sound": {
+            "type": "bool",
+            "name": "Sonido al salvar",
+            "description": "Reproduce un sonido corto cada vez que el mod te salva.",
+            "default": false
+        },
+        "show-path": {
+            "type": "bool",
+            "name": "Mostrar trayectoria salvada",
+            "description": "Cuando un click se salva, dibuja durante 1 segundo el camino que predijo el fantasma.",
+            "default": false
+        },
+        "floating-button": {
+            "type": "bool",
+            "name": "Boton flotante en el nivel",
+            "description": "Muestra un boton TS arrastrable dentro del nivel que pausa y abre el menu (util en celular).",
+            "default": false
+        },
+        "title-colors": {
+            "type": "title",
+            "name": "Paleta (8 colores)"
+        },
+        "color-streak": {
+            "type": "rgba",
+            "name": "Racha",
+            "default": [
+                255,
+                200,
+                60,
+                255
+            ]
+        },
+        "color-good": {
+            "type": "rgba",
+            "name": "Justo",
+            "default": [
+                90,
+                230,
+                120,
+                255
+            ]
+        },
+        "color-early": {
+            "type": "rgba",
+            "name": "Temprano",
+            "default": [
+                255,
+                170,
+                60,
+                255
+            ]
+        },
+        "color-saved": {
+            "type": "rgba",
+            "name": "Salvado",
+            "default": [
+                80,
+                200,
+                255,
+                255
+            ]
+        },
+        "color-danger": {
+            "type": "rgba",
+            "name": "Sin salvacion",
+            "default": [
+                255,
+                80,
+                80,
+                255
+            ]
+        },
+        "color-bar-bg": {
+            "type": "rgba",
+            "name": "Fondo de paneles",
+            "default": [
+                15,
+                15,
+                25,
+                170
+            ]
+        },
+        "color-text": {
+            "type": "rgba",
+            "name": "Texto",
+            "default": [
+                230,
+                230,
+                240,
+                255
+            ]
+        },
+        "color-accent": {
+            "type": "rgba",
+            "name": "Histograma",
+            "default": [
+                180,
+                120,
+                255,
+                255
+            ]
+        },
+        "title-advanced": {
+            "type": "title",
+            "name": "Avanzado"
+        },
+        "sim-budget-ms": {
+            "type": "float",
+            "name": "Presupuesto de simulacion (ms)",
+            "description": "Tiempo maximo por frame para simular el fantasma. Bajalo si un nivel pesado se traba (por ejemplo Slaughterhouse); subilo si en un nivel liviano no te salva.",
+            "default": 2.0,
+            "min": 0.5,
+            "max": 10.0,
+            "control": {
+                "slider": true,
+                "slider-step": 0.5,
+                "input": true
+            }
+        },
+        "direct-inject": {
+            "type": "bool",
+            "name": "Reinyeccion directa",
+            "description": "Aplica el click retrasado directo al jugador (pushButton) en vez de pasarlo por el juego. Desde v0.4 lo recomendado es dejarlo apagado: el click entra al principio del paso, como en Afterflow.",
+            "default": false
+        },
+        "full-sync": {
+            "type": "bool",
+            "name": "Copia extendida del jugador",
+            "description": "Copia al fantasma unos 110 datos del jugador (velocidad, gravedad, pendientes, suelo, dash, orbes, tiempos internos). Recomendado.",
+            "default": true
+        },
+        "debug-log": {
+            "type": "bool",
+            "name": "Log de depuracion",
+            "description": "Registra cada click y cada simulacion en la consola de Geode.",
+            "default": false
+        },
+        "validate-sim": {
+            "type": "bool",
+            "name": "Validar fantasma",
+            "description": "Compara cada tick la prediccion del fantasma con el jugador real y avisa si se desvian.",
+            "default": false
+        },
+        "title-keys": {
+            "type": "title",
+            "name": "Teclas rapidas (PC)",
+            "platforms": [
+                "win"
+            ]
+        },
+        "key-menu": {
+            "type": "keybind",
+            "name": "Abrir el menu",
+            "description": "Abre el menu de TickSaver (en un nivel, pausa primero).",
+            "category": "universal",
+            "default": [
+                "F7"
+            ],
+            "platforms": [
+                "win"
+            ]
+        },
+        "key-toggle": {
+            "type": "keybind",
+            "name": "Activar / desactivar",
+            "description": "Prende o apaga la correccion de clicks al instante.",
+            "category": "gameplay",
+            "default": [
+                "F8"
+            ],
+            "platforms": [
+                "win"
+            ]
+        },
+        "key-preset": {
+            "type": "keybind",
+            "name": "Siguiente preset",
+            "description": "Pasa al siguiente preset (Suave, Normal, Fuerte, Maximo, Wave, Entrenar).",
+            "category": "gameplay",
+            "default": [],
+            "platforms": [
+                "win"
+            ]
+        }
+    }
+}

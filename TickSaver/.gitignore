@@ -1,0 +1,5 @@
+build/
+build-*/
+.cache/
+*.geode
+compile_commands.json
