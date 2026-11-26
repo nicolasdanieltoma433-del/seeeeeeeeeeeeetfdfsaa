@@ -41,8 +41,10 @@ class $modify(TSPlayLayer, PlayLayer) {
     void destroyPlayer(PlayerObject* player, GameObject* object) {
         // Muerte de un fantasma: se anota y se corta acá. El jugador real no
         // se entera y no hay explosión, sonido ni reinicio.
-        if (ts::sim::isGhost(player)) {
-            ts::sim::markDeath(player);
+        // Durante una simulación sólo se mueven fantasmas: nada de lo que pase
+        // ahí puede matar al jugador real.
+        if (ts::sim::isGhost(player) || ts::sim::active()) {
+            if (ts::sim::active() && ts::sim::isGhost(player)) ts::sim::markDeath(player);
             return;
         }
 

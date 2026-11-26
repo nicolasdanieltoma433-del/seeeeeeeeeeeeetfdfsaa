@@ -33,6 +33,12 @@
 //  SOLTAR TEMPRANO (nave/wave, `saveReleases`): si soltar ahora mata, se
 //  sigue "manteniendo" y se suelta en el primer tick en que soltar es seguro.
 //
+//  BUFFER DE ORBES (`orbBufferTicks`): un click en el aire que no hace nada
+//  (todavía no llegaste al orbe) se retiene; en cuanto el jugador real toca un
+//  orbe se entrega y el orbe se activa. Si en esa ventana no aparece ningún
+//  orbe, el click se descarta sin contar (no hacía nada de todas formas).
+//  Idea tomada de Afterflow (MIT, prsevend).
+//
 //  CLICKS INNECESARIOS (modos de toque, `dropUnneeded`): si el click mata y
 //  NO apretar también sobrevive, el click no hacía falta: se descarta en vez
 //  de dispararse tarde. Y un click que no cambia nada (cubo en el aire) se
@@ -68,6 +74,8 @@ public:
     virtual SimOutcome simulateInjectedPress(Slot slot, int holdTicks, int extraDelay) {
         return extraDelay == 0 ? simulatePress(slot, holdTicks) : SimOutcome::Dies;
     }
+    // ¿El jugador REAL de este slot está tocando un orbe ahora mismo?
+    virtual bool touchingOrb(Slot) { return false; }
 };
 
 // Parámetros vigentes para un slot en el tick actual (los calcula el motor
@@ -81,6 +89,9 @@ struct SlotParams {
     // Ticks de margen: si el tick siguiente también es seguro, esperar para no
     // disparar justo en el borde de la ventana segura (frágil ante errores).
     int safetyMargin = 0;
+    // Buffer de orbes: cuántos ticks puede esperar un click en el aire a que
+    // aparezca un orbe (0 = apagado).
+    int orbBufferTicks = 0;
 };
 
 // Comando que el motor debe meter en GJBaseGameLayer::m_queuedButtons.
@@ -98,6 +109,7 @@ struct ClickEvent {
     Tick pressTick = 0;  // tick del click físico
     Tick applyTick = 0;  // tick en que el juego lo recibió
     bool release = false;  // el evento es de un SOLTAR (nave/wave)
+    bool orb = false;      // el click esperó a un orbe (buffer de orbes)
 };
 
 struct PressResult {
@@ -142,7 +154,10 @@ private:
         bool pendingRelease = false;           // un SOLTAR retenido (nave/wave)
         Tick releaseHeldTick = 0;
         int viableTicks = 0;                   // ticks seguidos en que apretar ya sobrevivía
+        bool waitingOrb = false;               // press retenido esperando un orbe
     };
+
+    void tickOrbWait(Slot slot, Tick now, SlotParams const& p, IPredictor& predictor, std::vector<InjectCmd>& out);
 
     void apply(Slot slot, Tick now, ClickKind kind, int holdTicks, std::vector<InjectCmd>& out);
     void drop(Slot slot, Tick now);

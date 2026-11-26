@@ -47,6 +47,15 @@ Config readAll() {
     c.saveReleases = value<bool>("save-releases");
     c.safetyMargin = static_cast<int>(value<std::int64_t>("safety-margin"));
 
+    c.orbBuffer = value<bool>("orb-buffer");
+    c.orbBufferTicks = static_cast<int>(std::clamp<std::int64_t>(value<std::int64_t>("orb-buffer-ticks"), 4, 60));
+    c.ignoreSpam = value<bool>("ignore-spam");
+    c.practiceOnly = value<bool>("practice-only");
+    c.platformer = value<bool>("platformer");
+    c.saveSound = value<bool>("save-sound");
+    c.showPath = value<bool>("show-path");
+    c.floatingButton = value<bool>("floating-button");
+
     c.showHud = value<bool>("show-hud");
     c.showTimingBar = value<bool>("show-timing-bar");
     c.showDeathSummary = value<bool>("show-death-summary");
@@ -130,11 +139,12 @@ void install() {
     reload();
 
     for (auto key : {"enabled", "region-enabled", "correct-both", "adaptive", "preserve-hold", "safe-mode",
-                     "drop-unneeded", "save-releases",
+                     "drop-unneeded", "save-releases", "orb-buffer", "ignore-spam", "practice-only", "platformer",
+                     "save-sound", "show-path", "floating-button",
                      "show-hud", "show-timing-bar", "show-death-summary", "debug-log", "validate-sim", "direct-inject", "full-sync"}) {
         listen<bool>(key);
     }
-    for (auto key : {"max-ticks", "region-start", "region-end", "region-extra", "safety-margin"}) {
+    for (auto key : {"max-ticks", "region-start", "region-end", "region-extra", "safety-margin", "orb-buffer-ticks"}) {
         listen<std::int64_t>(key);
     }
     for (std::size_t i = 0; i < kModeCount; ++i) listen<std::int64_t>(modeKey(i));
@@ -160,6 +170,14 @@ void write(Config const& c) {
     mod->setSettingValue<bool>("drop-unneeded", c.dropUnneeded);
     mod->setSettingValue<bool>("save-releases", c.saveReleases);
     mod->setSettingValue<std::int64_t>("safety-margin", c.safetyMargin);
+    mod->setSettingValue<bool>("orb-buffer", c.orbBuffer);
+    mod->setSettingValue<std::int64_t>("orb-buffer-ticks", c.orbBufferTicks);
+    mod->setSettingValue<bool>("ignore-spam", c.ignoreSpam);
+    mod->setSettingValue<bool>("practice-only", c.practiceOnly);
+    mod->setSettingValue<bool>("platformer", c.platformer);
+    mod->setSettingValue<bool>("save-sound", c.saveSound);
+    mod->setSettingValue<bool>("show-path", c.showPath);
+    mod->setSettingValue<bool>("floating-button", c.floatingButton);
     mod->setSettingValue<bool>("show-hud", c.showHud);
     mod->setSettingValue<bool>("show-timing-bar", c.showTimingBar);
     mod->setSettingValue<bool>("show-death-summary", c.showDeathSummary);

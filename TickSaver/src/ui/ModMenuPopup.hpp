@@ -3,7 +3,7 @@
 //  TickSaver · ui/ModMenuPopup.hpp
 //  Menú del mod dentro del juego (botón "TS" en pausa y en el menú principal).
 //
-//   [General] [Modos] [Tramo] [Opciones] [HUD]
+//   [General] [Modos] [Tramo] [Ayudas] [Tecnico] [HUD] [Log]
 //   ┌──────────────────────────────────────────┐
 //   │  contenido de la pestaña                  │
 //   └──────────────────────────────────────────┘
@@ -27,6 +27,10 @@
 
 namespace ts::ui {
 
+// Abre el menú desde cualquier lado (botón TS, botón flotante, tecla rápida).
+// Dentro de un nivel pausa primero. No abre dos menús a la vez.
+void openModMenu();
+
 class ModMenuPopup : public geode::Popup {
 public:
     static ModMenuPopup* create();
@@ -35,7 +39,7 @@ protected:
     bool init();
 
 private:
-    enum class Tab : int { General = 0, Modes, Region, Options, Hud, Count };
+    enum class Tab : int { General = 0, Modes, Region, Assists, Tech, Hud, Log, Count };
 
     void rebuild();
     void requestRebuild();
@@ -44,8 +48,10 @@ private:
     void buildGeneral();
     void buildModes();
     void buildRegion();
-    void buildOptions();
+    void buildAssists();
+    void buildTech();
     void buildHud();
+    void buildLog();
     void buildFooter();
 
     // --- helpers de UI -------------------------------------------------------

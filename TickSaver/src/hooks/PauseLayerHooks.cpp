@@ -37,10 +37,6 @@ void addToMenu(CCNode* layer, char const* menuID, CCMenuItemSpriteExtra* button,
     layer->addChild(fallback);
 }
 
-void openModMenu() {
-    if (auto popup = ts::ui::ModMenuPopup::create()) popup->show();
-}
-
 } // namespace
 
 class $modify(TSPauseLayer, PauseLayer) {
@@ -51,7 +47,7 @@ class $modify(TSPauseLayer, PauseLayer) {
                   {win.width - 32.f, 32.f});
     }
 
-    void onTickSaver(CCObject*) { openModMenu(); }
+    void onTickSaver(CCObject*) { ts::ui::openModMenu(); }
 };
 
 class $modify(TSMenuLayer, MenuLayer) {
@@ -63,5 +59,5 @@ class $modify(TSMenuLayer, MenuLayer) {
         return true;
     }
 
-    void onTickSaver(CCObject*) { openModMenu(); }
+    void onTickSaver(CCObject*) { ts::ui::openModMenu(); }
 };

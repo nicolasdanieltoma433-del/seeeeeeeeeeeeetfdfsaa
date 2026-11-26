@@ -1,3 +1,19 @@
+# v0.4.0
+- Fantasma rehecho con las tecnicas de Afterflow (MIT, prsevend): ahora sigue el orden real del paso (moverse y despues chocar), vive en una capa aparte y copia unos 110 datos del jugador. Arregla "dice salvado y me mata igual"
+- Portales de velocidad y de tamano: el fantasma los respeta. Los portales de modo, dual y teleport cortan la prediccion sin tocar el nivel
+- Orbes y pads: cada uno se usa una vez por prediccion y nunca uno que ya usaste; los objetos que un orbe apaga dejan de chocar; los pinchos que ya estas rozando no matan al fantasma
+- El reloj y la reinyeccion se movieron al paso del jugador (como Afterflow): el click entra justo al principio del tick que predijo el fantasma. Soporta pasos partidos (click-between-steps) y time warp
+- Nuevo: buffer de orbes. Un click en el aire un poco antes de un orbe espera y se aplica al tocarlo ("ORBE +Nt")
+- Nuevo: un click sobre un orbe que ya estas tocando nunca se retrasa
+- Nuevo: dejar pasar el spam en wave, nave, UFO, bola y swing (3 inputs muy seguidos pasan directo)
+- Nuevo: solo en modo practica, ayudar en plataformero (experimental)
+- Nuevo: sonido al salvar, mostrar la trayectoria salvada y boton flotante "TS" arrastrable dentro del nivel
+- Nuevo: pestana Log con los ultimos eventos (copiar y limpiar) y pestana Tecnico con la latencia calibrada
+- Nuevo (PC): teclas rapidas F7 menu, F8 activar/desactivar y siguiente preset
+- Menu en 7 pestanas: General, Modos, Tramo, Ayudas, Tecnico, HUD, Log
+- Codigo TS2: guarda las ayudas nuevas sin cambiar de formato (los codigos viejos siguen sirviendo)
+- "Reinyeccion directa" ahora viene apagada (lo recomendado es la ruta normal del juego)
+
 # v0.3.1
 - "Dice salvado y me mata igual": el click salvado ya no se dispara en el borde de la ventana segura; espera un tick de margen si el siguiente tambien es seguro (opcion "Margen de seguridad", 0 a 3)
 - Autocalibracion: despues de cada salvada del cubo compara tu trayectoria real con la prediccion (0, 1 o 2 ticks de retraso) y ajusta sola la latencia

@@ -26,6 +26,7 @@ struct LastClick {
     Mode mode = Mode::Cube;
     bool release = false;  // fue un SOLTAR (nave/wave)
     bool failed = false;   // dijo "salvado" y moriste igual enseguida
+    bool orb = false;      // fue un click guardado para un orbe
 };
 
 // "temprano por 3t: salvado", "justo", ... (sin tildes: fuentes de GD).

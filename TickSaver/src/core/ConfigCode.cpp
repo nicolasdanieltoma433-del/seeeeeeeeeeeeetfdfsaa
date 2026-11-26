@@ -135,7 +135,11 @@ void readPalette(Config& cfg, std::vector<std::uint8_t> const& bytes, std::size_
 } // namespace
 
 // Formato v3:
-//   [0] versión=3  [1] flags  [2] flags2 (b0 dropUnneeded, b1 saveReleases)
+//   [0] versión=3  [1] flags  [2] flags2 (b0 dropUnneeded, b1 saveReleases,
+//       b2 SIN buffer de orbes, b3 SIN pasar el spam, b4 sólo práctica,
+//       b5 plataformero, b6 sonido, b7 trayectoria). b2 y b3 van invertidos
+//       para que los códigos de antes de v0.4 (con esos bits en 0) importen
+//       con el buffer de orbes y el spam en su valor por defecto (activados).
 //   [3] preset  [4-5] global u16  [6-21] 8 modos u16  [22] desde%  [23] hasta%
 //   [24-25] extra u16  [26] HUD flags  [27] escala*50  [28-59] paleta (opcional)
 //   [último] CRC-8
@@ -159,6 +163,12 @@ std::string encodeConfig(Config const& cfg) {
     std::uint8_t flags2 = 0;
     flags2 |= cfg.dropUnneeded ? 0x01 : 0;
     flags2 |= cfg.saveReleases ? 0x02 : 0;
+    flags2 |= cfg.orbBuffer ? 0 : 0x04;
+    flags2 |= cfg.ignoreSpam ? 0 : 0x08;
+    flags2 |= cfg.practiceOnly ? 0x10 : 0;
+    flags2 |= cfg.platformer ? 0x20 : 0;
+    flags2 |= cfg.saveSound ? 0x40 : 0;
+    flags2 |= cfg.showPath ? 0x80 : 0;
     bytes.push_back(flags2);
 
     bytes.push_back(static_cast<std::uint8_t>(cfg.preset));
@@ -229,6 +239,12 @@ std::variant<Config, CodeError> decodeConfig(std::string_view code, Config const
     else {
         cfg.dropUnneeded = bytes[2] & 0x01;
         cfg.saveReleases = bytes[2] & 0x02;
+        cfg.orbBuffer = !(bytes[2] & 0x04);
+        cfg.ignoreSpam = !(bytes[2] & 0x08);
+        cfg.practiceOnly = bytes[2] & 0x10;
+        cfg.platformer = bytes[2] & 0x20;
+        cfg.saveSound = bytes[2] & 0x40;
+        cfg.showPath = bytes[2] & 0x80;
         cfg.preset = bytes[3] < kPresetCount ? static_cast<Preset>(bytes[3]) : Preset::Custom;
         cfg.globalMaxTicks = clampTicks(getU16(bytes, 4));
         for (std::size_t i = 0; i < kModeCount; ++i) cfg.modeMaxTicks[i] = clampTicks(getU16(bytes, 6 + i * 2));

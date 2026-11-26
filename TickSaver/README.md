@@ -9,21 +9,31 @@ con un "fantasma" invisible y retrasa el click hasta el primer tick en el que so
 
 ## Funciones
 
-- Predicción y corrección de clicks tempranos, hasta 240 ticks, para cubo, nave, bola, UFO,
+- Predicción y corrección de clicks tempranos, hasta 255 ticks, para cubo, nave, bola, UFO,
   wave, robot, araña y swing (con sus propios ticks); dual y modo 2 jugadores
+- Fantasma fiel a la física del juego: velocidad, gravedad, tamaño, orbes, pads y dash
+- Buffer de orbes, clicks sobre orbes que nunca se retrasan y regla de spam para wave/nave
 - Modo adaptativo: aprende cuán temprano clickeás y cuánto mantenés el botón
-- HUD: racha `x12`, barra de timing (temprano ↔ justo), aviso `SALVADO +3t`
-- Resumen al morir y estadísticas por nivel con histograma 0–100 %
+- HUD: racha `x12`, barra de timing (temprano ↔ justo), aviso `SALVADO +3t` / `ORBE +5t`,
+  sonido opcional y trayectoria salvada
+- Resumen al morir, estadísticas por nivel con histograma 0–100 % y log en vivo
 - Presets Suave, Normal, Fuerte, Máximo, Wave y Entrenar; ticks extra en un tramo del nivel
 - Paleta de 8 colores; exportar/importar config con un código `TS2-...`
-- Menú in-game (botón **TS** en pausa y en el menú principal) para configurar todo
+- Menú in-game (botón **TS** en pausa, en el menú principal, botón flotante en el nivel y
+  teclas rápidas F7/F8 en PC)
+
+## Créditos
+
+La predicción del fantasma (orden del paso, copia de campos, filtro de colisiones, fotos de
+objetos), el buffer de orbes, la regla de spam, el botón flotante y el log en vivo están
+adaptados de [Afterflow](https://github.com/afterflow-gd/afterflow) (MIT, (c) 2026 prsevend).
 
 ## Estructura
 
 ```
 src/core    lógica pura (sin Geode), con tests en tests/
 src/game    motor, simulador fantasma, settings, guardado
-src/ui      HUD, resumen al morir, popup de estadísticas
+src/ui      HUD, resumen al morir, menú, estadísticas, botón flotante
 src/hooks   $modify sobre GJBaseGameLayer, PlayLayer, PlayerObject, PauseLayer
 ```
 

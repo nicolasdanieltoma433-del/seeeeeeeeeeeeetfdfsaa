@@ -45,4 +45,11 @@ ModeProfile const& profileFor(Mode mode);
 // Ventana efectiva para un hold dado.
 int windowFor(ModeProfile const& profile, int holdTicks);
 
+// Modos donde es normal spamear (wave, nave, UFO, bola, swing). Ahí, 3 inputs
+// muy seguidos pasan directo: retenerlos se siente como lag (idea de Afterflow).
+bool isSpammyMode(Mode mode);
+// Separación máxima (en ticks) entre dos inputs para contarlos como spam.
+int spamGapTicks(Mode mode);
+inline constexpr int kSpamStreak = 3;
+
 } // namespace ts

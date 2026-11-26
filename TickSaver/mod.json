@@ -6,7 +6,7 @@
     },
     "id": "tuusuario.ticksaver",
     "name": "TickSaver",
-    "version": "v0.3.1",
+    "version": "v0.4.0",
     "developer": "TuUsuario",
     "description": "Asistente de practica: retrasa los clicks tempranos para salvar el intento",
     "tags": [
@@ -245,6 +245,48 @@
             "description": "Los intentos en los que el mod te salvo no guardan progreso ni completados (como una start position).",
             "default": true
         },
+        "title-assists": {
+            "type": "title",
+            "name": "Ayudas"
+        },
+        "orb-buffer": {
+            "type": "bool",
+            "name": "Buffer de orbes",
+            "description": "Si clickeas en el aire un poco antes de llegar a un orbe, el click espera y se aplica justo al tocarlo. Si no aparece ningun orbe, el click se descarta sin contar (no hacia nada).",
+            "default": true
+        },
+        "orb-buffer-ticks": {
+            "type": "int",
+            "name": "Ventana del buffer de orbes (ticks)",
+            "description": "Cuanto puede esperar un click a que llegues al orbe. 24 ticks = 0,1 s.",
+            "default": 24,
+            "min": 4,
+            "max": 60,
+            "enable-if": "orb-buffer",
+            "control": {
+                "slider": true,
+                "arrows": true,
+                "input": true
+            }
+        },
+        "ignore-spam": {
+            "type": "bool",
+            "name": "Dejar pasar el spam",
+            "description": "Wave, nave, UFO, bola y swing: si haces 3 inputs muy seguidos, pasan directo sin evaluarse (retenerlos se sentiria como lag).",
+            "default": true
+        },
+        "practice-only": {
+            "type": "bool",
+            "name": "Solo en modo practica",
+            "description": "El mod solo ayuda en modo practica; en modo normal los clicks pasan tal cual.",
+            "default": false
+        },
+        "platformer": {
+            "type": "bool",
+            "name": "Ayudar en plataformero",
+            "description": "Experimental: tambien corrige el salto en niveles plataformero.",
+            "default": false
+        },
         "title-hud": {
             "type": "title",
             "name": "HUD"
@@ -275,6 +317,24 @@
                 "slider-step": 0.05,
                 "input": true
             }
+        },
+        "save-sound": {
+            "type": "bool",
+            "name": "Sonido al salvar",
+            "description": "Reproduce un sonido corto cada vez que el mod te salva.",
+            "default": false
+        },
+        "show-path": {
+            "type": "bool",
+            "name": "Mostrar trayectoria salvada",
+            "description": "Cuando un click se salva, dibuja durante 1 segundo el camino que predijo el fantasma.",
+            "default": false
+        },
+        "floating-button": {
+            "type": "bool",
+            "name": "Boton flotante en el nivel",
+            "description": "Muestra un boton TS arrastrable dentro del nivel que pausa y abre el menu (util en celular).",
+            "default": false
         },
         "title-colors": {
             "type": "title",
@@ -380,13 +440,13 @@
         "direct-inject": {
             "type": "bool",
             "name": "Reinyeccion directa",
-            "description": "Aplica el click retrasado directo al jugador, igual que en la simulacion (recomendado). Desactivalo si los clicks salvados no se registran.",
-            "default": true
+            "description": "Aplica el click retrasado directo al jugador (pushButton) en vez de pasarlo por el juego. Desde v0.4 lo recomendado es dejarlo apagado: el click entra al principio del paso, como en Afterflow.",
+            "default": false
         },
         "full-sync": {
             "type": "bool",
-            "name": "Copia completa del jugador",
-            "description": "Copia al fantasma el estado completo del jugador con el sistema de checkpoints del modo practica: velocidad, gravedad, orbes y dash. Recomendado.",
+            "name": "Copia extendida del jugador",
+            "description": "Copia al fantasma unos 110 datos del jugador (velocidad, gravedad, pendientes, suelo, dash, orbes, tiempos internos). Recomendado.",
             "default": true
         },
         "debug-log": {
@@ -400,6 +460,47 @@
             "name": "Validar fantasma",
             "description": "Compara cada tick la prediccion del fantasma con el jugador real y avisa si se desvian.",
             "default": false
+        },
+        "title-keys": {
+            "type": "title",
+            "name": "Teclas rapidas (PC)",
+            "platforms": [
+                "win"
+            ]
+        },
+        "key-menu": {
+            "type": "keybind",
+            "name": "Abrir el menu",
+            "description": "Abre el menu de TickSaver (en un nivel, pausa primero).",
+            "category": "universal",
+            "default": [
+                "F7"
+            ],
+            "platforms": [
+                "win"
+            ]
+        },
+        "key-toggle": {
+            "type": "keybind",
+            "name": "Activar / desactivar",
+            "description": "Prende o apaga la correccion de clicks al instante.",
+            "category": "gameplay",
+            "default": [
+                "F8"
+            ],
+            "platforms": [
+                "win"
+            ]
+        },
+        "key-preset": {
+            "type": "keybind",
+            "name": "Siguiente preset",
+            "description": "Pasa al siguiente preset (Suave, Normal, Fuerte, Maximo, Wave, Entrenar).",
+            "category": "gameplay",
+            "default": [],
+            "platforms": [
+                "win"
+            ]
         }
     }
 }

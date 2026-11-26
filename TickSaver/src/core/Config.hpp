@@ -77,6 +77,24 @@ struct Config {
     // tick seguro, que es el borde y el más frágil).
     int safetyMargin = 1;
 
+    // --- Ayudas (v0.4, ideas de Afterflow) ----------------------------------
+    // Buffer de orbes: un click en el aire que no hace nada espera hasta
+    // `orbBufferTicks` ticks a que llegues a un orbe y se aplica ahí.
+    bool orbBuffer = true;
+    int orbBufferTicks = 24;
+    // Spam (wave, nave, UFO, bola, swing): 3 inputs muy seguidos pasan directo
+    // sin evaluar, porque ahí retener cualquier click se siente como lag.
+    bool ignoreSpam = true;
+    // Ayudar sólo en modo práctica.
+    bool practiceOnly = false;
+    // Ayudar también en niveles plataformero (experimental).
+    bool platformer = false;
+
+    // --- Feedback ------------------------------------------------------------
+    bool saveSound = false;       // sonido corto cada vez que te salva
+    bool showPath = false;        // dibuja 1 s la trayectoria del click salvado
+    bool floatingButton = false;  // botón "TS" arrastrable dentro del nivel
+
     // --- HUD -----------------------------------------------------------------
     bool showHud = true;
     bool showTimingBar = true;
@@ -91,10 +109,11 @@ struct Config {
     // es en tiempo y no en cantidad de pasos.
     float simBudgetMs = 2.f;
     // Reinyectar el click retrasado con PlayerObject::pushButton (igual que
-    // hace el fantasma) en vez de pasar por handleButton.
-    bool directInject = true;
-    // Sincronizar el fantasma con saveToCheckpoint/loadFromCheckpoint (la
-    // copia del modo práctica): respeta velocidad, gravedad, orbes y dash.
+    // hace el fantasma) en vez de pasar por handleButton (lo recomendado
+    // desde v0.4: el click entra al principio del paso, como en Afterflow).
+    bool directInject = false;
+    // Copia extendida del jugador al fantasma (~110 campos: velocidad,
+    // gravedad, pendientes, suelo, dash, orbes, tiempos internos).
     bool fullSync = true;
     bool debugLog = false;
     bool validateSim = false;

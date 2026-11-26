@@ -20,40 +20,59 @@ configurable (hasta 255t ≈ 1,06 s).
         │
         ▼
  GJBaseGameLayer::handleButton(down, button, isPlayer1)   ◄── hook: punto de entrada
-        │  (internamente: queueButton -> m_queuedButtons, con timestamp)
+        │
         ▼
  GJBaseGameLayer::update(dt)  — cada frame
-        │  por cada paso de física (240/s; con click-between-steps
-        │  puede haber "medios pasos" hasta el timestamp del input)
+        │  por cada paso de física (240/s; con click-between-steps un paso
+        │  puede partirse en dos updates más cortos)
         ▼
- GJBaseGameLayer::processCommands(dt, isHalfTick, isLastTick)  ◄── hook: reloj de ticks
-        │  procesa la cola -> PlayerObject::pushButton / releaseButton
+ PlayerObject::update(dt) del jugador 1   ◄── hook: RELOJ de ticks + reinyección (antes del original)
+        │
         ▼
- PlayerObject::update(dt) + checkCollisions(player, dt, false)
+ checkCollisions(player, dt, false)
         │  colisión con pinchos -> PlayLayer::destroyPlayer(player, obj)  ◄── hook: muerte
         ▼
 ```
 
-`queueButton` es *inline* en Windows, por eso **no** se engancha la cola: se intercepta
-`handleButton` (estable en todas las plataformas) y se reinyecta llamando al `handleButton`
-original, que recorre la ruta normal del juego (dual, 2 jugadores, grabación de replays).
+Se intercepta `handleButton` (estable en todas las plataformas) y se reinyecta llamando al
+`handleButton` original al **principio del paso** del jugador 1, que recorre la ruta normal
+del juego (dual, 2 jugadores, plataformero). Es el mismo punto que usa Afterflow.
 
 ## 3. Flujo de un click en TickSaver
 
 ```
 handleButton(press)
-   └─► Engine::onButton ─► InputScheduler::onPhysicalPress(tick = T)
+   └─► Engine::onButton ─► reglas de paso directo (orbe bajo el click, spam, práctica, plataformero)
+                       └─► InputScheduler::onPhysicalPress(tick = T)
                               └─► GhostSimulator::simulatePress()  "¿si apreto en T, vivo?"
-                                     ├─ vive ──► se deja pasar (Clean, racha +1)
-                                     └─ muere ─► se RETIENE (el juego no se entera)
+                                     ├─ vive y hace algo ......► se deja pasar (Clean, racha +1)
+                                     ├─ vive y no hace nada ...► buffer de orbes (espera un orbe)
+                                     └─ muere .................► se RETIENE (el juego no se entera)
 
-processCommands (cada tick completo T+1, T+2, ...)
-   └─► Engine::beforeStep ─► InputScheduler::onTick
-          ├─ simulatePress() vive ............► reinyectar   (Saved "+N t")
+PlayerObject::update del jugador 1 (cada tick T+1, T+2, ...; antes del update original)
+   └─► Engine::onRealPlayerUpdate ─► InputScheduler::onTick
+          ├─ simulateInjectedPress() vive ....► reinyectar   (Saved "+N t")
+          ├─ tocás un orbe (buffer de orbes) .► reinyectar   (Saved "ORBE +N t")
           ├─ muere y esperar 1 tick también ..► reinyectar   (Unsalvageable)
           ├─ se llegó al máximo de ticks .....► reinyectar   (Unsalvageable)
           └─ si no, seguir reteniendo
 ```
+
+**Reloj:** `m_tick` avanza al empezar cada paso del jugador 1. El dt del paso es un
+promedio (EMA, como Afterflow) que ignora pasos partidos y adopta un dt nuevo si se repite 4
+veces (time warp). Si un click llega en medio de un paso (click-between-steps), el primer
+paso del fantasma dura sólo lo que falta del paso real.
+
+**Reglas de paso directo** (el click pasa sin evaluarse, `maxDelay = 0`):
+* estás tocando un orbe al clickear (es justo lo que querías hacer);
+* spam: en wave, nave, UFO, bola y swing, 3 inputs separados por menos de 16 ticks (6 en
+  nave) pasan directo (*Dejar pasar el spam*);
+* *Solo en modo práctica* fuera de práctica; plataformero sin *Ayudar en plataformero*.
+
+**Buffer de orbes:** un click en el aire que no hace nada espera hasta `orbBufferTicks`
+ticks (24 por defecto) a que el jugador real toque un orbe y se reinyecta ahí. Si seguís
+apretando y el click empieza a hacer algo (por ejemplo aterrizás), se entrega igual. Si no
+aparece ningún orbe, un tap se descarta sin contar; un botón mantenido se entrega.
 
 **Por qué evaluar tick a tick** (y no calcular de una el offset ideal):
 cada evaluación usa el estado real del nivel en ese tick (objetos que se movieron, triggers
@@ -89,32 +108,34 @@ press, así nave/wave/robot mantienen exactamente lo que mantuviste.
 
 ```
 TickSaver/
-├── mod.json                 settings (presets, ticks, tramo, HUD, 8 colores, avanzado)
+├── mod.json                 settings (presets, ticks, tramo, ayudas, HUD, 8 colores, avanzado, teclas)
 ├── CMakeLists.txt           build estándar de Geode (setup_geode_mod)
 ├── src/
-│   ├── main.cpp             $on_mod(Loaded): settings + modelo adaptativo
+│   ├── main.cpp             $on_mod(Loaded): settings, modelo adaptativo, teclas rápidas
 │   ├── core/                C++23 puro, SIN Geode -> testeable en cualquier PC
 │   │   ├── Types.hpp            Tick, Mode, Slot, ClickKind, paleta
 │   │   ├── Config.*             Config + tabla de presets + ticks efectivos
 │   │   ├── ConfigCode.*         exportar/importar "TS2-..." (Base32 + CRC-8)
-│   │   ├── InputScheduler.*     máquina de estados retener/reinyectar (IPredictor)
+│   │   ├── InputScheduler.*     máquina de estados retener/reinyectar + buffer de orbes
 │   │   ├── AdaptiveModel.*      EMA de earliness y de hold por modo
 │   │   └── Stats.*              Session (racha) y LevelStats (histogramas)
 │   ├── game/                puente con GD
-│   │   ├── Engine.*             orquestador, uno por PlayLayer
-│   │   ├── GhostSimulator.*     IPredictor real: fantasmas PlayerObject
-│   │   ├── SimGuard.*           estado "simulando" + libro de activaciones
-│   │   ├── GameMode.*           detección de modo + ventana de simulación por modo
+│   │   ├── Engine.*             orquestador, uno por PlayLayer (reloj, reglas, reinyección)
+│   │   ├── GhostSimulator.*     IPredictor real: fantasmas PlayerObject en una capa aparte
+│   │   ├── SimGuard.*           estado "simulando" + fotos de objetos + usados/apagados
+│   │   ├── GameMode.*           detección de modo, ventana por modo, reglas de spam
+│   │   ├── LiveLog.*            últimos 64 eventos (pestaña Log del menú)
 │   │   ├── Settings.*           settings de Geode <-> Config, presets sin bucles
 │   │   └── StatsStore.*         JSON por nivel + modelo adaptativo
 │   ├── ui/
-│   │   ├── HudNode.*            racha, barra de timing, "esperando", "SALVADO +Nt"
+│   │   ├── HudNode.*            racha, barra de timing, "esperando", "SALVADO +Nt", "ORBE +Nt"
 │   │   ├── DeathSummaryNode.*   resumen al morir
-│   │   ├── ModMenuPopup.*       menu in-game: pestanas General/Modos/Tramo/Opciones/HUD
+│   │   ├── ModMenuPopup.*       menú: General/Modos/Tramo/Ayudas/Tecnico/HUD/Log
+│   │   ├── FloatingButton.*     botón "TS" arrastrable dentro del nivel
 │   │   ├── StatsPopup.*         stats + histograma + borrar
 │   │   └── Palette.hpp          RGBA -> cocos
 │   └── hooks/
-│       ├── InputHooks.cpp       handleButton, processCommands, PlayerObject::update
+│       ├── InputHooks.cpp       handleButton y PlayerObject::update (reloj)
 │       ├── PlayLayerHooks.cpp   init, resetLevel, destroyPlayer, levelComplete, onQuit
 │       ├── GhostGuardHooks.cpp  aislamiento del fantasma (ver §6)
 │       └── PauseLayerHooks.cpp  botón "TS" en pausa y en el menú principal
@@ -122,47 +143,60 @@ TickSaver/
 ```
 
 La regla de dependencias es `hooks → game/ui → core`. `core/` no incluye nada de Geode, por
-eso la lógica más delicada (cuándo retener, cuándo soltar, presets, el código TS2) se prueba
-sin abrir el juego: `tests/core_tests.cpp` (75 checks).
+eso la lógica más delicada (cuándo retener, cuándo soltar, el buffer de orbes, presets, el
+código TS2) se prueba sin abrir el juego: `tests/core_tests.cpp` (131 checks).
 
 ## 5. Hooks
 
 | Hook | Para qué | Archivo |
 |---|---|---|
 | `GJBaseGameLayer::handleButton(bool, int, bool)` | interceptar y retener el click de salto | InputHooks |
-| `GJBaseGameLayer::processCommands(float, bool, bool)` | reloj de ticks; reevaluar y reinyectar | InputHooks |
-| `PlayerObject::update(float)` | leer el dt real del paso para el fantasma | InputHooks |
-| `PlayLayer::init(GJGameLevel*, bool)` | crear el `Engine` (en `m_fields`) y el HUD | PlayLayerHooks |
+| `PlayerObject::update(float)` (jugador 1) | reloj de ticks; reevaluar y reinyectar antes del paso | InputHooks |
+| `PlayLayer::init(GJGameLevel*, bool)` | crear el `Engine` (en `m_fields`), el HUD y el botón flotante | PlayLayerHooks |
 | `PlayLayer::resetLevel()` | nuevo intento: racha, scheduler, modo seguro | PlayLayerHooks |
 | `PlayLayer::destroyPlayer(PlayerObject*, GameObject*)` | muerte del fantasma (flag) o real (stats) | PlayLayerHooks |
-| `PlayLayer::levelComplete()` / `onQuit()` | guardar stats | PlayLayerHooks |
+| `PlayLayer::levelComplete()` / `onQuit()` | guardar stats, liberar fantasmas | PlayLayerHooks |
 | `PauseLayer::customSetup()` / `MenuLayer::init()` | botón "TS" que abre el menú del mod | PauseLayerHooks |
-| 20 hooks de aislamiento | ver §6 | GhostGuardHooks |
+| ~50 hooks de aislamiento | ver §6 | GhostGuardHooks |
 
 `destroyPlayer` se registra con `Priority::First`: si un noclip de otro mod corta la cadena
 antes que nosotros, nunca veríamos morir al fantasma y cualquier click "salvaría".
-`handleButton` usa `Priority::Early` para ver el click antes que otros mods de input.
+`handleButton` y `PlayerObject::update` usan `Priority::Early`.
 
 ## 6. El fantasma
 
 **Creación** (al terminar de cargar el nivel, nunca en medio de un paso de física):
-`PlayerObject::create(1, 1, layer, layer->m_objectLayer, true)`, invisible, sin efectos,
-sin estelas ni partículas, registrado en `SimGuard`. Hay dos: uno por jugador.
+`PlayerObject::create(1, 1, layer, ghostLayer, true)` en una **capa propia que nunca se
+agrega a la escena**, con `unscheduleUpdate()`, invisible y sin efectos. Lo que el juego le
+cuelga al fantasma (estelas, partículas, círculos) se barre después de cada simulación. Hay
+dos fantasmas, uno por jugador.
 
 **Sincronización** antes de cada simulación (aislada con `sim::SyncScope`):
-1. `copyAttributes(real)`, lo que usa GD para clonar jugadores en el portal dual;
-2. `real->saveToCheckpoint(cp)` + `ghost->loadFromCheckpoint(cp)`, la **copia del modo
-   práctica**: velocidad, gravedad, mini, dash de orbes, pendientes, suelo y colisiones;
-3. estado de **orbes** que el checkpoint no guarda: `m_touchingRings` (orbes que estás
-   tocando ahora), `m_usedRings`, `m_jumpBuffered`, `m_statePreJump`...;
+1. `resetTouchedRings(true)` + `copyAttributes(real)`;
+2. copia extendida de ~110 campos (la lista de Afterflow con los nombres de 2.2091):
+   modo, velocidad, gravedad, mini, pendientes, suelo, colisiones, dash, fuerzas;
+3. estado de **orbes**: `m_touchingRings` (orbes que estás tocando ahora), `m_usedRings`,
+   `m_touchedRings`, `m_jumpBuffered`, `m_statePreJump`...;
 4. **tiempos** internos: margen tras un portal, último salto, flips de gravedad/araña;
 5. flags de física por versión del nivel (`m_enable22Changes`, `m_enableImpulseFix`...).
 
-Sin el punto 3 el fantasma no podía activar el orbe que estabas tocando al clickear,
-"moría", y el mod retenía un click correcto. La copia completa se puede apagar en
-*Opciones → Copia completa del jugador*.
+**Un paso** (el orden del juego, como Afterflow): `update(dt)` → `updateRotation(dt)` →
+vaciar los 4 logs de colisión → `checkCollisions(ghost, dt, false)`. Hasta v0.3 el orden era
+al revés (colisiones primero), y esa era la causa más probable de "dice salvado y me mata".
 
-**Un paso:** `checkCollisions(ghost, dt, false)` → `ghost->update(dt)` → `updateRotation(dt)`.
+**Filtro de colisiones** (`collisionCheckObjects`): el fantasma sólo revisa sólidos,
+pinchos, pendientes, pads, orbes, dash y portales de gravedad. Los portales de
+**velocidad** se aplican a mano (`m_playerSpeed`: 0.7 / 0.9 / 1.1 / 1.3 / 1.6), los de
+**tamaño** con `togglePlayerScale`, y los de modo, dual, teleport o el final del nivel
+terminan la simulación: llegar vivo hasta ahí cuenta como que el click sirvió (pero no
+alcanza para declarar un click "innecesario"). Los pinchos que el jugador real ya está
+tocando al empezar se ignoran, y los objetos que un orbe apaga dejan de chocar.
+
+**Orbes y pads:** se ejecutan con la física real. Antes de que el juego modifique un objeto
+se guarda una foto (`m_isActivated`, `m_activated`, `m_activatedByPlayer1/2`) que se
+restaura al terminar. Un pad se usa una vez por simulación; un orbe, hasta que realmente
+cambia la velocidad, la gravedad o el dash. Si el jugador real ya lo usó, el fantasma
+tampoco puede (se le pregunta al juego con el jugador real).
 
 **Ventana por modo** (`game/GameMode.cpp`):
 
@@ -171,41 +205,31 @@ Sin el punto 3 el fantasma no podía activar el orbe que estabas tocando al clic
 | Cubo, Robot | 120t | al aterrizar + 6t | 8t / 12t |
 | Bola | 60t | al aterrizar + 6t | 4t |
 | Araña | 40t | al aterrizar + 4t | 4t |
-| UFO, Swing | 20t | — | 6t |
-| Nave | hold + 6t (máx. 40t) | — | 14t |
-| Wave | hold + 4t (máx. 30t) | — | 10t |
+| UFO, Swing | 24t | — | 6t |
+| Nave | hold + 10t (máx. 48t) | — | 14t |
+| Wave | hold + 10t (máx. 40t) | — | 10t |
 
-En nave y wave la ventana termina poco después del soltar: lo que pase después depende
-de tu próximo click. Mirar más lejos hacía que el fantasma "muriera" por inputs futuros y
-el mod retuviera clicks correctos.
+**Presupuesto:** cada paso del fantasma es un `checkCollisions`, caro en niveles con muchos
+objetos. Hay un límite de **tiempo de CPU por frame** (*CPU por frame*, 2 ms por defecto).
+Si se agota, la simulación devuelve `Skipped` y no se retiene nada nuevo.
 
-**Presupuesto:** cada paso del fantasma es un `checkCollisions` completo, caro en niveles
-con muchos objetos. Hay un límite de **tiempo de CPU por frame** (*CPU por frame*, 2 ms por
-defecto). Si se agota, la simulación devuelve `Skipped` y no se retiene nada nuevo. El
-chequeo del click recién apretado tiene su propio presupuesto.
+**Reinyección:** por defecto con el `handleButton` original al principio del paso del
+jugador 1 (como Afterflow). *Reinyección directa* (opcional) usa `PlayerObject::pushButton`.
 
-**Reinyección:** por defecto el click retrasado se aplica con `PlayerObject::pushButton`
-sobre los jugadores reales, lo mismo que hizo el fantasma, en el mismo paso. En modo
-2 jugadores (o con *Reinyección directa* apagada) se usa el `handleButton` original.
-
-En modos de salto el click se da por bueno cuando el fantasma vuelve a apoyarse vivo: el
-obstáculo siguiente depende del próximo click, no de este.
-
-**Aislamiento** (`hooks/GhostGuardHooks.cpp`). `checkCollisions` no sólo mueve al jugador,
-también toca el nivel. Con el fantasma:
+**Aislamiento** (`hooks/GhostGuardHooks.cpp`):
 
 | Efecto | Tratamiento |
 |---|---|
-| orbes, pads (`ringJump`, `bumpPlayer`, `playerTouchedRing`, `activatedByPlayer`) | se ejecutan; los flags `m_activatedByPlayer1/2` se guardan y **se restauran** al terminar |
-| gravedad (`flipGravity`) | se ejecuta sin efectos visuales |
-| portal de modo, dual, teleport, final del nivel | se corta la simulación como **inconclusa** (= no retener) |
-| triggers por contacto, monedas/items, `destroyObject`, eventos de juego, checkpoints | bloqueados |
-| partículas, estelas, círculo de portal, dash de araña, contador de saltos | bloqueados |
-| muerte (`PlayLayer::destroyPlayer`) | se anota como resultado; el jugador real no se entera |
+| orbes, pads, dash (`ringJump`, `bumpPlayer`, `playerTouchedRing`, `startDashing`, `activatedByPlayer`, `canBeActivatedByPlayer`) | se ejecutan con foto y restauración; una vez por simulación |
+| gravedad (`flipGravity`) | `PlayerObject::flipGravity` del fantasma, sin tocar cámara ni suelo |
+| grupos que se apagan (`toggleGroupTriggered`) | el fantasma deja de chocar esos objetos |
+| portal de modo, dual, teleport, final del nivel | fin de la simulación |
+| triggers (`triggerObject`, `spawnGroup`, `toggleGroup`, contadores, items), monedas, eventos, checkpoints | bloqueados |
+| partículas, estelas, círculos, rotaciones, efectos de muerte, contador de saltos | bloqueados |
+| muerte (`destroyPlayer`, `playerDestroyed`) | se anota como resultado; el jugador real no se entera |
 
 **Limitación conocida:** durante la simulación el nivel queda "congelado" (no corren move
-triggers). Con ventanas cortas y la reevaluación tick a tick el error es chico, pero en
-partes con muchos objetos móviles la predicción puede equivocarse.
+triggers). Con ventanas cortas y la reevaluación tick a tick el error es chico.
 
 ## 7. Dual y 2 jugadores
 
@@ -269,11 +293,17 @@ juego, escribiendo en los mismos settings de Geode con `settings::update`:
 
 | Pestaña | Qué tiene |
 |---|---|
-| General | mod activado, preset (< >), ticks máximos, modo seguro |
+| General | mod activado, preset (< >), ticks máximos, modo seguro, margen de seguridad |
 | Modos | un botón por personaje (Cubo, Nave, Bola, UFO, Wave, Robot, Araña, Swing) y slider de ticks propios; 0 = usa el general |
 | Tramo | activar, desde %, hasta %, ticks extra |
-| Opciones | adaptativo, 2 jugadores, conservar hold, log, validar fantasma, presupuesto |
-| HUD | mostrar HUD/barra/resumen, escala y los 8 colores (selector de color de Geode) |
+| Ayudas | descartar innecesarios, corregir el soltar, buffer de orbes (+ ventana), dejar pasar el spam, adaptativo, 2 jugadores, conservar hold, sólo práctica, plataformero |
+| Tecnico | copia extendida, reinyección directa, log de depuración, validar fantasma, CPU por frame, latencia calibrada |
+| HUD | HUD/barra/resumen, sonido al salvar, trayectoria, botón flotante, escala y los 8 colores |
+| Log | los últimos eventos del mod, con "Copiar log" y "Limpiar" |
+
+También se abre con el **botón flotante** dentro del nivel (opcional, arrastrable) y en PC
+con las teclas rápidas **F7** (menú), **F8** (activar/desactivar) y una tecla configurable
+para pasar al siguiente preset.
 
 Abajo: Estadísticas, Exportar, Importar y Restablecer, y el aviso fijo de responsabilidad.
 Desactivar el modo seguro pide confirmación con una advertencia de baneo.
@@ -311,3 +341,12 @@ Esto no se puede verificar sin correr GD. Activar **Log de depuración** y **Val
 * **Tests de core:** `cmake -S tests -B build-tests && cmake --build build-tests && ./build-tests/core_tests`.
 
 Antes de publicar: cambiar `id` y `developer` en `mod.json`.
+
+## 16. Créditos
+
+Varias técnicas de la v0.4 están adaptadas de **Afterflow** (licencia MIT, (c) 2026 prsevend,
+https://github.com/afterflow-gd/afterflow): el reloj y la reinyección en
+`PlayerObject::update`, la capa aparte del fantasma, el orden del paso, la lista de campos
+copiados, el filtro de `collisionCheckObjects` (portales de velocidad y tamaño, objetos
+apagados, pinchos que ya tocás), las fotos de objetos, el buffer de orbes, la regla del
+spam, el botón flotante y el log en vivo. No se copió su auto-actualizador ni su terminal.

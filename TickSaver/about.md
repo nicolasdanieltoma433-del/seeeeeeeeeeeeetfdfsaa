@@ -9,6 +9,9 @@ Asistente de **practica**. Si clickeas un poco antes de tiempo y ese click te ib
 - Presets: Suave, Normal, Fuerte, Maximo, Wave, Entrenar
 - Ticks extra en un tramo del nivel, modo adaptativo, paleta de 8 colores
 - Exportar/importar config con un codigo `TS2-...`
-- Menu in-game: boton TS en pausa y en el menu principal
+- Menu in-game: boton TS en pausa y en el menu principal, boton flotante en el nivel y teclas rapidas en PC
+- Buffer de orbes, regla de spam, solo en practica, sonido y trayectoria al salvar, log en vivo
+
+Prediccion del fantasma adaptada de Afterflow (MIT, prsevend).
 
 **Es un cheat.** Con el modo seguro (activado por defecto) los intentos en los que te salvo no guardan progreso. No lo uses para records ni listas. Usalo bajo tu propia responsabilidad: el creador no se hace cargo de baneos.

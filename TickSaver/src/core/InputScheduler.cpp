@@ -49,11 +49,23 @@ PressResult InputScheduler::onPhysicalPress(Slot slot, Tick now, SlotParams cons
 
     // Primer chequeo: ¿el click en su tick original mata?
     switch (predictor.simulatePress(slot, params.expectedHold)) {
-        case SimOutcome::Survives:
+        case SimOutcome::Survives: {
+            bool effect = predictor.pressHasEffect(slot, params.expectedHold);
+            // Click en el aire que no hace nada: con buffer de orbes lo
+            // guardamos por si en los próximos ticks llegás a un orbe.
+            if (!effect && params.orbBufferTicks > 0) {
+                s.pending = true;
+                s.waitingOrb = true;
+                s.pressTick = now;
+                s.mode = params.mode;
+                result.forwardNow = false;
+                return result;
+            }
             // Pasa siempre (no cuesta nada), pero si no cambia nada no cuenta.
-            ev.kind = predictor.pressHasEffect(slot, params.expectedHold) ? ClickKind::Clean : ClickKind::Unnecessary;
+            ev.kind = effect ? ClickKind::Clean : ClickKind::Unnecessary;
             m_events.push_back(ev);
             return result;
+        }
         case SimOutcome::Inconclusive:
         case SimOutcome::Skipped:
             // Sin certeza nunca agregamos latencia.
@@ -118,6 +130,11 @@ void InputScheduler::onTick(Tick now, std::array<SlotParams, kSlotCount> const& 
         // onPhysicalPress; reevaluarlo ahí daría el mismo resultado.
         if (now <= s.pressTick) continue;
 
+        if (s.waitingOrb) {
+            tickOrbWait(slot, now, p, predictor, out);
+            continue;
+        }
+
         int elapsed = static_cast<int>(now - s.pressTick);
         int hold = s.released ? std::max<int>(1, static_cast<int>(s.releaseTick - s.pressTick)) : p.expectedHold;
 
@@ -176,6 +193,49 @@ void InputScheduler::onTick(Tick now, std::array<SlotParams, kSlotCount> const& 
     }
 }
 
+void InputScheduler::tickOrbWait(Slot slot, Tick now, SlotParams const& p, IPredictor& predictor,
+                                 std::vector<InjectCmd>& out) {
+    auto& s = m_slots[idx(slot)];
+    int elapsed = static_cast<int>(now - s.pressTick);
+    int hold = s.released ? std::max<int>(1, static_cast<int>(s.releaseTick - s.pressTick)) : p.expectedHold;
+
+    // Mod o buffer apagados mientras esperaba: entregarlo tal cual.
+    if (p.maxDelay <= 0 || p.orbBufferTicks <= 0) {
+        apply(slot, now, ClickKind::Unchecked, hold, out);
+        return;
+    }
+    // Llegaste al orbe: ahora el click lo activa.
+    if (predictor.touchingOrb(slot)) {
+        apply(slot, now, ClickKind::Saved, hold, out);
+        m_events.back().orb = true;
+        return;
+    }
+    // Seguís apretando y el click ahora sí hace algo (por ejemplo el cubo
+    // aterrizó con el botón apretado): entregarlo para no cambiar el juego.
+    if (!s.released && predictor.pressHasEffect(slot, hold)) {
+        apply(slot, now, ClickKind::Unchecked, hold, out);
+        return;
+    }
+    // No apareció ningún orbe.
+    if (elapsed >= p.orbBufferTicks) {
+        // Si seguís apretando, el botón tiene que llegar al juego (por
+        // ejemplo para saltar al aterrizar con el botón mantenido).
+        if (!s.released) {
+            apply(slot, now, ClickKind::Unchecked, hold, out);
+            return;
+        }
+        // Era un tap que no hacía nada: se descarta sin contar.
+        ClickEvent ev;
+        ev.slot = slot;
+        ev.kind = ClickKind::Unnecessary;
+        ev.mode = s.mode;
+        ev.pressTick = s.pressTick;
+        ev.applyTick = now;
+        m_events.push_back(ev);
+        s = SlotState{};
+    }
+}
+
 void InputScheduler::tickRelease(Slot slot, Tick now, SlotParams const& p, IPredictor& predictor,
                                  std::vector<InjectCmd>& out) {
     auto& s = m_slots[idx(slot)];
@@ -224,6 +284,7 @@ void InputScheduler::apply(Slot slot, Tick now, ClickKind kind, int holdTicks, s
     s.pending = false;
     s.released = false;
     s.viableTicks = 0;
+    s.waitingOrb = false;
 }
 
 void InputScheduler::drop(Slot slot, Tick now) {

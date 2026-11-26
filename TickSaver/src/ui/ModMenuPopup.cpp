@@ -3,6 +3,7 @@
 #include "../core/Config.hpp"
 #include "../core/ConfigCode.hpp"
 #include "../game/Engine.hpp"
+#include "../game/LiveLog.hpp"
 #include "../game/Settings.hpp"
 #include "Palette.hpp"
 #include "StatsPopup.hpp"
@@ -10,6 +11,7 @@
 #include <Geode/Geode.hpp>
 #include <Geode/binding/ButtonSprite.hpp>
 #include <Geode/binding/ColorChannelSprite.hpp>
+#include <Geode/binding/PlayLayer.hpp>
 #include <Geode/ui/Button.hpp>
 #include <Geode/ui/ColorPickPopup.hpp>
 #include <Geode/ui/Notification.hpp>
@@ -32,8 +34,8 @@ constexpr float kContentH = 165.f;
 constexpr float kRowLabelX = 14.f;
 constexpr float kRowControlX = 392.f;
 
-constexpr std::array<char const*, static_cast<std::size_t>(5)> kTabNames = {
-    "General", "Modos", "Tramo", "Opciones", "HUD",
+constexpr std::array<char const*, 7> kTabNames = {
+    "General", "Modos", "Tramo", "Ayudas", "Tecnico", "HUD", "Log",
 };
 
 // Nombres cortos de los 8 colores (mismo orden que PaletteRole).
@@ -47,7 +49,20 @@ RGBA dimColor() { return RGBA{170, 170, 185, 255}; }
 
 std::string ticksText(int t) { return fmt::format("{}t", t); }
 
+// Fila de toggles en dos columnas (para Ayudas, Tecnico y HUD).
+struct ToggleRow {
+    char const* label;
+    bool Config::*field;
+};
+
 } // namespace
+
+void openModMenu() {
+    auto* scene = CCDirector::get()->getRunningScene();
+    if (scene && scene->getChildByID("menu"_spr)) return;  // ya está abierto
+    if (auto* pl = PlayLayer::get(); pl && !pl->m_isPaused) pl->pauseGame(false);
+    if (auto popup = ModMenuPopup::create()) popup->show();
+}
 
 ModMenuPopup* ModMenuPopup::create() {
     auto ret = new ModMenuPopup();
@@ -62,6 +77,7 @@ ModMenuPopup* ModMenuPopup::create() {
 bool ModMenuPopup::init() {
     if (!Popup::init(kPopupW, kPopupH)) return false;
     this->setTitle("TickSaver");
+    this->setID("menu"_spr);
 
     m_tabRow = CCNode::create();
     m_tabRow->setContentSize({kContentW, 26.f});
@@ -101,8 +117,10 @@ void ModMenuPopup::rebuild() {
         case Tab::General: buildGeneral(); break;
         case Tab::Modes: buildModes(); break;
         case Tab::Region: buildRegion(); break;
-        case Tab::Options: buildOptions(); break;
+        case Tab::Assists: buildAssists(); break;
+        case Tab::Tech: buildTech(); break;
         case Tab::Hud: buildHud(); break;
+        case Tab::Log: buildLog(); break;
         case Tab::Count: break;
     }
     m_building = false;
@@ -213,7 +231,7 @@ void ModMenuPopup::buildTabs() {
     float slotW = kContentW / static_cast<float>(kTabNames.size());
     for (std::size_t i = 0; i < kTabNames.size(); ++i) {
         auto tab = static_cast<Tab>(i);
-        addButton(m_tabRow, kTabNames[i], {slotW * (static_cast<float>(i) + .5f), 13.f}, .62f, tab == m_tab, [this, tab] {
+        addButton(m_tabRow, kTabNames[i], {slotW * (static_cast<float>(i) + .5f), 13.f}, .5f, tab == m_tab, [this, tab] {
             m_tab = tab;
             requestRebuild();
         });
@@ -321,32 +339,60 @@ void ModMenuPopup::buildRegion() {
              invalid ? role(c.palette, PaletteRole::Danger) : dimColor());
 }
 
-void ModMenuPopup::buildOptions() {
+void ModMenuPopup::buildAssists() {
     auto const& c = cfg();
-    struct Row {
-        char const* label;
-        bool value;
-        bool Config::*field;
+    ToggleRow const left[] = {
+        {"Descartar clicks innecesarios", &Config::dropUnneeded},
+        {"Corregir el soltar (nave/wave)", &Config::saveReleases},
+        {"Buffer de orbes", &Config::orbBuffer},
+        {"Dejar pasar el spam", &Config::ignoreSpam},
+        {"Modo adaptativo", &Config::adaptive},
     };
-    // Dos columnas: comportamiento a la izquierda, técnico a la derecha.
-    Row const left[] = {
-        {"Descartar clicks innecesarios", c.dropUnneeded, &Config::dropUnneeded},
-        {"Corregir el soltar (nave/wave)", c.saveReleases, &Config::saveReleases},
-        {"Modo adaptativo", c.adaptive, &Config::adaptive},
-        {"Corregir a los 2 jugadores", c.correctBoth, &Config::correctBoth},
-        {"Conservar duracion del hold", c.preserveHold, &Config::preserveHold},
+    ToggleRow const right[] = {
+        {"Corregir a los 2 jugadores", &Config::correctBoth},
+        {"Conservar duracion del hold", &Config::preserveHold},
+        {"Solo en modo practica", &Config::practiceOnly},
+        {"Ayudar en plataformero", &Config::platformer},
     };
-    Row const right[] = {
-        {"Copia completa del jugador", c.fullSync, &Config::fullSync},
-        {"Reinyeccion directa", c.directInject, &Config::directInject},
-        {"Log de depuracion", c.debugLog, &Config::debugLog},
-        {"Validar fantasma", c.validateSim, &Config::validateSim},
-    };
-    auto addColumn = [this](auto const& rows, float x, float toggleX) {
+    auto addColumn = [this, &c](auto const& rows, float x, float toggleX) {
         float y = 154.f;
         for (auto const& row : rows) {
             auto field = row.field;
-            addToggleAt(row.label, x, y, toggleX, row.value, [field](bool on) {
+            addToggleAt(row.label, x, y, toggleX, c.*field, [this, field](bool on) {
+                settings::update([field, on](Config& cfgRef) { cfgRef.*field = on; });
+                if (field == &Config::orbBuffer) requestRebuild();
+            });
+            y -= 24.f;
+        }
+    };
+    addColumn(left, kRowLabelX, 192.f);
+    addColumn(right, 214.f, kRowControlX);
+
+    if (c.orbBuffer) {
+        addSliderRow("Ventana orbes", 14.f, 4.f, 60.f, 1.f, static_cast<float>(c.orbBufferTicks), ticksText,
+                     [](int v) { settings::update([v](Config& x) { x.orbBufferTicks = v; }); });
+    }
+    else {
+        addLabel(m_content, "Buffer de orbes: el click en el aire espera hasta tocar un orbe", {kContentW / 2.f, 14.f},
+                 .3f, {.5f, .5f}, dimColor());
+    }
+}
+
+void ModMenuPopup::buildTech() {
+    auto const& c = cfg();
+    ToggleRow const left[] = {
+        {"Copia extendida del jugador", &Config::fullSync},
+        {"Reinyeccion directa", &Config::directInject},
+    };
+    ToggleRow const right[] = {
+        {"Log de depuracion", &Config::debugLog},
+        {"Validar fantasma", &Config::validateSim},
+    };
+    auto addColumn = [this, &c](auto const& rows, float x, float toggleX) {
+        float y = 154.f;
+        for (auto const& row : rows) {
+            auto field = row.field;
+            addToggleAt(row.label, x, y, toggleX, c.*field, [field](bool on) {
                 settings::update([field, on](Config& cfgRef) { cfgRef.*field = on; });
             });
             y -= 26.f;
@@ -356,23 +402,49 @@ void ModMenuPopup::buildOptions() {
     addColumn(right, 214.f, kRowControlX);
 
     // En décimas de ms para que el slider sea entero: 5..100 = 0.5..10 ms.
-    addSliderRow("CPU por frame", 14.f, 5.f, 100.f, 5.f, std::round(c.simBudgetMs * 10.f),
+    addSliderRow("CPU por frame", 84.f, 5.f, 100.f, 5.f, std::round(c.simBudgetMs * 10.f),
                  [](int v) { return fmt::format("{:.1f} ms", static_cast<double>(v) / 10.0); },
                  [](int v) { settings::update([v](Config& x) { x.simBudgetMs = static_cast<float>(v) / 10.f; }); });
+
+    if (auto* engine = Engine::current()) {
+        addLabel(m_content,
+                 fmt::format("Latencia calibrada: {} tick(s)   -   dt del paso: {:.3f}", engine->injectLatency(),
+                             static_cast<double>(engine->tickDt())),
+                 {kContentW / 2.f, 50.f}, .32f, {.5f, .5f}, role(c.palette, PaletteRole::Streak));
+    }
+    else {
+        addLabel(m_content, "Entra a un nivel para ver la latencia calibrada", {kContentW / 2.f, 50.f}, .32f,
+                 {.5f, .5f}, dimColor());
+    }
+    addLabel(m_content, "Fantasma, orden del paso y filtro de colisiones adaptados de Afterflow (MIT, prsevend)",
+             {kContentW / 2.f, 22.f}, .26f, {.5f, .5f}, dimColor());
 }
 
 void ModMenuPopup::buildHud() {
     auto const& c = cfg();
-    addToggleRow("Mostrar HUD (racha)", 150.f, c.showHud, [](bool on) {
-        settings::update([on](Config& x) { x.showHud = on; });
-    });
-    addToggleRow("Barra de timing", 126.f, c.showTimingBar, [](bool on) {
-        settings::update([on](Config& x) { x.showTimingBar = on; });
-    });
-    addToggleRow("Resumen al morir", 102.f, c.showDeathSummary, [](bool on) {
-        settings::update([on](Config& x) { x.showDeathSummary = on; });
-    });
-    addSliderRow("Escala", 76.f, 50.f, 150.f, 5.f, std::round(c.hudScale * 100.f),
+    ToggleRow const left[] = {
+        {"Mostrar HUD (racha)", &Config::showHud},
+        {"Barra de timing", &Config::showTimingBar},
+        {"Resumen al morir", &Config::showDeathSummary},
+    };
+    ToggleRow const right[] = {
+        {"Sonido al salvar", &Config::saveSound},
+        {"Mostrar trayectoria", &Config::showPath},
+        {"Boton flotante en el nivel", &Config::floatingButton},
+    };
+    auto addColumn = [this, &c](auto const& rows, float x, float toggleX) {
+        float y = 154.f;
+        for (auto const& row : rows) {
+            auto field = row.field;
+            addToggleAt(row.label, x, y, toggleX, c.*field, [field](bool on) {
+                settings::update([field, on](Config& cfgRef) { cfgRef.*field = on; });
+            });
+            y -= 24.f;
+        }
+    };
+    addColumn(left, kRowLabelX, 192.f);
+    addColumn(right, 214.f, kRowControlX);
+    addSliderRow("Escala", 78.f, 50.f, 150.f, 5.f, std::round(c.hudScale * 100.f),
                  [](int v) { return fmt::format("{}%", v); },
                  [](int v) { settings::update([v](Config& x) { x.hudScale = static_cast<float>(v) / 100.f; }); });
 
@@ -396,6 +468,39 @@ void ModMenuPopup::buildHud() {
         m_content->addChild(button);
         addLabel(m_content, kColorNames[i], {x, 18.f}, .45f, {.5f, .5f}, textColor(), "chatFont.fnt");
     }
+}
+
+void ModMenuPopup::buildLog() {
+    auto const& c = cfg();
+    auto lines = livelog::lines();
+    constexpr std::size_t kVisible = 11;
+    if (lines.empty()) {
+        addLabel(m_content, "Todavia no hay eventos: juga un nivel con el mod activado.", {kContentW / 2.f, 96.f}, .5f,
+                 {.5f, .5f}, dimColor(), "chatFont.fnt");
+    }
+    std::size_t first = lines.size() > kVisible ? lines.size() - kVisible : 0;
+    float y = 160.f;
+    for (std::size_t i = first; i < lines.size(); ++i) {
+        bool latest = i + 1 == lines.size();
+        auto label = addLabel(m_content, lines[i], {6.f, y}, .5f, {0.f, .5f},
+                              latest ? role(c.palette, PaletteRole::Streak) : textColor(), "chatFont.fnt");
+        label->limitLabelWidth(kContentW - 12.f, .5f, .2f);
+        y -= 12.5f;
+    }
+
+    addButton(m_content, "Copiar log", {kContentW / 2.f - 70.f, 12.f}, .5f, false, [] {
+        auto text = livelog::joined();
+        if (!text.empty() && clipboard::write(text)) {
+            Notification::create("Log copiado al portapapeles", NotificationIcon::Success)->show();
+        }
+        else {
+            Notification::create("No hay nada para copiar", NotificationIcon::Info)->show();
+        }
+    });
+    addButton(m_content, "Limpiar", {kContentW / 2.f + 70.f, 12.f}, .5f, false, [this] {
+        livelog::clear();
+        requestRebuild();
+    });
 }
 
 // ---------------------------------------------------------------- footer

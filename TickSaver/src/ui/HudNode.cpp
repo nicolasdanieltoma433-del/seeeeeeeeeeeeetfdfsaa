@@ -146,13 +146,14 @@ void HudNode::onClick(ClickEvent const& ev, int streak, bool streakIncreased) {
     m_hasMarker = ev.kind != ClickKind::Ignored;  // un click descartado no tiene "timing"
     m_markerPos = markerX(ev.earlyTicks);
     m_markerColor = colorForKind(p, ev.kind);
-    m_caption->setString(describeClick(LastClick{true, ev.kind, ev.earlyTicks, ev.mode, ev.release}).c_str());
+    m_caption->setString(describeClick(LastClick{true, ev.kind, ev.earlyTicks, ev.mode, ev.release, false, ev.orb}).c_str());
     m_caption->setColor(c3(ev.kind == ClickKind::Clean ? role(p, PaletteRole::Good) : m_markerColor));
     redrawBar();
 
     if (ev.kind == ClickKind::Saved) {
-        auto text = ev.release ? fmt::format("SALVADO +{}t (soltar)", ev.earlyTicks)
-                               : fmt::format("SALVADO +{}t", ev.earlyTicks);
+        auto text = ev.orb       ? fmt::format("ORBE +{}t", ev.earlyTicks)
+                    : ev.release ? fmt::format("SALVADO +{}t (soltar)", ev.earlyTicks)
+                                 : fmt::format("SALVADO +{}t", ev.earlyTicks);
         spawnToast(text, role(p, PaletteRole::Saved));
     }
     else if (ev.kind == ClickKind::Ignored) {

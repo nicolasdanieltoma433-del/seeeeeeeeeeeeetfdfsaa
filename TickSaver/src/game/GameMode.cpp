@@ -40,4 +40,17 @@ int windowFor(ModeProfile const& profile, int holdTicks) {
     return std::clamp(holdTicks + profile.afterRelease, 6, profile.window);
 }
 
+bool isSpammyMode(Mode mode) {
+    switch (mode) {
+        case Mode::Ship:
+        case Mode::Ufo:
+        case Mode::Ball:
+        case Mode::Wave:
+        case Mode::Swing: return true;
+        default: return false;
+    }
+}
+
+int spamGapTicks(Mode mode) { return mode == Mode::Ship ? 6 : 16; }
+
 } // namespace ts

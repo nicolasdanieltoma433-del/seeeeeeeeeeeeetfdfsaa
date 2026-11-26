@@ -47,6 +47,9 @@ struct MockPredictor final : IPredictor {
     std::function<SimOutcome(Slot, Tick)> release = [](Slot, Tick) { return SimOutcome::Survives; };
     int lastHold = -1;
 
+    std::function<bool(Slot, Tick)> orbAt = [](Slot, Tick) { return false; };
+    bool touchingOrb(Slot sl) override { return orbAt(sl, *clock); }
+
     // Press reinyectado `delay` ticks después: por defecto, igual que press(t + delay).
     SimOutcome simulateInjectedPress(Slot s, int hold, int delay) override {
         lastHold = hold;
@@ -544,6 +547,38 @@ static void testConfigCodeV3BigTicks() {
     }
 }
 
+static void testConfigCodeAssistFlags() {
+    std::puts("[config] TS2 guarda las ayudas de v0.4 y los codigos viejos quedan con sus valores por defecto");
+    Config cfg;
+    cfg.orbBuffer = false;
+    cfg.ignoreSpam = false;
+    cfg.practiceOnly = true;
+    cfg.platformer = true;
+    cfg.saveSound = true;
+    cfg.showPath = true;
+    auto res = decodeConfig(encodeConfig(cfg), Config{});
+    CHECK(std::holds_alternative<Config>(res));
+    if (auto* c = std::get_if<Config>(&res)) {
+        CHECK(!c->orbBuffer && !c->ignoreSpam);
+        CHECK(c->practiceOnly && c->platformer && c->saveSound && c->showPath);
+    }
+    // Un código armado antes de v0.4 tiene esos bits en 0.
+    Config old;
+    old.dropUnneeded = false;
+    old.saveReleases = false;
+    Config base;
+    base.orbBuffer = false;  // aunque la config actual los tenga apagados
+    base.ignoreSpam = false;
+    auto res2 = decodeConfig(encodeConfig(old), base);
+    if (auto* c = std::get_if<Config>(&res2)) {
+        CHECK(c->orbBuffer && c->ignoreSpam);
+        CHECK(!c->practiceOnly && !c->platformer && !c->saveSound && !c->showPath);
+    }
+    else {
+        CHECK(false);
+    }
+}
+
 static SlotParams marginParams(int maxDelay, int margin) {
     SlotParams p;
     p.maxDelay = maxDelay;
@@ -597,6 +632,91 @@ static void testFailedSaveDescription() {
     CHECK(describeClick(session.lastClick()) == "temprano por 3t: salvado, pero fallo la prediccion");
 }
 
+static SlotParams orbParams(int window) {
+    SlotParams p;
+    p.maxDelay = 10;
+    p.orbBufferTicks = window;
+    return p;
+}
+
+static void testOrbBufferDeliversOnOrb() {
+    std::puts("[scheduler] buffer de orbes: el click en el aire espera y se entrega en el orbe");
+    Tick now = 0;
+    MockPredictor pred;
+    pred.clock = &now;
+    pred.effect = [](Slot, Tick) { return false; };            // en el aire no hace nada
+    pred.orbAt = [](Slot, Tick t) { return t >= 7; };           // el orbe llega en t=7
+    InputScheduler s;
+    CHECK(!s.onPhysicalPress(Slot::P1, now, orbParams(24), pred).forwardNow);
+    s.onPhysicalRelease(Slot::P1, 2, orbParams(24), pred);     // tap de 2 ticks
+    std::vector<std::pair<Tick, InjectCmd>> log;
+    for (now = 1; now <= 12; ++now) {
+        std::vector<InjectCmd> out;
+        s.onTick(now, {orbParams(24), orbParams(24)}, pred, out);
+        for (auto c : out) log.push_back({now, c});
+    }
+    CHECK(log.size() == 2 && log[0].first == 7 && log[0].second.push);
+    CHECK(log[1].first == 9 && !log[1].second.push);           // conserva el hold de 2 ticks
+    auto ev = s.drainEvents();
+    CHECK(ev.size() == 1 && ev[0].kind == ClickKind::Saved && ev[0].orb && ev[0].earlyTicks == 7);
+}
+
+static void testOrbBufferTimesOut() {
+    std::puts("[scheduler] buffer de orbes: sin orbe en la ventana, el click se descarta sin contar");
+    Tick now = 0;
+    MockPredictor pred;
+    pred.clock = &now;
+    pred.effect = [](Slot, Tick) { return false; };
+    InputScheduler s;
+    s.onPhysicalPress(Slot::P1, now, orbParams(5), pred);
+    s.onPhysicalRelease(Slot::P1, 1, orbParams(5), pred);
+    std::vector<InjectCmd> out;
+    for (now = 1; now <= 10; ++now) s.onTick(now, {orbParams(5), orbParams(5)}, pred, out);
+    CHECK(out.empty());
+    auto ev = s.drainEvents();
+    CHECK(ev.size() == 1 && ev[0].kind == ClickKind::Unnecessary);
+    CHECK(!s.isHolding(Slot::P1));
+}
+
+static void testOrbBufferLandingWhileHeld() {
+    std::puts("[scheduler] buffer de orbes: si seguis apretando y aterrizas, el click se entrega");
+    Tick now = 0;
+    MockPredictor pred;
+    pred.clock = &now;
+    pred.effect = [](Slot, Tick t) { return t >= 4; };  // aterriza en t=4 con el boton apretado
+    InputScheduler s;
+    s.onPhysicalPress(Slot::P1, now, orbParams(24), pred);
+    std::vector<std::pair<Tick, InjectCmd>> log;
+    for (now = 1; now <= 8; ++now) {
+        std::vector<InjectCmd> out;
+        s.onTick(now, {orbParams(24), orbParams(24)}, pred, out);
+        for (auto c : out) log.push_back({now, c});
+    }
+    CHECK(log.size() == 1 && log[0].first == 4 && log[0].second.push);
+    auto ev = s.drainEvents();
+    CHECK(ev.size() == 1 && ev[0].kind == ClickKind::Unchecked);
+}
+
+static void testOrbBufferHeldTimeoutDelivers() {
+    std::puts("[scheduler] buffer de orbes: si seguis apretando cuando vence la ventana, el boton llega al juego");
+    Tick now = 0;
+    MockPredictor pred;
+    pred.clock = &now;
+    pred.effect = [](Slot, Tick) { return false; };
+    InputScheduler s;
+    s.onPhysicalPress(Slot::P1, now, orbParams(5), pred);
+    std::vector<std::pair<Tick, InjectCmd>> log;
+    for (now = 1; now <= 9; ++now) {
+        std::vector<InjectCmd> out;
+        s.onTick(now, {orbParams(5), orbParams(5)}, pred, out);
+        for (auto c : out) log.push_back({now, c});
+    }
+    CHECK(log.size() == 1 && log[0].first == 5 && log[0].second.push);
+    CHECK(s.drainEvents().size() == 1);
+    // El soltar físico llega directo (ya no hay nada retenido).
+    CHECK(s.onPhysicalRelease(Slot::P1, 12, orbParams(5), pred));
+}
+
 int main() {
     testCleanClick();
     testEarlyClickSaved();
@@ -624,6 +744,11 @@ int main() {
     testSafetyMarginAvoidsEdge();
     testSafetyMarginNarrowWindow();
     testFailedSaveDescription();
+    testConfigCodeAssistFlags();
+    testOrbBufferDeliversOnOrb();
+    testOrbBufferTimesOut();
+    testOrbBufferLandingWhileHeld();
+    testOrbBufferHeldTimeoutDelivers();
     std::printf("\n%d/%d checks OK\n", g_checks - g_failures, g_checks);
     return g_failures == 0 ? 0 : 1;
 }

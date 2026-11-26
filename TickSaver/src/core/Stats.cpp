@@ -11,7 +11,9 @@ std::string describeClick(LastClick const& c) {
     std::string early = c.release ? "soltaste temprano por " : "temprano por ";
     switch (c.kind) {
         case ClickKind::Clean: return "justo";
-        case ClickKind::Saved: return early + t + (c.failed ? ": salvado, pero fallo la prediccion" : ": salvado");
+        case ClickKind::Saved:
+            if (c.orb) return "click al orbe (+" + t + "): salvado";
+            return early + t + (c.failed ? ": salvado, pero fallo la prediccion" : ": salvado");
         case ClickKind::Unsalvageable: return early + t + ": sin salvacion";
         case ClickKind::Unchecked: return "sin evaluar";
         case ClickKind::Unnecessary: return "click sin efecto: no cuenta";
@@ -59,7 +61,7 @@ bool Session::onClick(ClickEvent const& ev) {
     }
     m_bestStreak = std::max(m_bestStreak, m_streak);
     if (ev.kind != ClickKind::Unchecked && ev.kind != ClickKind::Unnecessary) {
-        m_last = LastClick{true, ev.kind, ev.earlyTicks, ev.mode, ev.release};
+        m_last = LastClick{true, ev.kind, ev.earlyTicks, ev.mode, ev.release, false, ev.orb};
     }
     return increased;
 }
