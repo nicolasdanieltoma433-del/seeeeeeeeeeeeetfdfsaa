@@ -8,12 +8,24 @@
       "skillPath": "caption-styles/SKILL.md",
       "computedHash": "fef4f1a6eb9eea0181710087c8014778b8417b4412089235fabb500bdd2734f1"
     },
+    "design-taste-frontend": {
+      "source": "Leonxlnx/taste-skill",
+      "commit": "952435f63acece7d2fcb4b4d3c1786c1c43603e0",
+      "sourceType": "github",
+      "skillPath": "skills/taste-skill/SKILL.md"
+    },
     "edit-footage-with-code": {
       "source": "vargHQ/skills",
       "commit": "55ac28d4b4f336f9235df38d1d7aa639e4bec942",
       "sourceType": "github",
       "skillPath": "edit-footage-with-code/SKILL.md",
       "computedHash": "835f37df87dab8212356cafdf48aa4e49dcfb4f6d19280040442b231cd2233d5"
+    },
+    "impeccable": {
+      "source": "pbakaus/impeccable",
+      "commit": "2fc5e1459efbbf06d92c7306517c286bf12490cf",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/impeccable/SKILL.md"
     },
     "kinetic-type-art": {
       "source": "vargHQ/skills",
